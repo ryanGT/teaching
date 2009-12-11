@@ -8,6 +8,7 @@ alts = {'Trutter':'Ben','Herren':'Zach', 'Schelp':'Tim', \
         'Tolbert':'Chris', 'Bailey':'Matt', \
         'Schutte':'Joe'}
 
+from IPython.Debugger import Pdb
 
 
 def file_name_from_group_name(group_name, ext='.rst'):
@@ -20,6 +21,9 @@ class group(object):
         self.group_name = group_name
         self.find_members()
 
+    def strip_names(self):
+        self.firstnames = [item.strip() for item in self.firstnames]
+        self.lastnames = [item.strip() for item in self.lastnames]
 
     def find_members(self):
         lastnames, firstnames = group_list.get_names(self.group_name)
@@ -28,6 +32,7 @@ class group(object):
         for n, lastname in enumerate(lastnames):
             if alts.has_key(lastname):
                 self.firstnames[n] = alts[lastname]
+        self.strip_names()
         self.names = zip(self.firstnames, self.lastnames)
 
 
@@ -44,5 +49,7 @@ class group(object):
                     name_str += 'and '
                 name_str += pair[0] + ' ' + pair[1]
             self.name_str = name_str
+
+
 
         
