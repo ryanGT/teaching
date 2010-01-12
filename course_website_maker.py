@@ -86,10 +86,19 @@ class course_website(object):
 if __name__ == '__main__':
     mypath = '/home/ryan/siue/classes/450/2010/'
     my_course_page = course_website(mypath, \
-                                    'ME 450')
-    my_course_page.go()
+                                    'ME 450', \
+                                    other_folders=['python_install',\
+                                                   #'homework',\
+                                                   #'labs',\
+                                                   #'projects',\
+                                                   #'python_tutorial',\
+                                                   ]\
+                                    )
+    #my_course_page.go()
+    #Pdb().set_trace()
+    my_course_page.make_other_pages()
 
-    path2 = '/home/ryan/siue/classes/484/2010'
-    course2 = course_website(path2, 'ME 484')
-    course2.go()
+##     path2 = '/home/ryan/siue/classes/484/2010'
+##     course2 = course_website(path2, 'ME 484')
+##     course2.go()
     
