@@ -66,6 +66,17 @@ class course_website(object):
                     other_pages.append(other_page)
         self.other_pages = other_pages
 
+
+    def run_top_level_rst(self, add_back_link=True):
+        pat = os.path.join(self.pathin, '*.rst')
+        top_level_rst = glob.glob(pat)
+        for curpath in top_level_rst:
+            folder, name = os.path.split(curpath)
+            if name != 'index.rst':
+                rst2html_fullpath(curpath, add_up_link=add_back_link, \
+                                  uplink_path='index.html')
+
+        
     
     def make_toplevel_page(self):
         pat = os.path.join(self.pathin, 'index_*.rst')
@@ -81,7 +92,7 @@ class course_website(object):
         self.make_lecture_pages()
         self.make_other_pages()
         self.make_toplevel_page()
-
+        self.run_top_level_rst()
         
 if __name__ == '__main__':
     mypath = '/home/ryan/siue/classes/450/2010/'
