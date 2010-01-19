@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os, glob, shutil
+import os, glob, shutil, pdb
 import thumbnail_maker
 reload(thumbnail_maker)
 
@@ -9,7 +9,8 @@ from IPython.Debugger import Pdb
 
 class course_website(object):
     def __init__(self, pathin, title, lecture_folders=['lectures'], \
-                 other_folders=['homework','labs','projects'], \
+                 other_folders=['homework','labs'], \
+                 index_rst_only_folders=['projects'], \
                  toplevel_files=['syllabus.pdf'], \
                  extlist=['html','pdf','py','m'], \
                  teaching_root = '../../index.html'):
@@ -27,6 +28,7 @@ class course_website(object):
         #need thumbnails made.  They will only be searched
         #for the files in extlist.
         self.other_folders = other_folders
+        self.index_rst_only_folders = index_rst_only_folders        
         self.toplevel_files = toplevel_files
         self.extlist = extlist
         self.teaching_root = teaching_root
@@ -49,22 +51,34 @@ class course_website(object):
                 lecture_pages.append(lecture_page)
         self.lecture_pages = lecture_pages
 
-
-    def make_other_pages(self):
-        other_pages = None
-        for folder in self.other_folders:
+    def _make_other_pages(self, folders, directorypageclass):
+        pages = None
+        for folder in folders:
             folder_path = os.path.join(self.pathin, folder)
             if os.path.exists(folder_path):
                 title = self.title + ': ' + folder
-                other_page = thumbnail_maker.MainPageMaker_no_images(folder_path, \
+                page = thumbnail_maker.MainPageMaker_no_images(folder_path, \
                                                                      title=title, \
-                                                                     DirectoryPageclass=thumbnail_maker.DirectoryPage_no_images)
-                other_page.Go(top_level_link='../index.html')
-                if other_pages is None:
-                    other_pages = [other_page]
+                                                                     DirectoryPageclass=directorypageclass)
+                page.Go(top_level_link='../index.html')
+                if pages is None:
+                    pages = [page]
                 else:
-                    other_pages.append(other_page)
+                    pages.append(page)
+        return pages
+        
+
+    def make_other_pages(self):
+        other_pages = self._make_other_pages(self.other_folders, \
+                                             thumbnail_maker.DirectoryPage_no_images)
         self.other_pages = other_pages
+
+
+    def make_index_rst_only_pages(self):
+        #pdb.set_trace()
+        index_only_pages = self._make_other_pages(self.index_rst_only_folders, \
+                                                  thumbnail_maker.DirectoryPage_index_rst_only)
+        self.index_only_pages = index_only_pages
 
 
     def run_top_level_rst(self, add_back_link=True):
@@ -92,6 +106,7 @@ class course_website(object):
         self.make_lecture_pages()
         self.make_other_pages()
         self.make_toplevel_page()
+        self.make_index_rst_only_pages()
         self.run_top_level_rst()
         
 if __name__ == '__main__':
