@@ -75,7 +75,6 @@ class course_website(object):
 
 
     def make_index_rst_only_pages(self):
-        #pdb.set_trace()
         index_only_pages = self._make_other_pages(self.index_rst_only_folders, \
                                                   thumbnail_maker.DirectoryPage_index_rst_only)
         self.index_only_pages = index_only_pages
