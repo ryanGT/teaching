@@ -128,6 +128,12 @@ class speaker(object):
         email = self.email
         #addresses = ['ryanwkrauss@gmail.com', 'ryanlists@gmail.com', 'ryanwkrauss@att.net']
         body = "The attached pdf contains feedback on your individual speaking and delivery grade."
+        assert hasattr(self, 'pdfpath'), \
+               'speaker object has no attribute "pdfpath".\n' + \
+               'The most likely problem is that you have not run latex.'
+        assert os.path.exists(self.pdfpath), \
+               'speaker.pdfpath does not exist.\n' + \
+               'The most likely problem is that you have not run latex.'
         gmail_smtp.sendMail(email, subject, body, self.pdfpath)
 
         
@@ -237,6 +243,8 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
             curspeaker.save_rst()
             if runlatex:
                 curspeaker.run_rst()
+            else:
+                curspeaker.set_pdfpath()
             if speaker_list is None:
                 speaker_list = [curspeaker]
             else:
@@ -373,12 +381,20 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
     def compose_and_send_team_gmail(self, subject):#, ga):
         """ga is a gmail account instance from libgmail that has
         already been logged into."""
-        if not hasattr(self,'pdfpath'):
-            print('you must call pres_rst_parser.rst_team before sending team email')
-            return
-        if not os.path.exists(self.pdfpath):
-            print('pdf does not exist: '+self.pdfpath)
-            return
+        assert hasattr(self, 'pdfpath'), \
+               'pres_rst_parser object has no attribute "pdfpath".\n' + \
+               'The most likely problem is that you have not run latex.'
+        assert os.path.exists(self.pdfpath), \
+               'pres_rst_parser.pdfpath does not exist.\n' + \
+               'The most likely problem is that you have not run latex.'
+
+##         if not hasattr(self,'pdfpath'):
+##             print('you must call pres_rst_parser.rst_team before sending team email')
+##             return
+##         if not os.path.exists(self.pdfpath):
+##             print('pdf does not exist: '+self.pdfpath)
+##             print('You need to run latex.')
+##             return
         
         #emails = self.get_emails()
         emails = self.emails
