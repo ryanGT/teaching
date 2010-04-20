@@ -48,12 +48,22 @@ class section(txt_mixin.txt_list):
             for ind in grade_inds:
                 grade_line = self.content[ind]
                 q = grade_pat.search(grade_line)
-                cur_grade = float(q.group(1))
+                grade_str = q.group(1)
+                try:
+                    cur_grade = float(grade_str)
+                except ValueError:
+                    print('Could not convert grade to float: %s' % grade_str)
+                    cur_grade = None
                 if grades is None:
                     grades = [cur_grade]
                 else:
                     grades.append(cur_grade)
-            self.grade = mean(grades)
+            #print('grades='+str(grades))
+            filt_grades = filter(None, grades)
+            if len(filt_grades) == 0:
+                self.grade = None
+            else:
+                self.grade = mean(filt_grades)
         
     def __repr__(self):
         outstr = self.title+'\n' + \
@@ -287,6 +297,7 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
         for section in self.sec_list:
             labels.append(section.title)
         self.labels = labels
+        self.labels.append('Raw Overall Score')
         self.labels.append('Overall Score')
         self.labels.insert(self.time_ind+1, 'Timing Penalty')
         return self.labels
@@ -316,6 +327,7 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
                 elem = ';'.join(section.content)
             row_out.append(elem)
         self.calc_overall_score()
+        row_out.append(self.raw_ave)
         row_out.append(self.ave)
         row_out.insert(self.time_ind+1, self.time_penalty)
         self.row_out = row_out
@@ -335,6 +347,7 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
             qt = timing_pat.search(cur_sec.title)
             if qt:
                 self.team_rst.append('')
+                #print('time_penalty = '+str(self.time_penalty))
                 self.team_rst.append('**Timing Penalty: %0.4g**' % \
                                      self.time_penalty)
             self.team_rst.append('')
