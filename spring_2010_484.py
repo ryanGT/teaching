@@ -14,6 +14,7 @@ wednesday_groups = ['Mechanized Tree Stand', \
                     'Green Pedaling', \
                     'Hydraulic Bicycle Transmission']
 
+all_groups = monday_groups + wednesday_groups
 
 class_folder = rwkos.FindFullPath('siue/classes/484/2010')
 group_path = os.path.join(class_folder, 'group_list.csv')

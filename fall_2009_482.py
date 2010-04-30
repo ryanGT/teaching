@@ -9,7 +9,7 @@ group_list = spreadsheet.group_list(group_path)
 
 alts = {'Trutter':'Ben','Herren':'Zach', 'Schelp':'Tim', \
         'Tolbert':'Chris', 'Bailey':'Matt', \
-        'Schutte':'Joe'}
+        'Schutte':'Joe', 'Knepper':'Nick'}
 
 email_path = rwkos.FindFullPath('siue/classes/482/2009/class_list.csv')
 email_list = spreadsheet.email_list(email_path)
