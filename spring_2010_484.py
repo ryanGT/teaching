@@ -23,7 +23,7 @@ group_list = spreadsheet.group_list(group_path)
 alts = {'Trutter':'Ben','Herren':'Zach', 'Schelp':'Tim', \
         'Tolbert':'Chris', 'Bailey':'Matt', \
         'Schutte':'Joe','Knepper':'Nick', 'Niccum':'Jake', \
-        'Sansone':'Vinnie'}
+        'Sansone':'Vinnie', 'Loucks':'Nate'}
 
 email_path = os.path.join(class_folder, 'class_list.csv')
 email_list = spreadsheet.email_list(email_path)
