@@ -38,6 +38,7 @@ class course_website(object):
     def make_lecture_pages(self):
         lecture_pages = None
         for folder in self.lecture_folders:
+            print('folder='+folder)
             folder_path = os.path.join(self.pathin, folder)
             title = self.title + ': Lecture Notes'
             lecture_page = thumbnail_maker.MainPageMaker2(folder_path, \
