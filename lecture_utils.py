@@ -1,4 +1,4 @@
-import datetime, os, rwkos, sys, copy, rwkmisc
+import datetime, os, rwkos, sys, copy, rwkmisc, time
 
 firstday = datetime.date(2010, 8, 23)
 
@@ -19,7 +19,7 @@ def date_string_to_datetime(string):
     Using spaces or underscores in place of /'s is tolerated."""
     string = string.replace(' ','/')
     string = string.replace('_','/')
-    out = time.strptime('08/23/10','%m/%d/%y')
+    out = time.strptime(string,'%m/%d/%y')
     date = datetime.date(out.tm_year, out.tm_mon, out.tm_mday)
     return date
 
@@ -84,11 +84,13 @@ class course(object):
 
 
     def create_one_rst(self, title='Outline'):
+        #make this create only if it doens't exist!!!
         rstname = title.lower() + '.rst'
         rstpath = os.path.join(self.exclude_path, rstname)
-        mylist = copy.copy(rst_list)
-        mylist.replaceall('@@TITLE@@', title)
-        txt_mixin.dump(rstpath, mylist)
+        if not os.path.exists(rstpath):
+            mylist = copy.copy(rst_list)
+            mylist.replaceall('@@TITLE@@', title)
+            txt_mixin.dump(rstpath, mylist)
         
         
     def create_rsts(self):
