@@ -12,7 +12,7 @@ class course_website(object):
                  other_folders=['homework','labs'], \
                  index_rst_only_folders=['projects'], \
                  toplevel_files=['syllabus.pdf'], \
-                 extlist=['html','pdf','py','m'], \
+                 extlist=['html','pdf','py','m','txt'], \
                  teaching_root = '../../index.html'):
         #teaching_root assumes that the courses will be in folders by
         #course number and year, i.e. 482/2009 so that the root to all

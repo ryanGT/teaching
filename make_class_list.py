@@ -35,7 +35,7 @@ class class_list_maker(txt_mixin.txt_file_with_list):
         self.list.replaceall(' Confidential','')
         
 
-    def run(self, pathout):
+    def run(self, pathout=None):
         self.replace_tabs()
         self.clean_end_of_lines()
         self.clean_number_from_front()
@@ -43,7 +43,8 @@ class class_list_maker(txt_mixin.txt_file_with_list):
         self.insert_labels()
         self.drop_confidentials()
         self.clean_spaces()
-        self.save(pathout)
+        if pathout is not None:
+            self.save(pathout)
         
 
 
