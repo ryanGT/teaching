@@ -180,3 +180,37 @@ class course_482(course):
         date_pat = self.next_lecture.strftime('%m_%d_%y')
         self.pat = 'ME482_' + date_pat + '_%0.4i.xcf'
         self.search_pat = 'ME482_' + date_pat
+
+
+class course_492(course):
+    def __init__(self, path=None):
+        if path is None:
+            today = datetime.date.today()
+            path = '~/siue/classes/mobile_robotics/' + \
+                   today.strftime('%Y')#4 digit year
+            path += '/lectures/'
+        self.path = rwkos.FindFullPath(path)
+        self.course_num = '492'
+
+
+    def next_lecture_date(self, date=None):
+        today = get_valid_date(date=date)
+        #482 lectures are on weekdays 1 and 3 (Tuesday and Thursday)
+        weekday = today.weekday()
+        if weekday == 2:#Wednesday
+            self.next_lecture = today
+        elif weekday == 0:#Monday or Wednesday
+            self.next_lecture = today + datetime.timedelta(days=2)
+        elif weekday == 1:#Monday or Wednesday
+            self.next_lecture = today + datetime.timedelta(days=1)
+        else:
+            self.next_lecture = find_next_day(today, \
+                                              des_day=2)#find next
+                                                        #Wednesday
+        return self.next_lecture
+
+
+    def build_pat(self):
+        date_pat = self.next_lecture.strftime('%m_%d_%y')
+        self.pat = 'ME492_' + date_pat + '_%0.4i.xcf'
+        self.search_pat = 'ME492_' + date_pat
