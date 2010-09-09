@@ -139,11 +139,13 @@ if __name__ == '__main__':
     if case == 1:
         root = '/home/ryan/siue/classes/mechatronics/2010'
         note = 'ME458 Fall 2010'
+        filename = 'class_list_raw.csv'
     elif case == 2:
         root = '/home/ryan/siue/classes/482/2010'
         note = 'ME482 Fall 2010'
+        filename = 'class_list_09_07_10_raw.csv'
 
-    pathin = os.path.join(root, 'class_list_raw.csv')
+    pathin = os.path.join(root, filename)
     pathout = pathin.replace('_raw.csv','_out.csv')
     email_path = os.path.join(root, 'email_list_raw.csv')
     mylist = class_list_maker(pathin)
