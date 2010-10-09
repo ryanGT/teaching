@@ -49,17 +49,21 @@ class course(object):
         self.path = rwkos.FindFullPath(path)
 
 
-    def format_date(self, date=None):
+    def format_date(self, date=None, attr='date_str'):
         if date is None:
             if not hasattr(self, 'next_lecture'):
                 self.next_lecture_date()
             date = self.next_lecture
         date_str = date.strftime('%m_%d_%y')
-        self.date_str = date_str
+        setattr(self, attr, date_str)
         return date_str
 
 
     def next_lecture_date(self, date=None):
+        raise NotImplementedError
+
+    
+    def previous_lecture_date(self, date=None):
         raise NotImplementedError
 
 
@@ -68,6 +72,17 @@ class course(object):
             self.format_date(date=date)
         self.lecture_path = os.path.join(self.path, self.date_str)
         return self.lecture_path
+
+
+    def build_previous_lecture_path(self):
+        if not hasattr(self, 'prev_lecture'):
+            self.previous_lecture_date()
+        self.format_date(date=self.prev_lecture, \
+                         attr='prev_date_str')
+        self.prev_lecture_path = os.path.join(self.path, \
+                                              self.prev_date_str)
+        return self.prev_lecture_path
+
 
 
     def make_lecture_dir(self, date=None):
@@ -110,6 +125,26 @@ class course(object):
         mydict['course_num'] = self.course_num
         rwkmisc.SavePickle(mydict, lecturerc_path)
 
+
+    def copy_announcements_forward(self, debug=0):
+        prev_exclude_path = os.path.join(self.prev_lecture_path, \
+                                         'exclude')
+        announce_path = os.path.join(prev_exclude_path,
+                                     'announcements.rst')
+        filein = txt_mixin.txt_file_with_list(announce_path)
+        listout = copy.copy(rst_list)
+        listout.replaceall('@@TITLE@@', 'Reminders')
+        if debug:
+            print('pathin = ' + announce_path)
+            print('listin = ' + str(filein.list))
+        if len(filein.list) > 3:
+            listout.extend(filein.list[3:])
+        new_exclude_path = os.path.join(self.lecture_path, 'exclude')
+        pathout = os.path.join(new_exclude_path, 'reminders.rst')
+        if debug:
+            print('pathout = ' + pathout)
+        txt_mixin.dump(pathout, listout)
+
         
     def run(self, date=None):
         self.next_lecture_date(date=date)
@@ -117,18 +152,23 @@ class course(object):
         self.make_lecture_dir()
         self.make_exclude_dir()
         print('lecture_path = ' + self.lecture_path)
+        self.build_previous_lecture_path()
+        print('previous lecture_path = ' + self.prev_lecture_path)
         self.set_pickle()
+        if self.forward:
+            self.copy_announcements_forward()
         self.create_rsts()
         
         
 class course_458(course):
-    def __init__(self, path=None):
+    def __init__(self, path=None, forward=False):
         if path is None:
             today = datetime.date.today()
             path = '~/siue/classes/mechatronics/' + today.strftime('%Y')#4 digit year
             path += '/lectures/'
         self.path = rwkos.FindFullPath(path)
         self.course_num = '458'
+        self.forward = forward
 
 
     def next_lecture_date(self, date=None):
@@ -145,6 +185,21 @@ class course_458(course):
         return self.next_lecture
 
 
+    def previous_lecture_date(self, date=None):
+        today = get_valid_date(date=date)
+        #458 lectures are on weekdays 0 and 2 (Monday and Wednesday)
+        weekday = today.weekday()
+        if weekday == 6:#Sunday --> prev. Wed.
+            self.prev_lecture = today + datetime.timedelta(days=-4)
+        elif weekday == 0:#Monday --> prev. Wed.
+            self.prev_lecture = today + datetime.timedelta(days=-5)
+        elif weekday in [1,2]:#backup to Mon.
+            self.prev_lecture = today + datetime.timedelta(days=-weekday)
+        elif weekday == [3,4,5]:#backup to Wed.
+            self.prev_lecture = today + datetime.timedelta(days=-weekday+2)
+        return self.prev_lecture
+
+
     def build_pat(self):
         date_pat = self.next_lecture.strftime('%m_%d_%y')
         self.pat = 'ME458_' + date_pat + '_%0.4i.xcf'
@@ -152,12 +207,13 @@ class course_458(course):
         
 
 class course_482(course):
-    def __init__(self, path=None):
+    def __init__(self, path=None, forward=False):
         if path is None:
             today = datetime.date.today()
             path = '~/siue/classes/482/' + today.strftime('%Y')#4 digit year
             path += '/lectures/'
         self.path = rwkos.FindFullPath(path)
+        self.forward = forward
         self.course_num = '482'
 
 
@@ -183,7 +239,7 @@ class course_482(course):
 
 
 class course_492(course):
-    def __init__(self, path=None):
+    def __init__(self, path=None, forward=False):
         if path is None:
             today = datetime.date.today()
             path = '~/siue/classes/mobile_robotics/' + \

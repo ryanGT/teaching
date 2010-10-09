@@ -211,14 +211,14 @@ class content_sec(quick_read):
     def __init__(self, *args, **kwargs):
         section_level_1.__init__(self, *args, **kwargs)
         self.weight = 0.5
-##         self.subweights = {'Persuasiveness': 1.0, \
-##                            'Design Strategy': 1.0, \
-##                            'Analysis': 1.0, \
-##                            'Background Research': 1.0, \
-##                            'Constraints': 0.8 , \
-##                            'Computers and Software': 0.8 , \
-##                            'Timeline': 0.8 , \
-##                            'Budget': 0.8}
+        self.subweights = {'Persuasiveness': 1.0, \
+                           'Design Strategy': 1.0, \
+                           'Analysis': 1.0, \
+                           'Background Research': 1.0, \
+                           'Constraints': 0.8 , \
+                           'Computers and Software': 0.8 , \
+                           'Timeline': 0.8 , \
+                           'Budget': 0.8}
 
 
 
@@ -566,9 +566,10 @@ class group_with_rst(section):
         
 class proposal(group_with_rst):
     def calc_overall_score(self):
-        weight_dict = {'Literature Review':0.05, \
+        weight_dict = {#'Literature Review':0.05, \#lit. review is a
+                       #separate grade
                        'Contemporary Issues':0.05, \
-                       'Writing: Quick Read':0.15, \
+                       'Writing: Quick Read':0.20, \
                        'Writing: Slow Read':0.25, \
                        'Content':0.5}
         self.overall_grade = 0.0
@@ -576,9 +577,10 @@ class proposal(group_with_rst):
             cursec = self.find_section(key)
             self.overall_grade += weight*cursec.grade*10.0
         ec = self.find_section('Extra Credit')
-        print('before ec, overall_grade='+str(self.overall_grade))
-        self.overall_grade += ec.grade
-        print('after ec, overall_grade='+str(self.overall_grade))        
+        if ec is not None:
+            print('before ec, overall_grade='+str(self.overall_grade))
+            self.overall_grade += ec.grade
+            print('after ec, overall_grade='+str(self.overall_grade))        
         return self.overall_grade
 
 
@@ -593,9 +595,8 @@ class proposal(group_with_rst):
         self.team_rst.append('')
         overall_title = mysecdec('Overall Grade')
         self.team_rst.extend(overall_title)
-        formula_line = '10*(0.05*(Literature Review) + ' + \
-                       '0.5*(Contemporary Issues) + ' + \
-                       '0.15*(Quick Read Weighted Average) + ' + \
+        formula_line = '10*(0.5*(Contemporary Issues) + ' + \
+                       '0.2*(Quick Read Weighted Average) + ' + \
                        '0.25*(Slow Read Weighted Average) + ' + \
                        '0.5*(Content Weighted Average))'
         self.team_rst.append('**Formula:**')
@@ -608,12 +609,10 @@ class proposal(group_with_rst):
             out(ws + strin)
         eq_out('\\newcommand{\\myrule}{\\rule{0pt}{1EM}}')
         eq_out(r'\begin{equation*}\begin{split}')
-        eq_out(r'\textrm{grade} = & 10 \left( \myrule 0.05(\textrm{Literature Review})')
-        eq_out(r'+ 0.05(\textrm{Contemporary Issues}) \right. \\')
+        eq_out(r'\textrm{grade} = & 10 \left( \myrule 0.05(\textrm{Contemporary Issues}) \right. \\')
         eq_out(r'& + 0.15 (\textrm{Quick Read Weighted Average}) ')
         eq_out(r'+ 0.25 (\textrm{Slow Read Weighted Average}) \\')
         eq_out(r'& \left. + 0.5 (\textrm{Content Weighted Average}) \myrule \right)')
-        eq_out(r'+ \textrm{Extra Credit}')
         eq_out(r'\end{split}\end{equation*}')
         self.team_rst.append('')
         self.team_rst.append('')
