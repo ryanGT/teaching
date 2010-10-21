@@ -175,6 +175,23 @@ class extra_credit(lit_review):
     def __init__(self, *args, **kwargs):
         section_level_1.__init__(self, *args, **kwargs)
         self.weight = 0.1
+
+class penalty(extra_credit):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.1    
+
+    def create_rst(self):
+        rst_out = [self.title]
+        rst_out.append(self.dec_line)
+        rst_out.append('')
+        grade_str = '%0.2g' % self.grade + '%'
+        grade_line = ':grade:`%s`' % grade_str
+        rst_out.append(grade_line)
+        self.rst = rst_out
+        return self.rst
+
+
     
 class quick_read(section_level_1):
     def __init__(self, *args, **kwargs):
@@ -199,7 +216,7 @@ class slow_read(quick_read):
         section_level_1.__init__(self, *args, **kwargs)
         self.weight = 0.25
         self.subweights = {'Problem Statement and Formulation': 1.0, \
-                           'Organization and Flow': 0.8, \
+                           'Organization and Flow': 0.5, \
                            'Clarity and Tone': 1.0, \
                            'Format/Style': 1.0, \
                            'Required Sections': 0.2, \
@@ -462,6 +479,9 @@ class group_with_rst(section):
         row_out = [self.get_group_name_from_path()]
         for section in self.sec_list:
             row_out.extend(section.get_grades())
+        #Pdb().set_trace()
+        if self.find_section('Penalty') is None:
+            row_out.append(0.0)
         overall = self.calc_overall_score()
         row_out.append(overall)
         self.row_out = row_out
@@ -580,7 +600,14 @@ class proposal(group_with_rst):
         if ec is not None:
             print('before ec, overall_grade='+str(self.overall_grade))
             self.overall_grade += ec.grade
-            print('after ec, overall_grade='+str(self.overall_grade))        
+            print('after ec, overall_grade='+str(self.overall_grade))
+        self.penalty = self.find_section('Penalty')
+        if self.penalty is not None:
+            multiplier = (1.0 + self.penalty.grade/100.0)
+            print('before penalty, overall_grade='+str(self.overall_grade))
+            self.overall_grade *= multiplier
+            print('after penalty, overall_grade='+str(self.overall_grade))
+            
         return self.overall_grade
 
 
@@ -599,6 +626,8 @@ class proposal(group_with_rst):
                        '0.2*(Quick Read Weighted Average) + ' + \
                        '0.25*(Slow Read Weighted Average) + ' + \
                        '0.5*(Content Weighted Average))'
+        if self.penalty is not None:
+            formula_line += '* (1 + penalty/100)'
         self.team_rst.append('**Formula:**')
         self.team_rst.append('')
         self.team_rst.append('.. raw:: latex')
@@ -613,10 +642,12 @@ class proposal(group_with_rst):
         eq_out(r'& + 0.15 (\textrm{Quick Read Weighted Average}) ')
         eq_out(r'+ 0.25 (\textrm{Slow Read Weighted Average}) \\')
         eq_out(r'& \left. + 0.5 (\textrm{Content Weighted Average}) \myrule \right)')
+        if self.penalty is not None:
+            eq_out(r'\times (1 + \textrm{Penalty}/100)')
         eq_out(r'\end{split}\end{equation*}')
         self.team_rst.append('')
         self.team_rst.append('')
-        self.team_rst.append(':grade:`%0.3g`' % self.overall_grade)
+        self.team_rst.append(':grade:`%0.1f`' % self.overall_grade)
 
 
 

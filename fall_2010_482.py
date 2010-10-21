@@ -20,6 +20,11 @@ alts = {'Bemrose-Fetter':'Rebecca', \
         'Woodrome':'Jon',\
         }
 
+inverse_alts = {'Joe':'Joseph', \
+                'Mike':'Michael', \
+                'Luke':'Lucas', \
+                'Andi':'Andrea'}
+
 email_path = rwkos.FindFullPath('siue/classes/482/2010/email_list_editted.csv')
 email_list = spreadsheet.email_list(email_path)
 

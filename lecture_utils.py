@@ -5,6 +5,8 @@ firstday = datetime.date(2010, 8, 23)
 import pdb
 import txt_mixin
 
+from IPython.Debugger import Pdb
+
 from pygimp_lecture_utils import lecturerc_path
 
 
@@ -195,7 +197,7 @@ class course_458(course):
             self.prev_lecture = today + datetime.timedelta(days=-5)
         elif weekday in [1,2]:#backup to Mon.
             self.prev_lecture = today + datetime.timedelta(days=-weekday)
-        elif weekday == [3,4,5]:#backup to Wed.
+        elif weekday in [3,4,5]:#backup to Wed.
             self.prev_lecture = today + datetime.timedelta(days=-weekday+2)
         return self.prev_lecture
 
@@ -231,6 +233,21 @@ class course_482(course):
                                                         #Tuesday
         return self.next_lecture
 
+
+    def previous_lecture_date(self, date=None):
+        today = get_valid_date(date=date)
+        #482 lectures are on weekdays 1 and 3 (Tuesday and Thursday)
+        weekday = today.weekday()
+        if weekday == 6:#Sunday --> prev. Thur.
+            self.prev_lecture = today + datetime.timedelta(days=-3)
+        elif weekday == [0,1]:#Monday or Tues. --> prev. Thur.
+            delta = -4 - weekday
+            self.prev_lecture = today + datetime.timedelta(days=delta)
+        elif weekday in [2,3]:#backup to Tues.
+            self.prev_lecture = today + datetime.timedelta(days=(-weekday+1))
+        elif weekday == [4,5]:#backup to Thurs.
+            self.prev_lecture = today + datetime.timedelta(days=(-weekday+3))
+        return self.prev_lecture
 
     def build_pat(self):
         date_pat = self.next_lecture.strftime('%m_%d_%y')
