@@ -34,7 +34,12 @@ from IPython.Debugger import Pdb
 def file_name_from_group_name(group_name, ext='.rst'):
     filename = group_name.replace(' ','_') + ext
     return filename
-    
+
+
+def path_from_name(name):
+    pathout = name.replace(' ','_') + '.rst'
+    return pathout
+
 
 class group(object):
     def __init__(self, group_name):

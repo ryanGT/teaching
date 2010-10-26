@@ -11,7 +11,9 @@ from IPython.Debugger import Pdb
 
 class course_grade_compiler(CSVSpreadSheet):
     def retrieve_multiple_grades(self, csvpath, column_labels, \
-                                 name_label='Student Name'):
+                                 name_label=None):
+        if name_label is None:
+            name_label = self.name_label
         retrieved_sheet = GradeSpreadSheetMany(csvpath, \
                                                namelabel=name_label,
                                                valuelabels=column_labels)
@@ -19,7 +21,9 @@ class course_grade_compiler(CSVSpreadSheet):
         return retrieved_sheet
 
     def retrieve_one_grade(self, csvpath, column_label, \
-                           name_label='Student Name'):
+                           name_label=None):
+        if name_label is None:
+            name_label = self.name_label
         if type(column_label) == str:
             column_labels = [column_label]
         else:
@@ -86,3 +90,7 @@ class course_grade_compiler(CSVSpreadSheet):
         bb.AppendColFromList(self.lastnames, destlabel, values, \
                              splitnames=splitnames)
                                  
+
+    def __init__(self, pathin=None, name_label='Student Name', **kwargs):
+        CSVSpreadSheet.__init__(self, pathin=pathin, **kwargs)
+        self.name_label = name_label
