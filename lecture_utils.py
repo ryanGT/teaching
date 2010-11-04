@@ -148,14 +148,15 @@ class course(object):
         txt_mixin.dump(pathout, listout)
 
         
-    def run(self, date=None):
+    def run(self, date=None, build_previous=True):
         self.next_lecture_date(date=date)
         self.build_lecture_path_string()
         self.make_lecture_dir()
         self.make_exclude_dir()
         print('lecture_path = ' + self.lecture_path)
-        self.build_previous_lecture_path()
-        print('previous lecture_path = ' + self.prev_lecture_path)
+        if build_previous:
+            self.build_previous_lecture_path()
+            print('previous lecture_path = ' + self.prev_lecture_path)
         self.set_pickle()
         if self.forward:
             self.copy_announcements_forward()
@@ -209,6 +210,9 @@ class course_458(course):
         
 
 class course_482(course):
+    def run(self, date=None, build_previous=False):
+        course.run(self, date=date, build_previous=build_previous)
+
     def __init__(self, path=None, forward=False):
         if path is None:
             today = datetime.date.today()

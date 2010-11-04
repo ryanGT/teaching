@@ -188,18 +188,3 @@ class design_paper_rst(group_with_rst):
         group_with_rst.get_section_labels(self)
         self.labels.append('Ave. So Far')
         return self.labels
-
-
-
-def find_group(lastname, firstname):
-    groups = [group(pname) for pname in group_list.Project_Name]
-    if alts.has_key(lastname):
-        firstname = alts[lastname]
-    for i, curgroup in enumerate(groups):
-        if lastname in curgroup.lastnames:
-            if firstname in curgroup.firstnames:
-                return i+1
-    return -1
-
-
-            
