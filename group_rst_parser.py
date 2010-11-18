@@ -19,6 +19,15 @@ notes_pat = re.compile('^Notes*[: ]*$')
 import copy
 reload(spreadsheet)
 
+mysig = """
+
+--
+Ryan Krauss, Ph.D.
+Assistant Professor
+Mechanical Engineering
+Southern Illinois University Edwardsville"""
+
+
 def clean_list(listin):
     """Remove empty lines at the beginning and end of a list."""
     listout = copy.copy(listin)
@@ -323,7 +332,9 @@ class speaker(object):
         else:
             email = self.email
         #addresses = ['ryanwkrauss@gmail.com', 'ryanlists@gmail.com', 'ryanwkrauss@att.net']
-        body = "The attached pdf contains feedback on your individual speaking and delivery grade."
+        body = self.name + ', \n\n' 
+        body += "The attached pdf contains feedback on your individual speaking and delivery grade."
+        body += mysig
         gmail_smtp.sendMail(email, subject, body, self.pdfpath)
 
 
@@ -632,6 +643,7 @@ class group_with_rst(section):
         #addresses = ['ryanwkrauss@gmail.com', 'ryanlists@gmail.com']
 
         body = "The attached pdf contains your team grade and my feedback."
+        body += mysig
 
         gmail_smtp.sendMail(emails, subject, body, self.pdfpath)
         
