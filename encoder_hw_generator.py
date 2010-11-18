@@ -43,7 +43,7 @@ def save_case(filename, A, B):
 
 if __name__ == '__main__':
     #folder = rwkos.FindFullPath('mechatronics_2009/homework/encoders')
-    folder = rwkos.FindFullPath('mechatronics_2009/final/figs')
+    folder = rwkos.FindFullPath('mechatronics_2010/quizzes/quiz_05')
     outpat = 'encoders_case_%0.2d.txt'
 
 ##     # case 11
@@ -78,11 +78,28 @@ if __name__ == '__main__':
 ##     outpath = os.path.join(folder, curname)
 ##     #save_case(outpath, A, B)
 
-    # case 14
-    case = 14
+    ## # case 14
+    ## case = 14
+    ## A_list = [0.1, 0.3, 0.5, 0.7, 0.8]
+    ## B_list = [0.2, 0.4, 0.6, 0.9]
+    ## A, B = create_case(A_list, B_list, 1, 0)
+    ## plot_case(A, B, fignum=case, bsty='--', linewidth=2.0)
+    ## ylim([-0.1,1.3])
+    ## legend(['A','B'])
+    ## curname = outpat % case
+    ## fno, ext = os.path.splitext(curname)
+    ## pdfname = fno + '.pdf'
+    ## pdfpath = os.path.join(folder, pdfname)
+    ## outpath = os.path.join(folder, curname)
+    ## save_case(outpath, A, B)
+    ## pylab_util.mysave(pdfpath)
+
+
+    # case 15
+    case = 15
     A_list = [0.1, 0.3, 0.5, 0.7, 0.8]
     B_list = [0.2, 0.4, 0.6, 0.9]
-    A, B = create_case(A_list, B_list, 1, 0)
+    A, B = create_case(A_list, B_list, 0, 1)
     plot_case(A, B, fignum=case, bsty='--', linewidth=2.0)
     ylim([-0.1,1.3])
     legend(['A','B'])

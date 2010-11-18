@@ -9,21 +9,27 @@ group_list = spreadsheet.group_list_2010(group_path)
 
 alts = {'Bemrose-Fetter':'Rebecca', \
         'Brown':'Chris',\
+        'Flahan':'Chris',\
         'Card':'Will',\
         'Dement':'Joe',\
         'Gehrs':'Ben',\
         'Graham':'Mike',\
+        'Mulvey':'Dan',\
         'Hankins':'Matt',\
         'Pish':'Jill',\
         'Spihlman':'Andi',\
         'Thompson':'Luke',\
         'Woodrome':'Jon',\
+        'Bemrose-Fetter':'Rebbecca',\
         }
 
 inverse_alts = {'Joe':'Joseph', \
                 'Mike':'Michael', \
                 'Luke':'Lucas', \
-                'Andi':'Andrea'}
+                'Andi':'Andrea', \
+                'Matt':'Matthew',\
+                'Jill':'Jillian'}
+
 
 email_path = rwkos.FindFullPath('siue/classes/482/2010/email_list_editted.csv')
 email_list = spreadsheet.email_list(email_path)

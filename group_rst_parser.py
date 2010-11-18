@@ -13,6 +13,8 @@ from scipy import mean
 from IPython.Debugger import Pdb
 
 grade_pat = re.compile(':grade:`(.*)`')
+timing_pat = re.compile('^Tim(ing|e)[: ]*$')
+notes_pat = re.compile('^Notes*[: ]*$')
 
 import copy
 reload(spreadsheet)
@@ -166,6 +168,21 @@ class lit_review(section_level_1):
         self.labels = [self.title]
         return self.labels
 
+
+class default_section_no_children(section_level_1):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 1.0
+
+    def get_grades(self):
+        self.grade_list = [self.grade]
+        return self.grade_list
+
+    def get_labels(self):
+        self.labels = [self.title]
+        return self.labels
+
+
 class contemp_issues(lit_review):
     def __init__(self, *args, **kwargs):
         section_level_1.__init__(self, *args, **kwargs)
@@ -236,7 +253,6 @@ class content_sec(quick_read):
                            'Computers and Software': 0.8 , \
                            'Timeline': 0.8 , \
                            'Budget': 0.8}
-
 
 
 class member(object):
@@ -328,12 +344,13 @@ class group_with_rst(section):
         fno, ext = os.path.splitext(filename)
         self.group_name = fno.replace('_',' ')
         return self.group_name
+    
 
     def break_into_sections(self, verbosity=1):
-        if self.class_dict is None:
-            if verbosity > 0:
-                print('skipping break_into_sections because self.class_dict is None')
-            return
+        ## if self.class_dict is None:
+        ##     if verbosity > 0:
+        ##         print('skipping break_into_sections because self.class_dict is None')
+        ##     return
         inds = self.content.findallre(self.subre)
         if len(inds) == 0:
             return
@@ -353,7 +370,10 @@ class group_with_rst(section):
 
         for curlist in self.raw_sec_list:
             curtitle = curlist[0]
-            curclass = self.class_dict[curtitle]
+            if self.class_dict is None:
+                curclass = default_section_no_children
+            else:
+                curclass = self.class_dict[curtitle]
             cur_sec = curclass(curlist)
             cur_sec.calc_grade()
             if self.sec_list is None:
@@ -369,7 +389,8 @@ class group_with_rst(section):
 ##         prevind = inds2.pop(0)
 ##         self.header = self.list[0:prevind]
 ##         for ind in inds2:
-##             curlist = self.list[prevind:ind]
+##
+##                curlist = self.list[prevind:ind]
 ##             if self.raw_sec_list is None:
 ##                 self.raw_sec_list = [curlist]
 ##             else:
@@ -386,11 +407,20 @@ class group_with_rst(section):
 
 
     def get_time_lines(self):
+        time_titles = ['Timing','Time']
         for n, section in enumerate(self.sec_list):
-            if section.title == 'Timing':
+            q = timing_pat.search(section.title)
+            if q:
                 self.time_ind = n + 1#plus one because group name will
-                                     #be in the first column
+                #be in the first column
                 return section.content
+            
+    ## def get_time_lines(self):
+    ##     for n, section in enumerate(self.sec_list):
+    ##         if section.title == 'Timing':
+    ##             self.time_ind = n + 1#plus one because group name will
+    ##                                  #be in the first column
+    ##             return section.content
 
         
     def get_speaking_lines(self):
@@ -506,7 +536,7 @@ class group_with_rst(section):
         self.team_rst.append('')
         overall_title = mysecdec('Overall Grade')
         self.team_rst.extend(overall_title)
-        self.team_rst.append(':grade:`%0.3g`' % self.ave)
+        self.team_rst.append(':grade:`%0.3g`' % self.overall_grade)
 
 
     def save_team_rst(self, outpath):
@@ -525,23 +555,45 @@ class group_with_rst(section):
         os.system(cmd)
         self.set_pdfpath()
 
+    def append_initials_to_firstnames(self):
+        """Fix self.firstnames by appending a last initial if
+        necessary."""
+        self.firstnames = txt_mixin.txt_list(self.firstnames)
+        N = len(self.firstnames)
+        for i in range(N):
+            first = self.firstnames[i]
+            inds = self.firstnames.findall(first)
+            if len(inds) > 1:
+                for j in inds:
+                    first = self.firstnames[j]
+                    last = self.lastnames[j]
+                    first += ' ' + last[0] + '.'
+                    self.firstnames[j] = first
+
+
     def find_members(self):
         lastnames, firstnames = self.group_list.get_names(self.group_name)
         self.lastnames = lastnames
         self.firstnames = firstnames
+        self.append_initials_to_firstnames()
         for n, lastname in enumerate(lastnames):
             if self.alts.has_key(lastname):
                 self.firstnames[n] = self.alts[lastname]
         members = None
+        emails = []
         for last, first in zip(self.lastnames, self.firstnames):
-            email = self.email_list.get_email(last)
+            try:
+                email = self.email_list.get_email(last)
+            except AssertionError:
+                email = self.email_list.get_email(last, first)
+            emails.append(email)
             curmember = member(last, first, email)
             if members is None:
                 members = {first:curmember}
             else:
                 members[first] = curmember
         self.members = members
-        self.emails = self.email_list.get_emails(lastnames)
+        self.emails = emails#self.email_list.get_emails(lastnames)
         return self.emails
 
 
@@ -658,3 +710,81 @@ class proposal(group_with_rst):
 
         gmail_smtp.sendMail(self.emails, subject, body, self.pdfpath)
 
+
+
+class presentation_with_appearance(group_with_rst):
+#    Appearance
+#    Content and Organization
+#    Speaking and Delivery
+#    Slides
+#    Listening to and Answering Questions
+ 
+    def __init__(self, *args, **kwargs):
+        group_with_rst.__init__(self, *args, **kwargs)
+        if kwargs.has_key('weight_dict'):
+            weight_dict = kwargs['weight_dict']
+        else:
+            weight_dict = {'Appearance':0.05,\
+                           'Content and Organization':0.5, \
+                           'Speaking and Delivery':0.25, \
+                           'Slides':0.15,\
+                           'Listening to and Answering Questions':0.05}
+        self.weight_dict = weight_dict
+        self.get_timing_grade()
+
+
+    
+    def calc_overall_score(self):
+        self.overall_grade = 0.0
+        for key, weight in self.weight_dict.iteritems():
+            cursec = self.find_section(key)
+            self.overall_grade += weight*cursec.grade
+        ec = self.find_section('Extra Credit')
+        if ec is not None:
+            print('before ec, overall_grade='+str(self.overall_grade))
+            self.overall_grade += ec.grade
+            print('after ec, overall_grade='+str(self.overall_grade))
+        self.penalty = self.find_section('Penalty')
+        if self.penalty is not None:
+            multiplier = (1.0 + self.penalty.grade/100.0)
+            print('before penalty, overall_grade='+str(self.overall_grade))
+            self.overall_grade *= multiplier
+            print('after penalty, overall_grade='+str(self.overall_grade))
+
+        return self.overall_grade
+
+
+    def build_spreadsheet_row(self):
+        row_out = [self.get_group_name_from_path()]
+        for section in self.sec_list:
+            if hasattr(section,'grade'):
+                elem = str(section.grade)
+            else:
+                elem = ';'.join(section.content)#this is how we handle timing and notes
+
+            row_out.append(elem)
+        ## if self.find_section('Penalty') is None:
+        ##     row_out.append(0.0)
+        overall = self.calc_overall_score()
+        row_out.append(overall)
+        row_out.insert(self.time_ind+1, self.time_penalty)
+        self.row_out = row_out
+        return self.row_out
+
+
+    def get_section_labels(self):
+        group_with_rst.get_section_labels(self)
+        self.labels.insert(self.time_ind+1, 'Time Penalty')
+        return self.labels
+
+
+    def get_timing_grade(self):
+        time_lines = self.get_time_lines()
+        time_str = self.find_time_string(time_lines)
+        time = self.parse_time_string(time_str)
+        if time > 15.0:
+            num_steps = int((time-9.0)/0.5)
+            penalty = -0.1*num_steps
+        else:
+            penalty = 0.0
+        self.time_penalty = penalty
