@@ -288,7 +288,9 @@ class speaker(object):
     def get_rst_name(self):
         poutpath = self.parent.outpath
         pne, ext = os.path.splitext(poutpath)
-        self.outpath = pne + '_' + self.name + ext
+        clean_name = self.name.replace(' ','_')
+        clean_name = clean_name.replace('.','')
+        self.outpath = pne + '_' + clean_name + ext
         
     def build_rst(self):
         self.rst = copy.copy(self.parent.header)
@@ -315,8 +317,11 @@ class speaker(object):
         self.save_rst()
         self.run_rst()
         
-    def send_email(self, subject):
-        email = self.email
+    def send_email(self, subject, debug=0):
+        if debug:
+            email = 'ryanlists@gmail.com'
+        else:
+            email = self.email
         #addresses = ['ryanwkrauss@gmail.com', 'ryanlists@gmail.com', 'ryanwkrauss@att.net']
         body = "The attached pdf contains feedback on your individual speaking and delivery grade."
         gmail_smtp.sendMail(email, subject, body, self.pdfpath)
@@ -606,7 +611,7 @@ class group_with_rst(section):
             return
         
 
-    def compose_and_send_team_gmail(self, subject):#, ga):
+    def compose_and_send_team_gmail(self, subject, debug=0):#, ga):
         """ga is a gmail account instance from libgmail that has
         already been logged into."""
         if not hasattr(self,'pdfpath'):
@@ -617,7 +622,11 @@ class group_with_rst(section):
             return
         
         #emails = self.get_emails()
-        emails = self.emails
+        if debug:
+            emails = ['ryanlists@gmail.com']
+        else:
+            emails = self.emails
+
         #print('emails=' + str(emails))
         #addresses = emails.replace(';',',')
         #addresses = ['ryanwkrauss@gmail.com', 'ryanlists@gmail.com']
