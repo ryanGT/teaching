@@ -32,7 +32,7 @@ def plot_case(A, B, fignum=1, asty='-', bsty='-', clear=True, **kwargs):
         clf()
     plot(t, A, asty, t, B, bsty, **kwargs)
     xlabel('Time (sec)')
-    ylabel('Encoder Voltages')
+    ylabel('Encoder Signals')
     ylim([-0.1, 1.1])
 
 
@@ -43,7 +43,7 @@ def save_case(filename, A, B):
 
 if __name__ == '__main__':
     #folder = rwkos.FindFullPath('mechatronics_2009/homework/encoders')
-    folder = rwkos.FindFullPath('mechatronics_2010/quizzes/quiz_05')
+    folder = rwkos.FindFullPath('mechatronics_2010/final_exam')
     outpat = 'encoders_case_%0.2d.txt'
 
 ##     # case 11
@@ -96,10 +96,10 @@ if __name__ == '__main__':
 
 
     # case 15
-    case = 15
-    A_list = [0.1, 0.3, 0.5, 0.7, 0.8]
-    B_list = [0.2, 0.4, 0.6, 0.9]
-    A, B = create_case(A_list, B_list, 0, 1)
+    case = 16
+    A_list = [0.1, 0.3, 0.5, 0.7, 0.9]
+    B_list = [0.4, 0.8]
+    A, B = create_case(A_list, B_list, 1, 0)
     plot_case(A, B, fignum=case, bsty='--', linewidth=2.0)
     ylim([-0.1,1.3])
     legend(['A','B'])

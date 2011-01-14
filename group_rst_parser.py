@@ -521,13 +521,14 @@ class group_with_rst(section):
         return self.ave
 
 
-    def build_spreadsheet_row(self):
+    def build_spreadsheet_row(self, look_for_penalty=False):
         row_out = [self.get_group_name_from_path()]
         for section in self.sec_list:
             row_out.extend(section.get_grades())
         #Pdb().set_trace()
-        if self.find_section('Penalty') is None:
-            row_out.append(0.0)
+        if look_for_penalty:
+            if self.find_section('Penalty') is None:
+                row_out.append(0.0)
         overall = self.calc_overall_score()
         row_out.append(overall)
         self.row_out = row_out
@@ -566,8 +567,11 @@ class group_with_rst(section):
         pne, ext = os.path.splitext(self.outpath)
         self.pdfpath = pne+'.pdf'
         
-    def rst_team(self):
-        cmd = 'rst2latex_rwk.py -c 2 ' + self.outpath
+    def rst_team(self, clean=False):
+        if clean:
+            cmd = 'rst2latex_rwk.py -c 2 ' + self.outpath
+        else:
+            cmd = 'rst2latex_rwk.py ' + self.outpath
         os.system(cmd)
         self.set_pdfpath()
 

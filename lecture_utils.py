@@ -1,6 +1,7 @@
 import datetime, os, rwkos, sys, copy, rwkmisc, time
 
-firstday = datetime.date(2010, 8, 23)
+#firstday = datetime.date(2010, 8, 23)
+firstday = datetime.date(2011, 1, 10)
 
 import pdb
 import txt_mixin
@@ -76,9 +77,9 @@ class course(object):
         return self.lecture_path
 
 
-    def build_previous_lecture_path(self):
+    def build_previous_lecture_path(self, date=None):
         if not hasattr(self, 'prev_lecture'):
-            self.previous_lecture_date()
+            self.previous_lecture_date(date=date)
         self.format_date(date=self.prev_lecture, \
                          attr='prev_date_str')
         self.prev_lecture_path = os.path.join(self.path, \
@@ -121,6 +122,7 @@ class course(object):
         mydict['lecture_path'] = self.lecture_path
         mydict['date_stamp'] = self.next_lecture.strftime('%m/%d/%y')
         mydict['current_slide'] = 0
+        mydict['outline_slide'] = 0
         self.build_pat()
         mydict['pat'] = self.pat
         mydict['search_pat'] = self.search_pat
@@ -155,7 +157,7 @@ class course(object):
         self.make_exclude_dir()
         print('lecture_path = ' + self.lecture_path)
         if build_previous:
-            self.build_previous_lecture_path()
+            self.build_previous_lecture_path(date=date)
             print('previous lecture_path = ' + self.prev_lecture_path)
         self.set_pickle()
         if self.forward:
@@ -291,3 +293,51 @@ class course_492(course):
         date_pat = self.next_lecture.strftime('%m_%d_%y')
         self.pat = 'ME492_' + date_pat + '_%0.4i.xcf'
         self.search_pat = 'ME492_' + date_pat
+
+
+
+class nonlinear_controls(course):
+    def __init__(self, path=None, forward=False):
+        if path is None:
+            today = datetime.date.today()
+            path = '~/siue/classes/nonlinear_controls/' + today.strftime('%Y')#4 digit year
+            path += '/lectures/'
+        self.path = rwkos.FindFullPath(path)
+        self.course_num = '592'
+        self.forward = forward
+
+
+    def next_lecture_date(self, date=None):
+        today = get_valid_date(date=date)
+        #592 lectures are on weekdays 1 and 3 (Tuesday and Thursday)
+        weekday = today.weekday()
+        if weekday in [1,3]:
+            self.next_lecture = today
+        elif weekday in [0,2]:
+            self.next_lecture = today + datetime.timedelta(days=1)
+        else:
+            self.next_lecture = find_next_day(today, \
+                                              des_day=1)#find next Monday
+        return self.next_lecture
+
+
+    def previous_lecture_date(self, date=None):
+        today = get_valid_date(date=date)
+        #592 lectures are on weekdays 1 and 3 (Tuesday and Thursday)
+        weekday = today.weekday()
+        ## if weekday == 6:#Sunday --> prev. Thurs..
+        ##     self.prev_lecture = today + datetime.timedelta(days=-3)
+        if weekday in [0,1]:#Monday or Tuesday --> prev. Thurs.
+            delta = -4 - weekday
+        elif weekday in [2,3]:#Wed. or Thurs. --> Tues.
+            delta = 1 - weekday
+        elif weekday in [4,5,6]:#backup to Thurs.
+            delta = 3 - weekday
+        self.prev_lecture = today + datetime.timedelta(days=delta)
+        return self.prev_lecture
+
+
+    def build_pat(self):
+        date_pat = self.next_lecture.strftime('%m_%d_%y')
+        self.pat = 'ME592_' + date_pat + '_%0.4i.xcf'
+        self.search_pat = 'ME592_' + date_pat

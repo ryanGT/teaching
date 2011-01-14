@@ -20,7 +20,6 @@ alts = {'Bemrose-Fetter':'Rebecca', \
         'Spihlman':'Andi',\
         'Thompson':'Luke',\
         'Woodrome':'Jon',\
-        'Bemrose-Fetter':'Rebbecca',\
         }
 
 inverse_alts = {'Joe':'Joseph', \
@@ -181,16 +180,18 @@ class design_paper_rst(group_with_rst):
                     print('elem = '+str(elem))
                     print('weight = '+str(weight))
                     print('total = '+str(total))
+        #Pdb().set_trace()
         self.ave = total
         self.ave_so_far = total/w_total
+        self.overall_grade = self.ave_so_far
         return self.ave
 
     def build_spreadsheet_row(self):
         group_with_rst.build_spreadsheet_row(self)
-        self.row_out.append(self.ave_so_far)
+        #self.row_out.append(self.ave_so_far)
         return self.row_out
 
     def get_section_labels(self):
         group_with_rst.get_section_labels(self)
-        self.labels.append('Ave. So Far')
+        #self.labels.append('Ave. So Far')
         return self.labels
