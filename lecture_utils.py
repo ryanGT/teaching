@@ -1,4 +1,7 @@
-import datetime, os, rwkos, sys, copy, rwkmisc, time
+import datetime, os, rwkos, sys, copy, rwkmisc, time, rst_creator, \
+       rst_utils, shutil
+
+reload(rst_utils)
 
 #firstday = datetime.date(2010, 8, 23)
 firstday = datetime.date(2011, 1, 10)
@@ -11,7 +14,7 @@ from IPython.Debugger import Pdb
 from pygimp_lecture_utils import lecturerc_path
 
 
-rst_line1 = '.. include:: /home/ryan/git/report_generation/header.rst'
+rst_line1 = '.. include:: /home/ryan/git/report_generation/beamer_header.rst'
 rst_title_line = '`\mytitle{@@TITLE@@}`'
 
 rst_list = txt_mixin.txt_list([rst_line1, '', rst_title_line, ''])
@@ -109,6 +112,20 @@ class course(object):
             mylist = copy.copy(rst_list)
             mylist.replaceall('@@TITLE@@', title)
             txt_mixin.dump(rstpath, mylist)
+
+
+    def create_rst2gimp_rst(self, force=0):
+        rstname = 'outline.rst'
+        rstpath = os.path.join(self.exclude_path, rstname)
+        if not os.path.exists(rstpath) or force:
+            mylist = [rst_line1,'']
+            mydec = rst_creator.rst_section_level_2()
+            sections = ['Outline', 'Announcements', 'Reminders']
+            for section in sections:
+                mylist.append('')
+                mylist.extend(mydec(section))
+                mylist.append('')
+                txt_mixin.dump(rstpath, mylist)
         
         
     def create_rsts(self):
@@ -149,6 +166,27 @@ class course(object):
             print('pathout = ' + pathout)
         txt_mixin.dump(pathout, listout)
 
+
+    def copy_announcements_rst2gimp(self, debug=0):
+        prev_exclude_path = os.path.join(self.prev_lecture_path, \
+                                         'exclude')
+        prev_outline_path = os.path.join(prev_exclude_path,
+                                         'outline.rst')
+        prev_filein = rst_utils.rst_file(prev_outline_path)
+        cur_outline_path = os.path.join(self.exclude_path, 'outline.rst')
+        cur_rst = rst_utils.rst_file(cur_outline_path)
+        prev_ann_list = prev_filein.get_section_contents('Announcements')
+        cur_rst.replace_section('Reminders', prev_ann_list)
+        txt_mixin.dump(cur_outline_path, cur_rst.list)
+        
+
+    def copy_prev_outline(self):
+        prev_exclude_path = os.path.join(self.prev_lecture_path, 'exclude')
+        prev_outline_path = os.path.join(prev_exclude_path, 'outline.rst')
+        copy_outline_path = os.path.join(self.exclude_path, 'prev_outline.rst')
+        if os.path.exists(prev_outline_path):
+            shutil.copy(prev_outline_path, copy_outline_path)
+
         
     def run(self, date=None, build_previous=True):
         self.next_lecture_date(date=date)
@@ -159,10 +197,14 @@ class course(object):
         if build_previous:
             self.build_previous_lecture_path(date=date)
             print('previous lecture_path = ' + self.prev_lecture_path)
+            self.copy_prev_outline()
         self.set_pickle()
+        self.create_rst2gimp_rst()
         if self.forward:
-            self.copy_announcements_forward()
-        self.create_rsts()
+            #self.copy_announcements_forward()
+            self.copy_announcements_rst2gimp()
+        #self.create_rsts()
+        
         
         
 class course_458(course):
@@ -297,7 +339,7 @@ class course_492(course):
 
 
 class nonlinear_controls(course):
-    def __init__(self, path=None, forward=False):
+    def __init__(self, path=None, forward=True):
         if path is None:
             today = datetime.date.today()
             path = '~/siue/classes/nonlinear_controls/' + today.strftime('%Y')#4 digit year
