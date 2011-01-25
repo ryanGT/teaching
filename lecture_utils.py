@@ -176,7 +176,8 @@ class course(object):
         cur_outline_path = os.path.join(self.exclude_path, 'outline.rst')
         cur_rst = rst_utils.rst_file(cur_outline_path)
         prev_ann_list = prev_filein.get_section_contents('Announcements')
-        cur_rst.replace_section('Reminders', prev_ann_list)
+        if prev_ann_list is not None:
+            cur_rst.replace_section('Reminders', prev_ann_list)
         txt_mixin.dump(cur_outline_path, cur_rst.list)
         
 
@@ -186,6 +187,8 @@ class course(object):
         copy_outline_path = os.path.join(self.exclude_path, 'prev_outline.rst')
         if os.path.exists(prev_outline_path):
             shutil.copy(prev_outline_path, copy_outline_path)
+        else:
+            print('did not find previous outline: '+prev_outline_path)
 
         
     def run(self, date=None, build_previous=True):
