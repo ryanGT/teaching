@@ -547,7 +547,7 @@ class group_with_rst(section):
                 self.team_rst.extend(cur_sec.content)
             if cur_sec.title == 'Timing':
                 self.team_rst.append('')
-                self.team_rst.append('**Timing Penalty: %0.4g**' % \
+                self.team_rst.append('**Timing Penalty:** %0.4g' % \
                                      self.time_penalty)
             self.team_rst.append('')
         self.team_rst.append('')
@@ -812,4 +812,45 @@ class presentation_with_appearance(group_with_rst):
             penalty = -0.1*num_steps
         else:
             penalty = 0.0
+        self.time_penalty = penalty
+
+
+class update_presentation(presentation_with_appearance):
+#    Appearance
+#    Content and Organization
+#    Speaking and Delivery
+#    Slides
+#    Listening to and Answering Questions
+
+    def __init__(self, *args, **kwargs):
+        group_with_rst.__init__(self, *args, **kwargs)
+        if kwargs.has_key('weight_dict'):
+            weight_dict = kwargs['weight_dict']
+        else:
+            weight_dict = {'Content and Organization':0.5, \
+                           'Speaking and Delivery':0.3, \
+                           'Slides':0.1,\
+                           'Listening to and Answering Questions':0.1}
+        self.weight_dict = weight_dict
+        self.get_timing_grade()
+
+
+
+    def calc_overall_score(self):
+        presentation_with_appearance.calc_overall_score(self)
+        self.overall_grade += self.time_penalty
+        return self.overall_grade
+
+
+    def get_timing_grade(self):
+        time_lines = self.get_time_lines()
+        time_str = self.find_time_string(time_lines)
+        time = self.parse_time_string(time_str)
+        penalty = 0.0
+        if time > 7.45:
+            num_steps = int((time-7.0)/0.5)
+            penalty = -0.15*num_steps
+        elif time < 4.55:
+            num_steps = int((5.0-time)/0.5)
+            penalty = -0.15*num_steps
         self.time_penalty = penalty
