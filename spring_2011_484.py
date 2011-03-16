@@ -33,6 +33,7 @@ alts = {'Bemrose-Fetter':'Rebecca', \
         'Spihlman':'Andi',\
         'Thompson':'Luke',\
         'Woodrome':'Jon',\
+        'Pirmann':'Tim'
         }
 
 inverse_alts = {'Joe':'Joseph', \
