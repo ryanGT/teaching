@@ -386,3 +386,14 @@ class nonlinear_controls(course):
         date_pat = self.next_lecture.strftime('%m_%d_%y')
         self.pat = 'ME592_' + date_pat + '_%0.4i.xcf'
         self.search_pat = 'ME592_' + date_pat
+
+
+class course_484(course_458):#<-- I am using 458 as a base class for MW classes
+    def __init__(self, path=None, forward=False):
+        if path is None:
+            today = datetime.date.today()
+            path = '~/siue/classes/484/' + today.strftime('%Y')#4 digit year
+            path += '/lectures/'
+        self.path = rwkos.FindFullPath(path)
+        self.course_num = '484'
+        self.forward = forward
