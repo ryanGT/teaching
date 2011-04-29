@@ -844,6 +844,7 @@ class update_presentation(presentation_with_appearance):
 
     def get_timing_grade(self):
         time_lines = self.get_time_lines()
+        #Pdb().set_trace()
         time_str = self.find_time_string(time_lines)
         time = self.parse_time_string(time_str)
         penalty = 0.0
@@ -854,3 +855,32 @@ class update_presentation(presentation_with_appearance):
             num_steps = int((5.0-time)/0.5)
             penalty = -0.15*num_steps
         self.time_penalty = penalty
+
+
+class update_presentation_no_timing_penalty(update_presentation):
+    def __init__(self, *args, **kwargs):
+        group_with_rst.__init__(self, *args, **kwargs)
+        if kwargs.has_key('weight_dict'):
+            weight_dict = kwargs['weight_dict']
+        else:
+            weight_dict = {'Content and Organization':0.55, \
+                           'Speaking and Delivery':0.35, \
+                           'Slides':0.1,\
+                           'Listening to and Answering Questions':0.0}
+        self.weight_dict = weight_dict
+        self.get_timing_grade()
+
+    def get_timing_grade(self):
+        time_lines = self.get_time_lines()
+        #Pdb().set_trace()
+        time_str = self.find_time_string(time_lines)
+        time = self.parse_time_string(time_str)
+        penalty = 0.0
+        ## if time > 7.45:
+        ##     num_steps = int((time-7.0)/0.5)
+        ##     penalty = -0.15*num_steps
+        ## elif time < 4.55:
+        ##     num_steps = int((5.0-time)/0.5)
+        ##     penalty = -0.15*num_steps
+        self.time_penalty = penalty
+    

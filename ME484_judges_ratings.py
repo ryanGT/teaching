@@ -5,14 +5,15 @@ import glob, copy, os
 import spreadsheet
 reload(spreadsheet)
 
-import spring_2010_484
+import spring_2011_484
 import txt_mixin
 
-group_names = spring_2010_484.all_groups
-group_list = spring_2010_484.group_list
-alts = spring_2010_484.group_list
+group_names = spring_2011_484.all_groups
+group_list = spring_2011_484.group_list
+alts = spring_2011_484.group_list
 
-csvpath = '/home/ryan/484_2010/final_presentations/judges_ratings'
+#csvpath = '/home/ryan/484_2010/final_presentations/judges_ratings'
+csvpath = '/home/ryan/484_2011/final_presentation_score_sheets/judges_scores'
 
 from IPython.Debugger import Pdb
 
@@ -68,7 +69,7 @@ class judges_ratings_sheet(spreadsheet.CSVSpreadSheet):
                 self.ave_list.append(average(float_col))
         self.overall_ave = average(self.ave_list[1:])#ignore me for now
         self.krauss_ave = self.ave_list[0]
-        self.combined_ave = 0.5*self.overall_ave + 0.5*self.krauss_ave
+        self.combined_ave = 0.75*self.overall_ave + 0.25*self.krauss_ave
         
 
     def append_judge_aves(self):
@@ -117,7 +118,8 @@ class judges_ratings_sheet(spreadsheet.CSVSpreadSheet):
         csv_in_path = os.path.join(csvpath, filename)
         spreadsheet.CSVSpreadSheet.__init__(self, csv_in_path)
         self.sniff()
-        self.ReadData()
+        #Pdb().set_trace()
+        self.ReadData(skiprows=1, minrows=3)
         self.jrow = self.find_judge_row()
         assert self.jrow > -1, 'Did not find the Judge row'
         self.start_row = self.jrow+1
@@ -188,18 +190,18 @@ if __name__ == '__main__':
     #  Parse input from judges files
     #
     #----------------------------------
-    monday_groups = ['Motorized Hand Truck', \
-                     'Beverage Launching Refrigerator', \
-                     'Green Refrigeration', \
-                     'Upright Wheelchair', \
-                     'Swirl Generator']
+    ## monday_groups = ['Motorized Hand Truck', \
+    ##                  'Beverage Launching Refrigerator', \
+    ##                  'Green Refrigeration', \
+    ##                  'Upright Wheelchair', \
+    ##                  'Swirl Generator']
 
-    wednesday_groups = ['Mechanized Tree Stand', \
-                        'Autonomous Vehicle', \
-                        'Simplified Water Purification',\
-                        'Cougar Baja', \
-                        'Green Pedaling', \
-                       ]
+    ## wednesday_groups = ['Mechanized Tree Stand', \
+    ##                     'Autonomous Vehicle', \
+    ##                     'Simplified Water Purification',\
+    ##                     'Cougar Baja', \
+    ##                     'Green Pedaling', \
+    ##                    ]
     
 ##     group_names = ['Autonomous Vehicle', \
 ##                    'Hydraulic Bicycle Transmission', \

@@ -1,7 +1,11 @@
 import os, rwkos, spreadsheet
 
+import txt_mixin
+
 import group_rst_parser
 reload(group_rst_parser)
+
+from IPython.Debugger import Pdb
 
 class_folder = rwkos.FindFullPath('siue/classes/482/2010/')
 group_path = os.path.join(class_folder, 'group_list.csv')
@@ -51,18 +55,33 @@ class group(object):
         self.group_name = group_name
         self.find_members()
 
+
+    def fix_dup_firsts(self):
+        for name in self.firstnames:
+            inds = self.firstnames.findall(name)
+            if len(inds) > 1:
+                print('found dup.:' + name)
+                for ind in inds:
+                    initial = ' ' + self.lastnames[ind][0] + '.'
+                    self.firstnames[ind] += initial
+
+
     def strip_names(self):
-        self.firstnames = [item.strip() for item in self.firstnames]
+        firstnames = [item.strip() for item in self.firstnames]
         self.lastnames = [item.strip() for item in self.lastnames]
+        self.firstnames = txt_mixin.txt_list(firstnames)
+
 
     def find_members(self):
         lastnames, firstnames = group_list.get_names(self.group_name)
         self.lastnames = lastnames
         self.firstnames = firstnames
+        self.firstnames = txt_mixin.txt_list(firstnames)
         for n, lastname in enumerate(lastnames):
             if alts.has_key(lastname):
                 self.firstnames[n] = alts[lastname]
         self.strip_names()
+        self.fix_dup_firsts()
         self.names = zip(self.firstnames, self.lastnames)
 
 
