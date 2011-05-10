@@ -7,6 +7,7 @@ import txt_mixin, spreadsheet, rst_creator, rwkos
 import re, os
 import gmail_smtp
 reload(gmail_smtp)
+from numpy import array, where
 
 from scipy import mean
 
@@ -338,7 +339,315 @@ class speaker(object):
         gmail_smtp.sendMail(email, subject, body, self.pdfpath)
 
 
-class group_with_rst(section):
+class group(object):
+    def __init__(self, group_name, group_list=None, email_list=None, \
+                 alts={}):
+        self.group_name = group_name
+        self.group_list = group_list
+        self.email_list = email_list
+        self.alts = alts
+        if (group_list is not None) and (email_list is not None):
+            self.find_members()
+
+
+    def clean_firstname(self, firstin):
+        out = firstin.split(' ',1)
+        first = out[0]
+        return first
+
+
+    def get_first_and_last_names(self):
+        lastnames, firstnames = self.group_list.get_names(self.group_name)
+        self.lastnames = lastnames
+        self.firstnames = firstnames
+
+
+    def find_alt_firstnames(self):
+        self.alt_firstnames = copy.copy(self.firstnames)
+        for n, lastname in enumerate(self.lastnames):
+            if self.alts.has_key(lastname):
+                self.alt_firstnames[n] = self.alts[lastname]
+        
+        
+    def build_names_tuples(self):
+        if not hasattr(self, 'lastnames'):
+            self.get_first_and_last_names()
+        names = []
+        for first, last in zip(self.firstnames, self.lastnames):
+            curtup = (first, last)
+            names.append(curtup)
+        self.names = names
+            
+    
+    def find_members(self):
+        self.get_first_and_last_names()
+        self.find_alt_firstnames()
+        self.append_initials_to_firstnames()
+        members = None
+        emails = []
+
+        for last, first in zip(self.lastnames, self.alt_firstnames):
+            try:
+                email = self.email_list.get_email(last)
+            except AssertionError:
+                email = self.email_list.get_email(last, first)
+            emails.append(email)
+            curmember = member(last, first, email)
+            if members is None:
+                members = {first:curmember}
+            else:
+                members[first] = curmember
+        self.members = members
+        self.emails = emails#self.email_list.get_emails(lastnames)
+        return self.emails
+
+
+    def append_initials_to_firstnames(self):
+        """Fix self.firstnames by appending a last initial if
+        necessary."""
+        self.firstnames = txt_mixin.txt_list(self.firstnames)
+        self.raw_firstnames = copy.copy(self.firstnames)
+        N = len(self.firstnames)
+        for i in range(N):
+            first = self.firstnames[i]
+            inds = self.firstnames.findall(first)
+            if len(inds) > 1:
+                for j in inds:
+                    first = self.firstnames[j]
+                    last = self.lastnames[j]
+                    first += ' ' + last[0] + '.'
+                    self.firstnames[j] = first
+
+
+
+class group_with_team_ratings(group):
+    def get_scores_from_students(self):
+        N = len(self.students)
+        nr, nc = self.students[0].scores.shape
+        scores = zeros((N,nr,nc))
+        for i, student in enumerate(self.students):
+            scores[i,:,:] = student.scores
+        self.scores = scores
+
+
+    def calc_aves(self):
+        self.ave_scores = self.scores.mean(axis=0)#the average scores
+            #for each student
+        self.team_cat_ave_scores = self.ave_scores.mean(axis=-1)#team
+            #average
+            #for
+            #each
+            #category
+        self.team_overall_ave = self.team_cat_ave_scores.mean()#overall
+            #team
+            #average
+
+    def calc_category_ratios(self):
+        for student in self.students:
+            student.get_my_category_aves()
+
+    def fix_team_factors(self):
+        #algorithm modified 4/29/11
+        #Pdb().set_trace()
+        above_inds = where(self.team_factors >= 1.1)[0]
+        m = float(len(above_inds))
+        rest_inds = where(self.team_factors < 1.1)[0]
+        n = float(len(rest_inds))
+        self.team_factors[above_inds] = 1.1
+
+        filt_below = self.team_factors[rest_inds]
+        old_ave = filt_below.mean()
+        new_ave = (n+m-1.1*m)/n
+        scale_factor = new_ave/old_ave
+        self.team_factors[rest_inds] *= scale_factor
+
+        ave1 = self.team_factors.mean()
+
+        eps = 1e-4
+        assert abs(ave1-1.0) < eps, "Problem with intermediate average after clipping at 1.1 and scaling up.  %s, ave1 = %0.4g" % (self.group_name, ave1)
+
+        aves_below = where(self.team_factors < 0.8)[0]
+        self.team_factors[aves_below] = 0.8
+
+        self.team_factor_ave = self.team_factors.mean()
+
+        N = len(self.names)
+        self.team_factor_ave_vect = array([self.team_factor_ave]*N)
+        assert self.team_factor_ave > 0.92, "Team with really low average: %s: %0.4g" % (self.group_name, self.team_factor_ave)
+        assert self.team_factor_ave < 1.03, "Team with really high average: %s: %0.4g" % (self.group_name, self.team_factor_ave)
+
+        for student, tf in zip(self.students, self.team_factors):
+            student.team_factor = tf
+
+
+    def build_name_str(self):
+        N = len(self.students)
+        if N == 1:
+            self.name_str = ' '.join(self.names[0])
+        else:
+            name_str = ''
+            for n, pair in enumerate(self.names):
+                if n > 0:
+                    name_str +=', '
+                if n == (N-1):
+                    name_str += 'and '
+                name_str += pair[0] + ' ' + pair[1]
+            self.name_str = name_str
+
+
+    def calc_overall_ave(self):
+        self.means = array([student.mean for student in self.students])
+        self.overall_mean = self.means.mean()
+
+
+    def find_student(self, search_student):
+        found = 0
+        for student in self.students:
+            if student.firstname == search_student.firstname and \
+                   student.lastname == search_student.lastname:
+                found = 1
+                return student
+        assert found == 1, "Did not find student: \n" + \
+               search_student.firstname + ' ' +search_student.lastname
+
+
+    def get_data_for_student(self, search_student):
+        student_scores = None
+        for student in self.students:
+            cur_scores = student.find_col(search_student)
+            if student_scores is None:
+                student_scores = [cur_scores]
+            else:
+                student_scores.append(cur_scores)
+        mystudent = self.find_student(search_student)
+        mystudent.myscores = array(student_scores).T
+        mystudent.calc_team_factor()
+
+
+    def get_student_scores(self):
+        for student in self.students:
+            self.get_data_for_student(student)
+
+
+    def copy_team_factors_to_raw(self):
+        self.raw_team_factors = copy.copy(self.team_factors)
+
+
+    def calc_team_factor_average(self):
+        team_factors = None
+        for student in self.students:
+            tf = student.team_factor
+            if team_factors is None:
+                team_factors = [tf]
+            else:
+                team_factors.append(tf)
+        team_factors = array(team_factors)
+        self.team_factors = team_factors
+
+
+    def check_team_factors_ave(self):
+        if not hasattr(self, 'team_factors'):
+            self.calc_team_factor_average()
+            
+        self.team_factor_ave = self.team_factors.mean()
+        if abs(1.0 - self.team_factor_ave) > 1e-7:
+            print('possible problem with self.team_factor_ave: ' + \
+                  str(self.team_factor_ave))
+        if self.team_factors.max() > 1.1:
+            print('-'*20)
+            print(self.group_name)
+            print('max team factor problem: ' + \
+                  str(self.team_factors))
+            print('-'*20)
+
+        if self.team_factors.min() < 0.8:
+            print('min team factor problem: ' + \
+                  str(self.team_factors))
+
+
+    def get_self_ratings(self):
+        self.self_factors = [student.self_factor for student in self.students]
+
+
+    def latex_all(self, runlatex=0):
+        for student in self.students:
+            student.latex(runlatex=runlatex)
+
+
+    def create_table(self):
+        N = len(self.students)
+        self.table = ['\\begin{tabular}{|l|'+'l|'*(N+1)+'}']
+        out = self.table.append
+        out('\\hline')
+        out('Category & Team Ave. & ' + ' & '.join(self.firstnames) + ' \\\\')
+        out('\\hline')
+        fmt = ' %s ' + '& %0.2f '*(N+1) + '\\\\'
+        team_ave = self.team_cat_ave_scores
+
+        for n, area in enumerate(self.students[0].areas):
+            if n % 2:
+                out('\\rowcolor[gray]{0.9}')
+            mytup = (area, team_ave[n]) + tuple(self.ave_scores[n,:])
+            row_str = fmt % mytup
+            out('\\rule{0pt}{1.1EM} ' + row_str)
+            out('\\hline')
+        mytup = ('Raw Ratios', self.raw_team_factors.mean()) + \
+                         tuple(self.raw_team_factors)
+        row_str = fmt % mytup
+        out(row_str)
+        out('\\hline')
+        mytup = ('Ratios', self.team_factors.mean()) + \
+                         tuple(self.team_factors)
+        row_str = fmt % mytup
+        out(row_str)
+        out('\\hline')
+        out('\\end{tabular}')
+        return self.table
+
+
+    def build_out_path(self):
+        outname = self.group_name.replace(' ','_') + '_team_evals.tex'
+        pathout = os.path.join(outfolder, outname)
+        self.tex_path = pathout
+        return pathout
+
+
+    def latex_summary(self, runlatex=0):
+        pathout = self.build_out_path()
+        self.latex = ['\\input{../../header}']
+        out = self.latex.append
+        out(r'\pagestyle{fancy}')
+        out(r'\lfoot{First Team Member Rating, After Written Proposals}')
+        out(r'\cfoot{}')
+        out(r'\rfoot{}')
+        out(r'\renewcommand{\headrulewidth}{0pt}')
+        out('\\begin{document}')
+        out(r'\newcommand*{\mytitle}[1]{\begin{center}\textbf{#1}\end{center}}')
+        out(r'\mytitle{\Large %s}' % self.group_name)
+        out('')
+        out('\\flushleft')
+        out('\\textbf{Team Members: }' + self.name_str +' \\\\')
+        out('')
+        out('\\vspace{0.25in}')
+        #out('\\input{../../ratings_body}')
+        out('\\mysec{Ratings}')
+        table_list = self.create_table()
+        self.latex.extend(table_list)
+        out('')
+        out('\\end{document}')
+        txt_mixin.dump(pathout, self.latex)
+        if runlatex:
+            pytexutils.RunLatex(pathout)
+
+
+    def send_emails(self):
+        for student in self.students:
+            student.send_email()
+
+
+
+
+class group_with_rst(group, section):
     def __init__(self, pathin, group_list=None, email_list=None, \
                  class_dict=None, subre='^-+$', alts={}, 
                  subclass=section_level_1):
@@ -574,47 +883,6 @@ class group_with_rst(section):
             cmd = 'rst2latex_rwk.py ' + self.outpath
         os.system(cmd)
         self.set_pdfpath()
-
-    def append_initials_to_firstnames(self):
-        """Fix self.firstnames by appending a last initial if
-        necessary."""
-        self.firstnames = txt_mixin.txt_list(self.firstnames)
-        N = len(self.firstnames)
-        for i in range(N):
-            first = self.firstnames[i]
-            inds = self.firstnames.findall(first)
-            if len(inds) > 1:
-                for j in inds:
-                    first = self.firstnames[j]
-                    last = self.lastnames[j]
-                    first += ' ' + last[0] + '.'
-                    self.firstnames[j] = first
-
-
-    def find_members(self):
-        lastnames, firstnames = self.group_list.get_names(self.group_name)
-        self.lastnames = lastnames
-        self.firstnames = firstnames
-        self.append_initials_to_firstnames()
-        for n, lastname in enumerate(lastnames):
-            if self.alts.has_key(lastname):
-                self.firstnames[n] = self.alts[lastname]
-        members = None
-        emails = []
-        for last, first in zip(self.lastnames, self.firstnames):
-            try:
-                email = self.email_list.get_email(last)
-            except AssertionError:
-                email = self.email_list.get_email(last, first)
-            emails.append(email)
-            curmember = member(last, first, email)
-            if members is None:
-                members = {first:curmember}
-            else:
-                members[first] = curmember
-        self.members = members
-        self.emails = emails#self.email_list.get_emails(lastnames)
-        return self.emails
 
 
     def pdfpath_checker(self):

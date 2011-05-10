@@ -5,17 +5,22 @@ import spreadsheet
 reload(spreadsheet)
 import rwkos
 
-folder = rwkos.FindFullPath('siue/classes/484/2010/team_member_ratings/ind_csv')
+import group_rst_parser
+reload(group_rst_parser)
+
+#folder = rwkos.FindFullPath('siue/classes/484/2011/team_member_ratings/ind_csv')
+folder = rwkos.FindFullPath('siue/classes/482/2010/team_ratings/final_482_ratings')
 
 import copy
 
-#import spring_2010_484
-#reload(spring_2010_484)
+import spring_2011_484
+course_module = spring_2011_484
+#reload(spring_2011_484)
 
-import fall_2009_482
+#import fall_2009_482
 
-#project_names = spring_2010_484.group_list.Project_Name
-project_names = fall_2009_482.group_list.Project_Name
+project_names = spring_2011_484.group_list.Project_Name
+#project_names = fall_2009_482.group_list.Project_Name
 ## project_names = ['Motorized Hand Truck', \
 ##                  'Cougar Baja',
 ##                  'Solar Powered Refrigeration', \
@@ -72,14 +77,26 @@ class student(spreadsheet.CSVSpreadSheet):
         float_list = nested_list_to_floats(nested_list)
         self.scores = array(float_list, dtype=float)
 
-    def find_col_ind(self, name=None):
-        if name is None:
-            name = self.firstname
-        ind = self.names.index(name)
+    def find_col_ind(self, student=None, alt=None):
+        if student is None:
+            student = self
+        if hasattr(student, 'firstname'):
+            try:
+                ind = self.names.index(student.firstname)
+            except ValueError:
+                ind = self.names.index(student.alt_first)
+        else:            
+            try:
+                ind = self.names.index(student)
+            except ValueError:
+                if alt is not None:
+                    ind = self.names.index(alt)
+                else:
+                    raise
         return ind
 
-    def find_col(self, name=None):
-        ind = self.find_col_ind(name=name)
+    def find_col(self, student=None, alt=None):
+        ind = self.find_col_ind(student=student, alt=alt)
         return self.scores[:,ind]
 
     def calc_self_mean(self):
@@ -121,11 +138,25 @@ class student(spreadsheet.CSVSpreadSheet):
         return myfactor
 
 
-    def __init__(self, firstname, lastname, parent=None):
+    def __init__(self, firstname, lastname, alt_first=None, parent=None):
         self.csvname = firstname + '_' + lastname + '.csv'
         self.csvpath = os.path.join(folder, self.csvname)
         self.firstname = firstname
         self.lastname = lastname
+        self.alt_first = alt_first
+        if (not os.path.exists(self.csvpath)) and (alt_first is not None):
+            if alt_first != firstname:
+                self.csvname = alt_first + '_' + lastname + '.csv'
+                self.csvpath = os.path.join(folder, self.csvname)
+
+        if not os.path.exists(self.csvpath):
+            if firstname.find(' ') > -1:
+                first_no_mi, rest = firstname.split(' ',1)
+                self.csvname = first_no_mi + '_' + lastname + '.csv'
+                self.csvpath = os.path.join(folder, self.csvname)
+
+        assert os.path.exists(self.csvpath), "Cannot find %s" % self.csvpath
+            
         spreadsheet.CSVSpreadSheet.__init__(self, self.csvpath, \
                                              skiprows=4)
         self.ReadData()
@@ -141,18 +172,24 @@ class student(spreadsheet.CSVSpreadSheet):
 
 
 
-class group(fall_2009_482.group):
+class group(group_rst_parser.group_with_team_ratings):
     def __init__(self, group_name):
-        fall_2009_482.group.__init__(self, group_name)
+        group_rst_parser.group.__init__(self, group_name, \
+                                        group_list=course_module.group_list, \
+                                        email_list=course_module.email_list, \
+                                        alts=course_module.alts)
+        self.find_alt_firstnames()
+        self.build_names_tuples()
         if len(self.names) == 1:
             return
         self.students = None
-        for first, last in self.names:
-            cur_student = student(first, last, parent=self)
+        for first, last, alt_first in zip(self.firstnames, self.lastnames, self.alt_firstnames):
+            cur_student = student(first, last, alt_first=alt_first, parent=self)
             if self.students is None:
                 self.students = [cur_student]
             else:
                 self.students.append(cur_student)
+
 
     def average_one_area(self, area):
         N = len(self.students)
@@ -184,102 +221,118 @@ class group(fall_2009_482.group):
         return myarray
 
 
-    def fix_team_factors(self):
-        N = float(len(self.names))
-        mymin = self.team_factors.min()
-        mymax = self.team_factors.max()
-        total = self.team_factors.sum()
-        i_max = self.team_factors.argmax()
-        i_min = self.team_factors.argmin()
-        self.raw_team_factors = copy.copy(self.team_factors)
+    ## def fix_team_factors(self):
+    ##     N = float(len(self.names))
+    ##     mymin = self.team_factors.min()
+    ##     mymax = self.team_factors.max()
+    ##     total = self.team_factors.sum()
+    ##     i_max = self.team_factors.argmax()
+    ##     i_min = self.team_factors.argmin()
+    ##     self.raw_team_factors = copy.copy(self.team_factors)
 
-        if (mymax > 1.1) and (mymin < 0.8):
-            mytotal = total - mymax - mymin
-            scale = (N-0.8-1.1)/mytotal
-            self.team_factors = scale*self.raw_team_factors
-            self.team_factors[i_max] = 1.1
-            self.team_factors[i_min] = 0.8
-        elif mymin < 0.8:
-            #the team factors should still average to 1.0, even if
-            #someone went below 0.8, so solve for x where
-            #   0.8 + x*(sum of the rest) = N
-            #
-            # 05/01/10 - I am not sure I subscribe to this theory
-            # anymore.  Should everyone else's grade go up because
-            # they are mad at one person?
-            mytotal = total - mymin
-            scale = (N-0.8)/mytotal
-            self.team_factors = scale*self.raw_team_factors
-            self.team_factors[i_min] = 0.8
-        elif mymax > 1.1:
-            mytotal = total - mymax
-            scale = (N-1.1)/mytotal
-            self.team_factors = scale*self.raw_team_factors
-            self.team_factors[i_max] = 1.1
+    ##     if (mymax > 1.1) and (mymin < 0.8):
+    ##         mytotal = total - mymax - mymin
+    ##         scale = (N-0.8-1.1)/mytotal
+    ##         self.team_factors = scale*self.raw_team_factors
+    ##         self.team_factors[i_max] = 1.1
+    ##         self.team_factors[i_min] = 0.8
+    ##     elif mymin < 0.8:
+    ##         #the team factors should still average to 1.0, even if
+    ##         #someone went below 0.8, so solve for x where
+    ##         #   0.8 + x*(sum of the rest) = N
+    ##         #
+    ##         # 05/01/10 - I am not sure I subscribe to this theory
+    ##         # anymore.  Should everyone else's grade go up because
+    ##         # they are mad at one person?
+    ##         mytotal = total - mymin
+    ##         scale = (N-0.8)/mytotal
+    ##         self.team_factors = scale*self.raw_team_factors
+    ##         self.team_factors[i_min] = 0.8
+    ##     elif mymax > 1.1:
+    ##         mytotal = total - mymax
+    ##         scale = (N-1.1)/mytotal
+    ##         self.team_factors = scale*self.raw_team_factors
+    ##         self.team_factors[i_max] = 1.1
 
-        for student, tf in zip(self.students, self.team_factors):
-            student.team_factor = tf
+    ##     for student, tf in zip(self.students, self.team_factors):
+    ##         student.team_factor = tf
             
             
 
-    def calc_overall_ave(self):
-        self.means = array([student.mean for student in self.students])
-        self.overall_mean = self.means.mean()
+    ## def calc_overall_ave(self):
+    ##     self.means = array([student.mean for student in self.students])
+    ##     self.overall_mean = self.means.mean()
 
 
-    def find_student(self, name):
-        for student in self.students:
-            if student.firstname == name:
-                return student
+    ## def find_student(self, name):
+    ##     for student in self.students:
+    ##         if student.firstname == name:
+    ##             return student
             
-    def get_data_for_student(self, name):
-        student_scores = None
-        for student in self.students:
-            cur_scores = student.find_col(name)
-            if student_scores is None:
-                student_scores = [cur_scores]
-            else:
-                student_scores.append(cur_scores)
-        mystudent = self.find_student(name)
-        mystudent.myscores = array(student_scores).T
-        mystudent.calc_team_factor()
+    ## def get_data_for_student(self, name):
+    ##     student_scores = None
+    ##     for student in self.students:
+    ##         cur_scores = student.find_col(name)
+    ##         if student_scores is None:
+    ##             student_scores = [cur_scores]
+    ##         else:
+    ##             student_scores.append(cur_scores)
+    ##     mystudent = self.find_student(name)
+    ##     mystudent.myscores = array(student_scores).T
+    ##     mystudent.calc_team_factor()
 
-    def get_student_scores(self):
-        for first in self.firstnames:
-            self.get_data_for_student(first)
+    ## def get_student_scores(self):
+    ##     for first in self.firstnames:
+    ##         self.get_data_for_student(first)
 
-    def check_team_factor_average(self):
-        team_factors = None
-        for student in self.students:
-            tf = student.team_factor
-            if team_factors is None:
-                team_factors = [tf]
-            else:
-                team_factors.append(tf)
-        team_factors = array(team_factors)
-        self.team_factors = team_factors
+    ## def check_team_factor_average(self):
+    ##     team_factors = None
+    ##     for student in self.students:
+    ##         tf = student.team_factor
+    ##         if team_factors is None:
+    ##             team_factors = [tf]
+    ##         else:
+    ##             team_factors.append(tf)
+    ##     team_factors = array(team_factors)
+    ##     self.team_factors = team_factors
 
-    def check_team_factors_ave(self):
-        self.team_factor_ave = self.team_factors.mean()
-        if abs(1.0 - self.team_factor_ave) > 1e-7:
-            print('possible problem with self.team_factor_ave: ' + \
-                  str(self.team_factor_ave))
-        if self.team_factors.max() > 1.1:
-            print('max team factor problem: ' + \
-                  str(self.team_factors))
-        if self.team_factors.min() < 0.8:
-            print('min team factor problem: ' + \
-                  str(self.team_factors))
+    ## def check_team_factors_ave(self):
+    ##     self.team_factor_ave = self.team_factors.mean()
+    ##     if abs(1.0 - self.team_factor_ave) > 1e-7:
+    ##         print('possible problem with self.team_factor_ave: ' + \
+    ##               str(self.team_factor_ave))
+    ##         Pdb().set_trace()
+    ##     if self.team_factors.max() > 1.1:
+    ##         print('max team factor problem: ' + \
+    ##               str(self.team_factors))
+    ##     if self.team_factors.min() < 0.8:
+    ##         print('min team factor problem: ' + \
+    ##               str(self.team_factors))
         
-    def get_self_ratings(self):
-        self.self_factors = [student.self_factor for student in self.students]
+    ## def get_self_ratings(self):
+    ##     self.self_factors = [student.self_factor for student in self.students]
         
         
 if __name__ == '__main__':
-    areas = ['Teamwork', \
-             'Technical Contribution', \
-             'Project Management', \
-             'Contribution of Ideas']
+    case = 1#1 = 482, 2 = 484
+    if case == 1:
+        areas = ['Attendance', \
+                 'Participation']
+        course_path = rwkos.FindFullPath('siue/classes/482/2010/')
+        bb_in_name = 'bb_my_factor_and_white_paper_EC.csv'
+        outname = 'assessment_from_482_team_member_ratings.csv'
+
+    else:
+        areas = ['Teamwork', \
+                 'Technical Contribution', \
+                 'Project Management', \
+                 'Contribution of Ideas']
+        course_path = rwkos.FindFullPath('siue/classes/484/2011/')
+        bb_in_name = 'bb_download_my_factor.csv'
+        outname = 'assessment_from_484_team_member_ratings.csv'
+
+    outfolder = rwkos.FindFullPath('siue/classes/484/2011/')
+
         ## 'Accuracy',
         ## 'Dependability',
         ## 'Teamwork',
@@ -288,11 +341,11 @@ if __name__ == '__main__':
         ## 'Quantity of Work',
         ## 'Quality of Work',
         ## 'Overall Value to the Team']
-    course_path = rwkos.FindFullPath('siue/classes/484/2010/')
-    bb_in_name = 'bb_download_my_factor.csv'
+    
+    
     bb_in_path = os.path.join(course_path, bb_in_name)
-    assessment_path = os.path.join(course_path, 'assessment')
-    outpath = os.path.join(assessment_path, 'assessment_from_484_team_member_ratings.csv')
+    assessment_path = os.path.join(outfolder, 'assessment')
+    outpath = os.path.join(assessment_path, outname)
     bb = spreadsheet.BlackBoardGBFile_v_8_0(bb_in_path)
     for area in areas:
         bb.labels.append(area)
@@ -303,15 +356,17 @@ if __name__ == '__main__':
         if len(cur_group.names) > 1:
             cur_group.calc_overall_ave()
             cur_group.get_student_scores()
-            cur_group.check_team_factor_average()
+            cur_group.calc_team_factor_average()
+            cur_group.copy_team_factors_to_raw()
             cur_group.fix_team_factors()
             cur_group.check_team_factors_ave()
             cur_group.get_self_ratings()
             for area in areas:
                 myarray = cur_group.assess_one_area(area)
-                bb.InsertColFromList(cur_group.lastnames, area, \
-                                     myarray, splitnames=0, \
-                                     verbosity=1)
+                bb.InsertColFromList_v2(cur_group.lastnames, cur_group.firstnames, \
+                                        area, \
+                                        myarray, \
+                                        verbosity=1)
         else:
             cur_group.team_factors = [1.0]
             cur_group.raw_team_factors = [1.0]
@@ -319,13 +374,16 @@ if __name__ == '__main__':
                 bb.InsertColFromList(cur_group.lastnames, area, \
                                      [1.0], splitnames=0, \
                                      verbosity=1)
-            
-        bb.InsertColFromList(cur_group.lastnames, 'Team Factor', \
-                             cur_group.team_factors, splitnames=0, \
-                             verbosity=1)
-        bb.InsertColFromList(cur_group.lastnames, 'Raw Team Factor', \
-                             cur_group.raw_team_factors, splitnames=0, \
-                             verbosity=1)
+        ## InsertColFromList_v2(self.lastnames, self.firstnames, \
+        ##                             key, val_list, \
+        ##                             verbosity=2)            
+        bb.InsertColFromList_v2(cur_group.lastnames, cur_group.firstnames, \
+                                'Team Factor', \
+                                cur_group.team_factors, verbosity=1)
+        bb.InsertColFromList_v2(cur_group.lastnames, cur_group.firstnames, \
+                                'Raw Team Factor', \
+                                cur_group.raw_team_factors, \
+                                verbosity=1)
     #bb.save('../bb_out_test.csv')
     #bb.save('../team_factors.csv')
     bb.save(outpath)
