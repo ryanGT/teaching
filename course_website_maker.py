@@ -58,9 +58,11 @@ class course_website(object):
             folder_path = os.path.join(self.pathin, folder)
             if os.path.exists(folder_path):
                 title = self.title + ': ' + folder
-                page = thumbnail_maker.MainPageMaker_no_images(folder_path, \
-                                                                     title=title, \
-                                                                     DirectoryPageclass=directorypageclass)
+                myclass = thumbnail_maker.MainPageMaker_no_images
+                page = myclass(folder_path, \
+                               title=title, \
+                               DirectoryPageclass=directorypageclass, \
+                               extlist=self.extlist)
                 page.Go(top_level_link='../index.html')
                 if pages is None:
                     pages = [page]
@@ -108,7 +110,30 @@ class course_website(object):
         self.make_toplevel_page()
         self.make_index_rst_only_pages()
         self.run_top_level_rst()
+
+class research_website(course_website):
+    def __init__(self, pathin, title, \
+                 other_folders=[], \
+                 index_rst_only_folders=[], \
+                 toplevel_files=[], \
+                 extlist=['html','pdf','py','m','txt','zip'], \
+                 teaching_root = '../../index.html'):
+        course_website.__init__(self, pathin, title, \
+                                lecture_folders=[], \
+                                other_folders=other_folders, \
+                                index_rst_only_folders=index_rst_only_folders, \
+                                toplevel_files=toplevel_files, \
+                                extlist=extlist, \
+                                teaching_root=teaching_root)
         
+    def go(self):
+        #self.make_lecture_pages()
+        self.make_other_pages()
+        self.make_toplevel_page()
+        self.make_index_rst_only_pages()
+        self.run_top_level_rst()
+
+    
 if __name__ == '__main__':
     mypath = '/home/ryan/siue/classes/450/2010/'
     my_course_page = course_website(mypath, \

@@ -9,13 +9,15 @@ def get_path_for_mass_spring_damper_sketch():
     labels = ['undamped free', \
               'damped free', \
               'damped forced', \
-              'two DOF']
+              'two DOF', \
+              'two DOF damped']
 
-    keys = ['1','2','3','4']
+    keys = ['1','2','3','4','5']
     
     filenames = ['undamped_free_vibration_mass_spring.jpg', \
                  'damped_free_vibration_mass_spring_damper.jpg', \
                  'forced_damped_vibration.jpg', \
+                 'two_dof_free_undamped.jpg', \
                  'two_dof_free.jpg']
 
     mygui = radiobutton_dialog.RadioButtons(labels, keys)
