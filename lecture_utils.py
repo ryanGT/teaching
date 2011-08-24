@@ -170,6 +170,9 @@ class course(object):
 
 
     def copy_announcements_rst2gimp(self, debug=0):
+        if not hasattr(self, 'prev_lecture_path'):
+            print('not copying previous lecture stuff')
+            return
         prev_exclude_path = os.path.join(self.prev_lecture_path, \
                                          'exclude')
         prev_outline_path = os.path.join(prev_exclude_path,
