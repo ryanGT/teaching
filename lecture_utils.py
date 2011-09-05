@@ -342,7 +342,7 @@ class course_482(tuesday_thursday_course):
         self.search_pat = 'ME482_' + date_pat
 
 
-class course_492(tuesday_thursday_course):
+class course_492(course_458):#tuesday_thursday_course):
     def __init__(self, path=None, forward=False):
         if path is None:
             today = datetime.date.today()
@@ -351,7 +351,7 @@ class course_492(tuesday_thursday_course):
             path += '/lectures/'
         self.path = rwkos.FindFullPath(path)
         self.course_num = '492'
-
+        self.forward = forward
 
     ## def next_lecture_date(self, date=None):
     ##     today = get_valid_date(date=date)
