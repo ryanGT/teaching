@@ -221,13 +221,22 @@ class penalty(extra_credit):
 
     
 class quick_read(section_level_1):
+    ## def __init__(self, *args, **kwargs):
+    ##     section_level_1.__init__(self, *args, **kwargs)
+    ##     self.weight = 0.15
+    ##     self.subweights = {'Abstract':1.0, \
+    ##                        'Introduction':1.0, \
+    ##                        'Conclusion':1.0, \
+    ##                        'Organization':0.2}
+
     def __init__(self, *args, **kwargs):
         section_level_1.__init__(self, *args, **kwargs)
-        self.weight = 0.15
+        self.weight = 0.1
         self.subweights = {'Abstract':1.0, \
                            'Introduction':1.0, \
                            'Conclusion':1.0, \
-                           'Organization':0.2}
+                           }
+        
 
     def create_rst(self):
         section_level_1.create_rst(self)
@@ -239,14 +248,23 @@ class quick_read(section_level_1):
 
         
 class slow_read(quick_read):
+    ## def __init__(self, *args, **kwargs):
+    ##     section_level_1.__init__(self, *args, **kwargs)
+    ##     self.weight = 0.25
+    ##     self.subweights = {'Problem Statement and Formulation': 1.0, \
+    ##                        'Organization and Flow': 0.5, \
+    ##                        'Clarity and Tone': 1.0, \
+    ##                        'Format/Style': 1.0, \
+    ##                        'Required Sections': 0.2, \
+    ##                        'Technical Language': 1.0, \
+    ##                        'Grammar and Spelling': 1.0}
+
     def __init__(self, *args, **kwargs):
         section_level_1.__init__(self, *args, **kwargs)
-        self.weight = 0.25
-        self.subweights = {'Problem Statement and Formulation': 1.0, \
-                           'Organization and Flow': 0.5, \
+        self.weight = 0.15
+        self.subweights = {'Organization and Flow': 0.5, \
                            'Clarity and Tone': 1.0, \
                            'Format/Style': 1.0, \
-                           'Required Sections': 0.2, \
                            'Technical Language': 1.0, \
                            'Grammar and Spelling': 1.0}
 
@@ -264,6 +282,60 @@ class content_sec(quick_read):
                            'Timeline': 0.8 , \
                            'Budget': 0.8}
 
+
+
+
+
+class intro_and_problem_statement(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.2
+        self.subweights = {'Problem Statement and Formulation': 1.0, \
+                           'Design Goals': 1.0, \
+                           'Testing Plans': 1.0, \
+                           'Constraints': 1.0, \
+                           }
+
+class lit_review_and_br(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.05
+        self.subweights = {'Literature Review': 1.0, \
+                           'Background Research': 0.5, \
+                           }
+
+class design_strategy(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.2
+        self.subweights = {'Design Strategy': 1.0, \
+                           'Preliminary Design Ideas': 1.0, \
+                           'Discussion of Risks': 1.0, \
+                           'Backup Plans': 1.0, \
+                           'Design Methodology': 1.0, \
+                           }
+
+
+class analysis(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.2
+        self.subweights = {'Analysis Plans': 1.0, \
+                           'Preliminary Analysis': 1.0, \
+                           'Feasibility Calculations': 1.0, \
+                           'Connection to Decisions': 0.7, \
+                           }
+
+
+class miscellaneous(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.05
+        self.subweights = {'Timeline': 1.0, \
+                           'Budget': 1.0, \
+                           'Computers and Software': 1.0, \
+                           }
+    
 
 class member(object):
     def __init__(self, lastname, firstname, email):
