@@ -111,8 +111,11 @@ class section(txt_mixin.txt_list):
             self.weighted_total = 0.0
             for title, weight in self.subweights.iteritems():
                 sec = self.find_section(title)
-                self.total_weight += weight
-                self.weighted_total += sec.grade * weight
+                if sec is None:
+                    print('did not find a section with the title ' + title)
+                else:
+                    self.total_weight += weight
+                    self.weighted_total += sec.grade * weight
             self.grade = self.weighted_total/self.total_weight
         
     def __repr__(self):
@@ -717,6 +720,162 @@ class group_with_team_ratings(group):
             student.send_email()
 
 
+class grade_subsection(object):
+    def __init__(self, title, optional):
+        self.title = title
+        self.optional = optional
+        
+
+class grade_major_section(object):
+    """A major section that has optional subsections, subsection_dict
+    is a dictionary of subsection_titles:optional (bool)"""
+    def __init__(self, title, sublist, optlist):
+        self.title = title
+        self.subsections = []
+        for subtitle in sublist:
+            opt = False
+            if subtitle in optlist:
+                opt = True
+            cursub = grade_subsection(subtitle, opt)
+            self.subsections.append(cursub)
+
+
+class grade_major_section_no_subs(object):
+    """A major section such as Contemporary Issues that has no
+    subsections."""
+    def __init__(self, title):
+        self.title = title
+        self.subsections = []
+
+
+class grade_major_section_all_subs_required(object):
+    """class for a major section where all the subsections are
+    required.  subsection_titles is simply a list of the titles of the
+    subsections."""
+    def __init__(self, title, subsection_titles):
+        self.title = title
+        self.subsections = []
+        for title in subsection_titles:
+            cursub = grade_subsection(title, False)
+            self.subsections.append(cursub)
+
+
+class proposal_grade_map_2011(object):
+    """Some students omitted certain subsections in their proposals
+    that they felt were redundant or unnecessary.  This is OK for
+    certain subsections, but it makes a mess of my spreadsheet.  This
+    class tries to map student grades to a spreadsheet row while
+    allowing certain subsections to be missing.  It depends on the
+    classes above:
+
+    grade_subsection, grade_major_section,
+    grade_major_section_no_subs, and
+    grade_major_section_all_subs_required"""
+    def append_required(self, titles, lists):
+        for curtitle, curlist in zip(titles, lists):
+            cursec = grade_major_section_all_subs_required(curtitle, \
+                                                           curlist)
+            self.major_sections.append(cursec)
+
+
+    def append_no_sub(self, title):
+        cursub = grade_major_section_no_subs(title)
+        self.major_sections.append(cursub)
+        
+
+    def append_optional(self, title, sublist, optlist):
+        cursec = grade_major_section(title,sublist, optlist)
+        self.major_sections.append(cursec)
+
+    def __init__(self):
+        title1 = 'Writing: Quick Read'
+        list1 = ['Abstract', \
+                 'Introduction', \
+                 'Conclusion', \
+                 ]
+        title2 = 'Introduction and Problem Statement'
+        list2 = ['Problem Statement and Formulation', \
+                 'Design Goals', \
+                 'Testing Plans', \
+                 'Constraints']
+
+        title3 = 'Literature Review and Background Research'
+        list3 = ['Literature Review','Background Research']
+
+        self.major_sections = []
+
+
+        titles = [title1, title2, title3]
+        lists = [list1, list2, list3]
+
+        self.append_required(titles, lists)
+
+        title4 = 'Contemporary Issues'
+        self.append_no_sub(title4)
+
+        title5 = 'Design Strategy'
+        list5 = ['Design Strategy', 'Preliminary Design Ideas', \
+                 'Discussion of Risks', 'Backup Plans', \
+                 'Design Methodology']
+        opt_list5 = ['Design Strategy', 'Backup Plans']
+        self.append_optional(title5, list5, opt_list5)
+
+        title6 = 'Analysis'
+        list6 = ['Analysis Plans', \
+                 'Preliminary Analysis', \
+                 'Feasibility Calculations', \
+                 'Connection to Decisions']
+        opt_list6 = ['Preliminary Analysis', 'Connection to Decisions']
+        
+        self.append_optional(title6, list6, opt_list6)
+
+        title7 = 'Miscellaneous'
+        list7 = ['Timeline','Budget','Computers and Software']
+
+        title8 = 'Writing: Slow Read'
+        list8 = ['Organization and Flow', 'Clarity and Tone', \
+                 'Format/Style','Technical Language', \
+                 'Grammar and Spelling']
+
+        self.append_required([title7, title8], [list7, list8])
+
+        
+        
+    def build_row(self, group_with_rst, missing_val=''):
+        """Intelligently pull grades out of a group_with_rst instance,
+        allowing some to be missing."""
+        row_out = []
+        total_missing = 0
+        for section in self.major_sections:
+            group_sec = group_with_rst.find_section(section.title)
+            for subsection in section.subsections:
+                subsec = group_sec.find_section(subsection.title)
+                if subsec is not None:
+                    row_out.append(subsec.grade)
+                else:
+                    if subsection.optional:
+                        #db().set_trace()
+                        print('----------------')
+                        print('')
+                        print('group: %s' % group_with_rst.group_name)
+                        print('   missing section: %s' % subsection.title)
+                        total_missing += 1
+                        print('')
+                        print('----------------')
+                        row_out.append(missing_val)
+                    else:
+                        msg = "did not find required grade %s" % \
+                              subsection.title
+                        raise ValueError, msg
+            row_out.append(group_sec.grade)
+        if total_missing > 1:
+            print('*******************')
+            print('')
+            print('group: %s' % group_with_rst.group_name)
+            print('  total missing subsections = %s' % total_missing)
+            print('')
+            print('*******************')
+        return row_out
 
 
 class group_with_rst(group, section):
@@ -902,10 +1061,17 @@ class group_with_rst(group, section):
         return self.ave
 
 
-    def build_spreadsheet_row(self, look_for_penalty=False):
+    def build_spreadsheet_row(self, look_for_penalty=False, \
+                              grade_map=None):
         row_out = [self.get_group_name_from_path()]
-        for section in self.sec_list:
-            row_out.extend(section.get_grades())
+        if grade_map is None:
+            for section in self.sec_list:
+                row_out.extend(section.get_grades())
+        else:
+            #intelligently map the grades, allowing certain ones to be
+            #blank
+            cur_grades = grade_map.build_row(self)
+            row_out.extend(cur_grades)
         #Pdb().set_trace()
         if look_for_penalty:
             if self.find_section('Penalty') is None:
@@ -1003,12 +1169,18 @@ class group_with_rst(group, section):
         
 class proposal(group_with_rst):
     def calc_overall_score(self):
-        weight_dict = {#'Literature Review':0.05, \#lit. review is a
-                       #separate grade
+        weight_dict = {'Writing: Quick Read':0.10, \
+                       'Introduction and Problem Statement':0.2, \
+                       'Literature Review and Background Research':0.05, \
                        'Contemporary Issues':0.05, \
-                       'Writing: Quick Read':0.20, \
-                       'Writing: Slow Read':0.25, \
-                       'Content':0.5}
+                       'Design Strategy': 0.2, \
+                       'Analysis': 0.2, \
+                       'Miscellaneous': 0.05, \
+                       'Writing: Slow Read':0.15, \
+                       #'Extra Credit':group_rst_parser.extra_credit, \
+                       #'Penalty':group_rst_parser.penalty, \
+                       }
+
         self.overall_grade = 0.0
         for key, weight in weight_dict.iteritems():
             cursec = self.find_section(key)
@@ -1053,12 +1225,33 @@ class proposal(group_with_rst):
         out = self.team_rst.append
         def eq_out(strin):
             out(ws + strin)
+
+        line_fmt = '& + %0.2g (\\textrm{%s}) \\\\'
+        line_fmt2 = '& + \\left. %0.2g (\\textrm{%s}) \\right) \\\\'
+        def line_out(weight, title, wa=True, last=False):
+            if wa:
+                title += ' Weighted Average'
+            if last:
+                myline = line_fmt2 % (weight, title)
+            else:
+                myline = line_fmt % (weight, title)
+            eq_out(myline)
+            
         eq_out('\\newcommand{\\myrule}{\\rule{0pt}{1EM}}')
         eq_out(r'\begin{equation*}\begin{split}')
-        eq_out(r'\textrm{grade} = & 10 \left( \myrule 0.05(\textrm{Contemporary Issues}) \right. \\')
-        eq_out(r'& + 0.15 (\textrm{Quick Read Weighted Average}) ')
-        eq_out(r'+ 0.25 (\textrm{Slow Read Weighted Average}) \\')
-        eq_out(r'& \left. + 0.5 (\textrm{Content Weighted Average}) \myrule \right)')
+        ## eq_out(r'\textrm{grade} = & 10 \left( \myrule 0.05(\textrm{Contemporary Issues}) \right. \\')
+        ## eq_out(r'& + 0.15 (\textrm{Quick Read Weighted Average}) ')
+        ## eq_out(r'+ 0.25 (\textrm{Slow Read Weighted Average}) \\')
+        ## eq_out(r'& \left. + 0.5 (\textrm{Content Weighted Average}) \myrule \right)')
+        eq_out(r'\textrm{grade} = & 10 \left( \myrule 0.1 (\textrm{Quick Read Weighted Average}) \right. \\')
+        line_out(0.20,'Introduction and Problem Statement')
+        eq_out(r'& + 0.05 (\textrm{Literature Review and Background Research Weighted Average}) \\')
+        eq_out(r'& + 0.05 (\textrm{Contemporary Issues}) \\')
+        line_out(0.2, 'Design Strategy')
+        line_out(0.2, 'Analysis')
+        line_out(0.05, 'Miscellaneous')
+        line_out(0.15, 'Slow Read', last=True)
+
         if self.penalty is not None:
             eq_out(r'\times (1 + \textrm{Penalty}/100)')
         eq_out(r'\end{split}\end{equation*}')
@@ -1223,4 +1416,22 @@ class update_presentation_no_timing_penalty(update_presentation):
         ##     num_steps = int((5.0-time)/0.5)
         ##     penalty = -0.15*num_steps
         self.time_penalty = penalty
+    
+
+
+class proposal_presentation_no_appearance(update_presentation):
+    def get_timing_grade(self):
+        time_lines = self.get_time_lines()
+        #Pdb().set_trace()
+        time_str = self.find_time_string(time_lines)
+        time = self.parse_time_string(time_str)
+        penalty = 0.0
+        if time > 11.251:
+            num_steps = int((time-11.0)/0.25)
+            penalty = -0.075*num_steps
+        elif time < 8.849:
+            num_steps = int((9.0-time)/0.25)
+            penalty = -0.075*num_steps
+        self.time_penalty = penalty
+
     

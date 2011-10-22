@@ -12,7 +12,7 @@ group_path = os.path.join(class_folder, 'group_list.csv')
 group_list = spreadsheet.group_list_2010(group_path)
 
 alts = {'Grahek':'Nick', \
-        'Hall':'Matthew', \
+        'Hall':'Matt', \
         'Luebcke':'Kim', \
         'Luly':'Ben', \
         'Jeffery':'Benny', \
