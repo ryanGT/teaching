@@ -16,13 +16,22 @@ alts = {'Grahek':'Nick', \
         'Luebcke':'Kim', \
         'Luly':'Ben', \
         'Jeffery':'Benny', \
+        'Parker':'Logan', \
+        'Donlan':'Zach', \
+        'Hake':'Cliff', \
+        'Clabby':'Nate', \
+        'Raube':'Zach', \
         }
 
 inverse_alts = {'Kim':'Kimberly', \
                 'Ben':'Benjamin', \
                 'Benny':'Benjamin', \
                 'Nick':'Nicholas', \
-                'Matt':'Matthew',\
+                'Matt':'Matthew', \
+                'Logan':'Richard', \
+                'Zach':'Zachary', \
+                'Cliff':'Clifton', \
+                'Nate':'Nathan', \
                 }
 
 

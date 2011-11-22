@@ -117,11 +117,24 @@ class section(txt_mixin.txt_list):
                     self.total_weight += weight
                     self.weighted_total += sec.grade * weight
             self.grade = self.weighted_total/self.total_weight
+
+
+    def correct_grade(self, newgrade, fmt='%0.2g'):
+        self.grade = newgrade
+        inds = self.content.findall(':grade:`')
+        assert len(inds) == 1, "Problem with finding exactly one grade to replace"
+        grade_fmt = ':grade:`' + fmt + '`'
+        grade_line = grade_fmt % newgrade
+        self.content[inds[0]] = grade_line
         
     def __repr__(self):
-        outstr = self.title+'\n' + \
-                 self.dec_line +'\n'+ \
-                 '\n'.join(self.content)
+        outstr = ""
+        if self.title is not None:
+            outstr += self.title+'\n'
+        if self.dec_line is not None:
+                 outstr += self.dec_line +'\n'
+        content_str = '\n'.join(self.content)
+        outstr += content_str
         return outstr
 
 
@@ -894,6 +907,15 @@ class group_with_rst(group, section):
         self.get_group_name_from_path()
         if (group_list is not None) and (email_list is not None):
             self.find_members()
+
+
+    def get_grades(self):
+        grade_dict = {}
+        for key, weight in self.weight_dict.iteritems():
+            cursec = self.find_section(key)
+            grade_dict[key] = cursec.grade
+        self.grades = grade_dict
+
         
     def get_group_name_from_path(self):
         folder, filename = os.path.split(self.pathin)
@@ -1165,7 +1187,67 @@ class group_with_rst(group, section):
         for sec in self.sec_list:
             if sec.title == title:
                 return sec
-            
+
+
+class group_rst_needing_grade_correction(group_with_rst):
+    """This class exists to cleanly correct the grades in an rst.  The
+    need for this comes from having guests/volunteers grade half of
+    the design review presentations for 482.  This class will take an
+    rst path and a correction dict, open the rst, read in the grades,
+    multiply the grade for each section by the correction factor for
+    that section from the dictionary, and then output modified rst to
+    a new folder."""
+    def __init__(self, pathin, correction_dict={}, outfolder=None, \
+                 **kwargs):
+        group_with_rst.__init__(self, pathin, **kwargs)
+        self.correction_dict = correction_dict
+        curfolder, name = os.path.split(pathin)
+        self.name = name
+        if outfolder is None:#add corrected folder to pathin
+            curfolder, name = os.path.split(pathin)
+            outfolder = os.path.join(curfolder, 'corrected')
+            if not os.path.exists(outfolder):
+                os.mkdir(outfolder)
+        self.outfolder = outfolder
+        self.outpath = os.path.join(self.outfolder, name)
+        
+
+    def save_rst(self):
+        self.get_rst_name()
+        txt_mixin.dump(self.outpath, self.corrected_rst)
+
+
+    def calc_correct_grades(self):
+        self.corrected_grades = {}
+        for key, value in self.correction_dict.iteritems():
+            raw_grade = self.grades[key]
+            corrected_grade = raw_grade*value
+            self.corrected_grades[key] = corrected_grade
+
+                 
+    def build_corrected_rst_output(self):
+        if not hasattr(self, 'corrected_grades'):
+            self.calc_correct_grades()
+        self.corrected_rst = copy.copy(self.header)
+        for cur_sec in self.sec_list:
+            self.corrected_rst.append('')
+            self.corrected_rst.append(cur_sec.title)
+            self.corrected_rst.append(cur_sec.dec_line)
+            key = cur_sec.title
+            if self.corrected_grades.has_key(key):
+                newgrade = self.corrected_grades[key]
+                cur_sec.correct_grade(newgrade)
+            self.corrected_rst.extend(cur_sec.content)
+            ## if cur_sec.title == 'Timing':
+            ##     self.corrected_rst.append('')
+            ##     self.corrected_rst.append('**Timing Penalty:** %0.4g' % \
+            ##                          self.time_penalty)
+            self.corrected_rst.append('')
+        self.corrected_rst.append('')
+        ## overall_title = mysecdec('Overall Grade')
+        ## self.corrected_rst.extend(overall_title)
+        ## self.corrected_rst.append(':grade:`%0.3g`' % self.overall_grade)
+    
         
 class proposal(group_with_rst):
     def calc_overall_score(self):
@@ -1269,6 +1351,13 @@ class proposal(group_with_rst):
         gmail_smtp.sendMail(self.emails, subject, body, self.pdfpath)
 
 
+pres_weight_w_apperance_2011 = {'Appearance':0.05,\
+                                'Content and Organization':0.45, \
+                                'Speaking and Delivery':0.3, \
+                                'Slides':0.1,\
+                                'Listening to and Answering Questions':0.1}
+
+
 
 class presentation_with_appearance(group_with_rst):
 #    Appearance
@@ -1282,11 +1371,7 @@ class presentation_with_appearance(group_with_rst):
         if kwargs.has_key('weight_dict'):
             weight_dict = kwargs['weight_dict']
         else:
-            weight_dict = {'Appearance':0.05,\
-                           'Content and Organization':0.5, \
-                           'Speaking and Delivery':0.25, \
-                           'Slides':0.15,\
-                           'Listening to and Answering Questions':0.05}
+            weight_dict = pres_weight_w_apperance_2011
         self.weight_dict = weight_dict
         self.get_timing_grade()
 
@@ -1347,6 +1432,14 @@ class presentation_with_appearance(group_with_rst):
             penalty = 0.0
         self.time_penalty = penalty
 
+
+
+class presentation_needing_grade_correction(group_rst_needing_grade_correction):
+    def __init__(self, *args, **kwargs):
+        #group_with_rst.__init__(self, *args, **kwargs)
+        group_rst_needing_grade_correction.__init__(self, *args, **kwargs)
+        self.weight_dict = pres_weight_w_apperance_2011
+    
 
 class update_presentation(presentation_with_appearance):
 #    Appearance
