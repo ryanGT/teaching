@@ -44,9 +44,10 @@ subsec_dec = rst_creator.rst_section_dec()
 
 class section(txt_mixin.txt_list):
     def __init__(self, raw_list, subre=None, subclass=None, \
-                 has_title=True):
+                 has_title=True, max_grade=10.0):
         #print('raw_list=')
         #print('\n'.join(raw_list))
+        self.max_grade = max_grade#used for checking grade corrections
         self.subweights = None
         if has_title:
             self.title = raw_list.pop(0)
@@ -75,6 +76,17 @@ class section(txt_mixin.txt_list):
             self.break_into_sections()
 
 
+    def get_grade_from_line(self, line):
+        q = grade_pat.search(line)
+        cur_grade = float(q.group(1))
+        return cur_grade
+        
+
+    def get_grade_from_ind(self, ind):
+        grade_line = self.content[ind]
+        return self.get_grade_from_line(grade_line)
+    
+        
     def break_into_sections(self):
         inds = self.content.findallre(self.subre)
         if len(inds) == 0:
@@ -119,13 +131,25 @@ class section(txt_mixin.txt_list):
             self.grade = self.weighted_total/self.total_weight
 
 
-    def correct_grade(self, newgrade, fmt='%0.2g'):
-        self.grade = newgrade
+    def correct_grade(self, correction_factor, fmt='%0.2g'):
+        #self.grade = newgrade
         inds = self.content.findall(':grade:`')
-        assert len(inds) == 1, "Problem with finding exactly one grade to replace"
+        N = len(inds)
+        expected_grades = 1
+        msg = "Problem with finding exactly one grade to replace, N = " + str(N)
+        if self.title == 'Speaking and Delivery':
+            expected_grades = len(self.sec_list)
+            msg = "Grades to replace does not equal number of speakers, N = " + str(N)
+        assert N == expected_grades, msg
         grade_fmt = ':grade:`' + fmt + '`'
-        grade_line = grade_fmt % newgrade
-        self.content[inds[0]] = grade_line
+        for ind in inds:
+            old_grade = self.get_grade_from_ind(ind)
+            new_grade = old_grade*correction_factor
+            if new_grade > self.max_grade:
+                new_grade = self.max_grade
+            new_grade_line = grade_fmt % new_grade
+            self.content[ind] = new_grade_line
+            
         
     def __repr__(self):
         outstr = ""
@@ -1213,7 +1237,7 @@ class group_rst_needing_grade_correction(group_with_rst):
         
 
     def save_rst(self):
-        self.get_rst_name()
+        #self.get_rst_name()
         txt_mixin.dump(self.outpath, self.corrected_rst)
 
 
@@ -1235,8 +1259,9 @@ class group_rst_needing_grade_correction(group_with_rst):
             self.corrected_rst.append(cur_sec.dec_line)
             key = cur_sec.title
             if self.corrected_grades.has_key(key):
-                newgrade = self.corrected_grades[key]
-                cur_sec.correct_grade(newgrade)
+                #newgrade = self.corrected_grades[key]
+                factor = self.correction_dict[key]
+                cur_sec.correct_grade(factor)
             self.corrected_rst.extend(cur_sec.content)
             ## if cur_sec.title == 'Timing':
             ##     self.corrected_rst.append('')
@@ -1366,8 +1391,14 @@ class presentation_with_appearance(group_with_rst):
 #    Slides
 #    Listening to and Answering Questions
  
-    def __init__(self, *args, **kwargs):
-        group_with_rst.__init__(self, *args, **kwargs)
+    def __init__(self, pathin, max_time=10.0, \
+                 min_time=8.0, grace=0.25, \
+                 **kwargs):
+        group_with_rst.__init__(self, pathin, **kwargs)
+        self.max_time = max_time
+        self.min_time = min_time
+        self.grace = grace
+        
         if kwargs.has_key('weight_dict'):
             weight_dict = kwargs['weight_dict']
         else:
@@ -1425,9 +1456,12 @@ class presentation_with_appearance(group_with_rst):
         time_lines = self.get_time_lines()
         time_str = self.find_time_string(time_lines)
         time = self.parse_time_string(time_str)
-        if time > 15.0:
-            num_steps = int((time-9.0)/0.5)
-            penalty = -0.1*num_steps
+        if time > (self.max_time + self.grace):
+            num_steps = int((time-self.max_time)/0.25)
+            penalty = -0.075*num_steps
+        elif time < (self.min_time - self.grace):
+            num_steps = int((self.min_time-time)/0.25)
+            penalty = -0.075*num_steps
         else:
             penalty = 0.0
         self.time_penalty = penalty
