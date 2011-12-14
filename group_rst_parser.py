@@ -366,6 +366,32 @@ class analysis(quick_read):
                            'Connection to Decisions': 0.7, \
                            }
 
+class design(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.25
+        self.subweights = {'Design Methodology':1.0, \
+                           'Completeness':1.0, \
+                           'Quality of the Design':1.0, \
+                           'Explanation':1.0, \
+                           'Risks and Back-up Plans':1.0, \
+                           }
+
+
+
+class analysis_design_review(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.25
+        self.subweights = {'Preliminary Analysis and Feasibility Calculations':1.0, \
+                           'Analysis Completed':1.0, \
+                           'Explanation':1.0, \
+                           'Connection to Decisions':1.0, \
+                           'Thoroughness and Approach':1.0, \
+                           }
+
+
+
 
 class miscellaneous(quick_read):
     def __init__(self, *args, **kwargs):
@@ -1347,23 +1373,41 @@ class group_rst_needing_grade_correction(group_with_rst):
         ## self.corrected_rst.extend(overall_title)
         ## self.corrected_rst.append(':grade:`%0.3g`' % self.overall_grade)
     
-        
-class proposal(group_with_rst):
-    def calc_overall_score(self):
-        weight_dict = {'Writing: Quick Read':0.10, \
-                       'Introduction and Problem Statement':0.2, \
-                       'Literature Review and Background Research':0.05, \
-                       'Contemporary Issues':0.05, \
-                       'Design Strategy': 0.2, \
-                       'Analysis': 0.2, \
-                       'Miscellaneous': 0.05, \
-                       'Writing: Slow Read':0.15, \
-                       #'Extra Credit':group_rst_parser.extra_credit, \
-                       #'Penalty':group_rst_parser.penalty, \
-                       }
+weight_dict_proposal_2011 = {'Writing: Quick Read':0.10, \
+                             'Introduction and Problem Statement':0.2, \
+                             'Literature Review and Background Research':0.05, \
+                             'Contemporary Issues':0.05, \
+                             'Design Strategy': 0.2, \
+                             'Analysis': 0.2, \
+                             'Miscellaneous': 0.05, \
+                             'Writing: Slow Read':0.15, \
+                             #'Extra Credit':group_rst_parser.extra_credit, \
+                             #'Penalty':group_rst_parser.penalty, \
+                             }
 
+proposal_ordered_keys = ['Writing: Quick Read', \
+                         'Introduction and Problem Statement', \
+                         'Literature Review and Background Research', \
+                         'Contemporary Issues', \
+                         'Design Strategy', \
+                         'Analysis', \
+                         'Miscellaneous', \
+                         'Writing: Slow Read', \
+                         ]
+
+
+class proposal(group_with_rst):
+    def __init__(self, pathin, weight_dict=weight_dict_proposal_2011, \
+                 ordered_keys=proposal_ordered_keys, \
+                 **kwargs):
+        group_with_rst.__init__(self, pathin, **kwargs)
+        self.weight_dict = weight_dict
+        self.ordered_keys = ordered_keys
+
+
+    def calc_overall_score(self):
         self.overall_grade = 0.0
-        for key, weight in weight_dict.iteritems():
+        for key, weight in self.weight_dict.iteritems():
             cursec = self.find_section(key)
             self.overall_grade += weight*cursec.grade*10.0
         ec = self.find_section('Extra Credit')
@@ -1381,7 +1425,7 @@ class proposal(group_with_rst):
         return self.overall_grade
 
 
-    def build_team_rst_output(self):
+    def build_team_rst_output_old(self):
         """Note that all grades must be calculated before calling this
         method."""
         self.team_rst = copy.copy(self.header)
@@ -1441,6 +1485,73 @@ class proposal(group_with_rst):
         self.team_rst.append(':grade:`%0.1f`' % self.overall_grade)
 
 
+    def append_eqn_rst(self):
+        ## formula_line = '10*(0.5*(Contemporary Issues) + ' + \
+        ##                '0.2*(Quick Read Weighted Average) + ' + \
+        ##                '0.25*(Slow Read Weighted Average) + ' + \
+        ##                '0.5*(Content Weighted Average))'
+        ## if self.penalty is not None:
+        ##     formula_line += '* (1 + penalty/100)'
+        self.team_rst.append('**Formula:**')
+        self.team_rst.append('')
+        self.team_rst.append('.. raw:: latex')
+        self.team_rst.append('')
+        ws = ' '*4
+        out = self.team_rst.append
+        def eq_out(strin):
+            out(ws + strin)
+
+        line_fmt = '& + %0.2g (\\textrm{%s}) \\\\'
+        line_fmt2 = '& + \\left. %0.2g (\\textrm{%s}) \\myrule \\right) \\\\'
+        def line_out(weight, title, wa=True, last=False):
+            if wa:
+                title += ' Weighted Average'
+            if last:
+                myline = line_fmt2 % (weight, title)
+            else:
+                myline = line_fmt % (weight, title)
+            eq_out(myline)
+
+        eq_out('\\newcommand{\\myrule}{\\rule{0pt}{1EM}}')
+        eq_out(r'\begin{equation*}\begin{split}')
+        ## eq_out(r'\textrm{grade} = & 10 \left( \myrule 0.05(\textrm{Contemporary Issues}) \right. \\')
+        ## eq_out(r'& + 0.15 (\textrm{Quick Read Weighted Average}) ')
+        ## eq_out(r'+ 0.25 (\textrm{Slow Read Weighted Average}) \\')
+        ## eq_out(r'& \left. + 0.5 (\textrm{Content Weighted Average}) \myrule \right)')
+        first = 1
+        N = len(self.ordered_keys)
+        for i, key in enumerate(self.ordered_keys):
+            weight = self.weight_dict[key]
+            if first:
+                first = 0
+                eq_out(r'\textrm{grade} = 10 & \left( \myrule \right. %s (\textrm{%s}) \\' % (weight, key))
+            else:
+                last = False
+                if i == N-1:
+                    last = True
+                line_out(weight, key, last=last)
+
+        if self.penalty is not None:
+            eq_out(r'\times (1 + \textrm{Penalty}/100)')
+        eq_out(r'\end{split}\end{equation*}')
+        
+
+    def build_team_rst_output(self):
+        """Note that all grades must be calculated before calling this
+        method."""
+        self.team_rst = copy.copy(self.header)
+        for cur_sec in self.sec_list:
+            self.team_rst.append('')
+            self.team_rst.extend(cur_sec.create_rst())
+            self.team_rst.append('')
+        self.team_rst.append('')
+        overall_title = mysecdec('Overall Grade')
+        self.team_rst.extend(overall_title)
+        self.append_eqn_rst()
+        self.team_rst.append('')
+        self.team_rst.append('')
+        self.team_rst.append(':grade:`%0.1f`' % self.overall_grade)
+
 
     def compose_and_send_team_gmail(self):#, subject):#, ga):
         self.pdfpath_checker()
@@ -1450,11 +1561,44 @@ class proposal(group_with_rst):
         gmail_smtp.sendMail(self.emails, subject, body, self.pdfpath)
 
 
+
+weight_dict_design_report_2011 = {'Writing: Quick Read':0.10, \
+                                  'Introduction and Problem Statement':0.2, \
+                                  'Design': 0.25, \
+                                  'Analysis': 0.25, \
+                                  'Miscellaneous': 0.05, \
+                                  'Writing: Slow Read':0.15, \
+                                  #'Extra Credit':group_rst_parser.extra_credit, \
+                                  #'Penalty':group_rst_parser.penalty, \
+                                  }
+
+design_report_ordered_keys = ['Writing: Quick Read', \
+                              'Introduction and Problem Statement', \
+                              'Design', \
+                              'Analysis', \
+                              'Miscellaneous', \
+                              'Writing: Slow Read', \
+                              ]
+
+
+
+class design_report(proposal):
+    def __init__(self, pathin, weight_dict=weight_dict_design_report_2011, \
+                 ordered_keys=design_report_ordered_keys, \
+                 **kwargs):
+        proposal.__init__(self, pathin, weight_dict=weight_dict, \
+                          ordered_keys=ordered_keys, \
+                          **kwargs)
+
+    
+
 pres_weight_w_apperance_2011 = {'Appearance':0.05,\
                                 'Content and Organization':0.45, \
                                 'Speaking and Delivery':0.3, \
                                 'Slides':0.1,\
                                 'Listening to and Answering Questions':0.1}
+
+
 
 
 
