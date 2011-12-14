@@ -824,57 +824,88 @@ class proposal_grade_map_2011(object):
         cursec = grade_major_section(title,sublist, optlist)
         self.major_sections.append(cursec)
 
-    def __init__(self):
+
+    def _append_quick_read(self):
         title1 = 'Writing: Quick Read'
         list1 = ['Abstract', \
                  'Introduction', \
                  'Conclusion', \
                  ]
+
+        self.append_required([title1], [list1])
+
+
+    def _append_introduction_and_prob_statement(self):
         title2 = 'Introduction and Problem Statement'
         list2 = ['Problem Statement and Formulation', \
                  'Design Goals', \
                  'Testing Plans', \
                  'Constraints']
 
+        self.append_required([title2], [list2])
+
+
+    def _append_lit_review_and_back_res(self):
         title3 = 'Literature Review and Background Research'
         list3 = ['Literature Review','Background Research']
 
-        self.major_sections = []
+        self.append_required([title3], [list3])
+        
 
 
-        titles = [title1, title2, title3]
-        lists = [list1, list2, list3]
-
-        self.append_required(titles, lists)
-
-        title4 = 'Contemporary Issues'
-        self.append_no_sub(title4)
-
-        title5 = 'Design Strategy'
-        list5 = ['Design Strategy', 'Preliminary Design Ideas', \
-                 'Discussion of Risks', 'Backup Plans', \
-                 'Design Methodology']
-        opt_list5 = ['Design Strategy', 'Backup Plans']
-        self.append_optional(title5, list5, opt_list5)
-
+    def _append_analysis(self):
         title6 = 'Analysis'
         list6 = ['Analysis Plans', \
                  'Preliminary Analysis', \
                  'Feasibility Calculations', \
                  'Connection to Decisions']
         opt_list6 = ['Preliminary Analysis', 'Connection to Decisions']
-        
+
         self.append_optional(title6, list6, opt_list6)
 
+
+    def _append_misc(self):
         title7 = 'Miscellaneous'
         list7 = ['Timeline','Budget','Computers and Software']
 
+        self.append_required([title7], [list7])
+
+
+    def _append_slow_read(self):
         title8 = 'Writing: Slow Read'
         list8 = ['Organization and Flow', 'Clarity and Tone', \
                  'Format/Style','Technical Language', \
                  'Grammar and Spelling']
 
-        self.append_required([title7, title8], [list7, list8])
+        self.append_required([title8], [list8])
+        
+
+    def _append_design_strategy(self):
+        title5 = 'Design Strategy'
+        list5 = ['Design Strategy', 'Preliminary Design Ideas', \
+                 'Discussion of Risks', 'Backup Plans', \
+                 'Design Methodology']
+        opt_list5 = ['Design Strategy', 'Backup Plans']
+
+        self.append_optional(title5, list5, opt_list5)
+
+        
+        
+    def __init__(self):
+
+        self.major_sections = []#you must do this before calling the _append* methods
+
+        self._append_quick_read()
+        self._append_introduction_and_prob_statement()
+        self._append_lit_review_and_back_res()
+        
+        title4 = 'Contemporary Issues'
+        self.append_no_sub(title4)
+
+        self._append_design_strategy()
+        self._append_analysis()
+        self._append_misc()
+        self._append_slow_read()
 
         
         
@@ -913,6 +944,49 @@ class proposal_grade_map_2011(object):
             print('')
             print('*******************')
         return row_out
+
+
+class design_report_grade_map_2011(proposal_grade_map_2011):
+    def __init__(self):
+        self.major_sections = []#you must do this before calling the _append* methods
+
+        self._append_quick_read()
+        self._append_introduction_and_prob_statement()
+        #self._append_lit_review_and_back_res()
+        
+        self._append_design()
+        self._append_analysis()
+        self._append_misc()
+        self._append_slow_read()
+
+
+    def _append_design(self):
+        title5 = 'Design'
+        list5 = ['Design Methodology', \
+                 'Completeness', \
+                 'Quality of the Design', \
+                 'Explanation', \
+                 'Risks and Back-up Plans', \
+                 ]
+        #opt_list5 = []#'Design Strategy', 'Backup Plans']
+
+        #self.append_optional(title5, list5, opt_list5)
+        self.append_required([title5], [list5])
+
+
+    def _append_analysis(self):
+        title6 = 'Analysis'
+        list6 = ['Preliminary Analysis and Feasibility Calculations', \
+                 'Analysis Completed', \
+                 'Explanation', \
+                 'Connection to Decisions', \
+                 'Thoroughness and Approach', \
+                 ]
+        #opt_list6 = ['Preliminary Analysis', 'Connection to Decisions']
+
+        #self.append_optional(title6, list6, opt_list6)
+        self.append_required([title6], [list6])
+
 
 
 class group_with_rst(group, section):
