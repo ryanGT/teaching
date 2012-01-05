@@ -6,7 +6,7 @@ reload(rst_utils)
 #firstday = datetime.date(2010, 8, 23)
 #firstday = datetime.date(2011, 1, 10)
 #firstday = datetime.date(2011, 5, 23)
-firstday = datetime.date(2011, 8, 22)
+firstday = datetime.date(2012, 1, 9)
 
 import pdb
 import txt_mixin
@@ -397,12 +397,61 @@ class nonlinear_controls(tuesday_thursday_course):
 class course_484(course_458):#<-- I am using 458 as a base class for MW classes
     def __init__(self, path=None, forward=False):
         if path is None:
-            today = datetime.date.today()
+            #today = datetime.date.today()
+            today = get_valid_date()
             path = '~/siue/classes/484/' + today.strftime('%Y')#4 digit year
             path += '/lectures/'
         self.path = rwkos.FindFullPath(path)
         self.course_num = '484'
         self.forward = forward
+
+
+class course_450(course_458):
+    """This is a MWF class."""
+    def __init__(self, path=None, forward=False):
+        if path is None:
+            #today = datetime.date.today()
+            today = get_valid_date()
+            path = '~/siue/classes/450/' + today.strftime('%Y')#4 digit year
+            path += '/lectures/'
+        self.path = rwkos.FindFullPath(path)
+        self.course_num = '450'
+        self.forward = forward
+
+
+    def next_lecture_date(self, date=None):
+        today = get_valid_date(date=date)
+        #458 lectures are on weekdays 0 and 2 and 4 (Monday, Wednesday, and Friday)
+        weekday = today.weekday()
+        if weekday in [0,2,4]:
+            self.next_lecture = today
+        elif weekday in [1,3]:
+            self.next_lecture = today + datetime.timedelta(days=1)
+        else:
+            self.next_lecture = find_next_day(today, \
+                                              des_day=0)#find next Monday
+        return self.next_lecture
+
+
+    def previous_lecture_date(self, date=None):
+        today = get_valid_date(date=date)
+        #458 lectures are on weekdays 0 and 2 (Monday and Wednesday)
+        weekday = today.weekday()
+        if weekday in [5,6]:#Saturday or Sunday --> prev. Wed.
+            self.prev_lecture = today + datetime.timedelta(days=-weekday+4)
+        elif weekday == 0:#Monday --> prev. Fri.
+            self.prev_lecture = today + datetime.timedelta(days=-3)
+        elif weekday in [1,2]:#backup to Mon.
+            self.prev_lecture = today + datetime.timedelta(days=-weekday)
+        elif weekday in [3,4]:#backup to Wed.
+            self.prev_lecture = today + datetime.timedelta(days=-weekday+2)
+        return self.prev_lecture
+
+
+    def build_pat(self):
+        date_pat = self.next_lecture.strftime('%m_%d_%y')
+        self.pat = 'ME450_' + date_pat + '_%0.4i.xcf'
+        self.search_pat = 'ME450_' + date_pat
 
 
 class course_452(tuesday_thursday_course):

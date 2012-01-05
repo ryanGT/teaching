@@ -43,7 +43,8 @@ class course_website(object):
             title = self.title + ': Lecture Notes'
             lecture_page = thumbnail_maker.MainPageMaker2(folder_path, \
                                                           title=title, \
-                                                          DirectoryPageclass=thumbnail_maker.DirectoryPage)
+                                                          DirectoryPageclass=thumbnail_maker.DirectoryPage, \
+                                                          extlist=self.extlist)
                                                           #DirectoryPageclass=thumbnail_maker.DirectoryPage_courses)
             lecture_page.Go(top_level_link='../index.html')
             if lecture_pages is None:
