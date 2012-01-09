@@ -41,7 +41,7 @@ def find_next_day(today, des_day=0):
     return today + delta
 
 
-def get_valid_date(date=None):
+def get_valid_date(date=None, force_next=False):
     if date is not None:
         today = date_string_to_datetime(date)
     else:
@@ -49,6 +49,8 @@ def get_valid_date(date=None):
     if today < firstday:
         return firstday
     else:
+        if force_next:
+            today += datetime.timedelta(days=1)
         return today
 
     
@@ -67,11 +69,11 @@ class course(object):
         return date_str
 
 
-    def next_lecture_date(self, date=None):
+    def next_lecture_date(self, date=None, force_next=False):
         raise NotImplementedError
 
     
-    def previous_lecture_date(self, date=None):
+    def previous_lecture_date(self, date=None, force_next=False):
         raise NotImplementedError
 
 
@@ -82,9 +84,9 @@ class course(object):
         return self.lecture_path
 
 
-    def build_previous_lecture_path(self, date=None):
+    def build_previous_lecture_path(self, date=None, force_next=False):
         if not hasattr(self, 'prev_lecture'):
-            self.previous_lecture_date(date=date)
+            self.previous_lecture_date(date=date, force_next=force_next)
         self.format_date(date=self.prev_lecture, \
                          attr='prev_date_str')
         self.prev_lecture_path = os.path.join(self.path, \
@@ -196,14 +198,14 @@ class course(object):
             print('did not find previous outline: '+prev_outline_path)
 
         
-    def run(self, date=None, build_previous=True):
-        self.next_lecture_date(date=date)
+    def run(self, date=None, build_previous=True, force_next=False):
+        self.next_lecture_date(date=date, force_next=force_next)
         self.build_lecture_path_string()
         self.make_lecture_dir()
         self.make_exclude_dir()
         print('lecture_path = ' + self.lecture_path)
         if build_previous:
-            self.build_previous_lecture_path(date=date)
+            self.build_previous_lecture_path(date=date, force_next=force_next)
             print('previous lecture_path = ' + self.prev_lecture_path)
             self.copy_prev_outline()
         self.set_pickle()
@@ -226,8 +228,8 @@ class course_458(course):
         self.forward = forward
 
 
-    def next_lecture_date(self, date=None):
-        today = get_valid_date(date=date)
+    def next_lecture_date(self, date=None, force_next=False):
+        today = get_valid_date(date=date, force_next=force_next)
         #458 lectures are on weekdays 0 and 2 (Monday and Wednesday)
         weekday = today.weekday()
         if weekday in [0,2]:
@@ -240,8 +242,8 @@ class course_458(course):
         return self.next_lecture
 
 
-    def previous_lecture_date(self, date=None):
-        today = get_valid_date(date=date)
+    def previous_lecture_date(self, date=None, force_next=False):
+        today = get_valid_date(date=date, force_next=force_next)
         #458 lectures are on weekdays 0 and 2 (Monday and Wednesday)
         weekday = today.weekday()
         if weekday == 6:#Sunday --> prev. Wed.
@@ -262,8 +264,8 @@ class course_458(course):
         
 
 class tuesday_thursday_course(course):
-    def next_lecture_date(self, date=None):
-        today = get_valid_date(date=date)
+    def next_lecture_date(self, date=None, force_next=False):
+        today = get_valid_date(date=date, force_next=force_next)
         #lectures are on weekdays 1 and 3 (Tuesday and Thursday)
         weekday = today.weekday()
         if weekday in [1,3]:
@@ -276,8 +278,8 @@ class tuesday_thursday_course(course):
         return self.next_lecture
 
 
-    def previous_lecture_date(self, date=None):
-        today = get_valid_date(date=date)
+    def previous_lecture_date(self, date=None, force_next=False):
+        today = get_valid_date(date=date, force_next=force_next)
         #lectures are on weekdays 1 and 3 (Tuesday and Thursday)
         weekday = today.weekday()
         ## if weekday == 6:#Sunday --> prev. Thurs..
@@ -307,7 +309,7 @@ class course_482(tuesday_thursday_course):
 
 
     ## def next_lecture_date(self, date=None):
-    ##     today = get_valid_date(date=date)
+    ##     today = get_valid_date(date=date, force_next=force_next)
     ##     #482 lectures are on weekdays 1 and 3 (Tuesday and Thursday)
     ##     weekday = today.weekday()
     ##     if weekday in [1,3]:#Tuesday or Thursday
@@ -321,8 +323,8 @@ class course_482(tuesday_thursday_course):
     ##     return self.next_lecture
 
 
-    ## def previous_lecture_date(self, date=None):
-    ##     today = get_valid_date(date=date)
+    ## def previous_lecture_date(self, date=None, force_next=False):
+    ##     today = get_valid_date(date=date, force_next=force_next)
     ##     #482 lectures are on weekdays 1 and 3 (Tuesday and Thursday)
     ##     weekday = today.weekday()
     ##     if weekday == 6:#Sunday --> prev. Thur.
@@ -354,7 +356,7 @@ class course_492(course_458):#tuesday_thursday_course):
         self.forward = forward
 
     ## def next_lecture_date(self, date=None):
-    ##     today = get_valid_date(date=date)
+    ##     today = get_valid_date(date=date, force_next=force_next)
     ##     #482 lectures are on weekdays 1 and 3 (Tuesday and Thursday)
     ##     weekday = today.weekday()
     ##     if weekday == 2:#Wednesday
@@ -419,10 +421,12 @@ class course_450(course_458):
         self.forward = forward
 
 
-    def next_lecture_date(self, date=None):
-        today = get_valid_date(date=date)
+    def next_lecture_date(self, date=None, force_next=False):
+        today = get_valid_date(date=date, force_next=force_next)
+
         #458 lectures are on weekdays 0 and 2 and 4 (Monday, Wednesday, and Friday)
         weekday = today.weekday()
+
         if weekday in [0,2,4]:
             self.next_lecture = today
         elif weekday in [1,3]:
@@ -433,8 +437,8 @@ class course_450(course_458):
         return self.next_lecture
 
 
-    def previous_lecture_date(self, date=None):
-        today = get_valid_date(date=date)
+    def previous_lecture_date(self, date=None, force_next=False):
+        today = get_valid_date(date=date, force_next=force_next)
         #458 lectures are on weekdays 0 and 2 (Monday and Wednesday)
         weekday = today.weekday()
         if weekday in [5,6]:#Saturday or Sunday --> prev. Wed.
