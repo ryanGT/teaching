@@ -1720,9 +1720,19 @@ class update_presentation(presentation_with_appearance):
         return self.overall_grade
 
 
+    def _check_time_NA(self, time_lines):
+        if len(time_lines) == 1:
+            time_str = time_lines[0]
+            if time_str.lower() == 'na':
+                return True
+        return False
+
+        
     def get_timing_grade(self):
         time_lines = self.get_time_lines()
-        #Pdb().set_trace()
+        if self._check_time_NA(time_lines):
+            self.time_penalty = 0
+            return
         time_str = self.find_time_string(time_lines)
         time = self.parse_time_string(time_str)
         penalty = 0.0
