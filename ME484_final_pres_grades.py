@@ -5,14 +5,14 @@ import glob, copy, os
 import spreadsheet
 reload(spreadsheet)
 
-import spring_2011_484
+import spring_2012_484
 import txt_mixin
 
-group_names = spring_2011_484.all_groups
-group_list = spring_2011_484.group_list
-alts = spring_2011_484.group_list
+group_names = spring_2012_484.all_groups
+group_list = spring_2012_484.group_list
+alts = spring_2012_484.group_list
 
-csvpath = '/home/ryan/484_2011/'
+csvpath = '/home/ryan/484_2012/'
 
 from IPython.Debugger import Pdb
 
@@ -35,7 +35,7 @@ def blank_time_and_appearance_csv(overwrite=False):
 time_app_name = 'time_and_appearance.csv'
 time_app_path = os.path.join(csvpath, time_app_name)
 
-judges_folder = '/home/ryan/484_2011/final_presentation_score_sheets/judges_scores'
+judges_folder = '/home/ryan/484_2012/final_presentation_score_sheets/judges_scores'
 judges_filename = 'compiled_presentation_scores.csv'
 judges_path = os.path.join(judges_folder, judges_filename)
 
@@ -55,7 +55,7 @@ judges_path = os.path.join(judges_folder, judges_filename)
 ################################
 
 
-def get_timing_grade(time, max_t=12.0, min_t=10.0, grace=0.5):
+def get_timing_grade(time, max_t=17.0, min_t=15.0, grace=1.0):
     penalty = 0-.0
     if time > (max_t + grace):
         num_steps = int((time-max_t-grace)/0.5+0.95)

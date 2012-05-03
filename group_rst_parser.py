@@ -336,6 +336,15 @@ class intro_and_problem_statement(quick_read):
                            'Constraints': 1.0, \
                            }
 
+class intro_and_problem_statement_final_report(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.1
+        self.subweights = {'Problem Statement and Formulation': 1.0, \
+                           'Design Goals': 1.0, \
+                           'Constraints': 1.0, \
+                           }
+
 class lit_review_and_br(quick_read):
     def __init__(self, *args, **kwargs):
         section_level_1.__init__(self, *args, **kwargs)
@@ -378,6 +387,16 @@ class design(quick_read):
                            }
 
 
+class design_final_report(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.2
+        self.subweights = {'Design Methodology':1.0, \
+                           'Quality of the Design':1.0, \
+                           'Explanation':1.0, \
+                           'Strengths and Weaknesses':1.0, \
+                           }
+
 
 class analysis_design_review(quick_read):
     def __init__(self, *args, **kwargs):
@@ -388,6 +407,37 @@ class analysis_design_review(quick_read):
                            'Explanation':1.0, \
                            'Connection to Decisions':1.0, \
                            'Thoroughness and Approach':1.0, \
+                           }
+
+
+class analysis_final_report(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.25
+        self.subweights = {'Thoroughness and Approach':1.0, \
+                           'Explanation':1.0, \
+                           'Connection to Decisions':1.0, \
+                           }
+
+
+class prototype_construction(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.1
+        self.subweights = {'Discussion':1.0, \
+                           'Challenges':1.0, \
+                           'Modifications':1.0, \
+                           }
+
+
+
+class testing(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.1
+        self.subweights = {'Coverage and Appropriateness':1.0, \
+                           'Methodology':1.0, \
+                           'Presentation of Results':1.0, \
                            }
 
 
@@ -1014,6 +1064,76 @@ class design_report_grade_map_2011(proposal_grade_map_2011):
         self.append_required([title6], [list6])
 
 
+class final_report_grade_map_2012(design_report_grade_map_2011):
+    def __init__(self):
+        self.major_sections = []#you must do this before calling the _append* methods
+
+        self._append_quick_read()
+        self._append_introduction_and_prob_statement()
+        self._append_design()
+        self._append_analysis()
+        self._append_prototype_construction()
+        self._append_testing()
+        self._append_misc()
+        self._append_slow_read()
+
+
+    def _append_introduction_and_prob_statement(self):
+        title2 = 'Introduction and Problem Statement'
+        list2 = ['Problem Statement and Formulation', \
+                 'Design Goals', \
+                 'Constraints']
+
+        self.append_required([title2], [list2])
+
+
+    def _append_design(self):
+        title5 = 'Design'
+        list5 = ['Design Methodology', \
+                 'Quality of the Design', \
+                 'Explanation', \
+                 'Strengths and Weaknesses', \
+                 ]
+        #opt_list5 = []#'Design Strategy', 'Backup Plans']
+
+        #self.append_optional(title5, list5, opt_list5)
+        self.append_required([title5], [list5])
+
+
+    def _append_analysis(self):
+        title6 = 'Analysis'
+        list6 = ['Thoroughness and Approach', \
+                 'Explanation', \
+                 'Connection to Decisions', \
+                 ]
+        #opt_list6 = ['Preliminary Analysis', 'Connection to Decisions']
+
+        #self.append_optional(title6, list6, opt_list6)
+        self.append_required([title6], [list6])
+
+
+    def _append_prototype_construction(self):
+        title6 = 'Prototype Construction'
+        list6 = ['Discussion', \
+                 'Challenges', \
+                 'Modifications', \
+                 ]
+        self.append_required([title6], [list6])
+
+
+    def _append_testing(self):
+        title6 = 'Testing'
+        list6 = ['Coverage and Appropriateness', \
+                 'Methodology', \
+                 'Presentation of Results', \
+                 ]
+        #opt_list6 = ['Preliminary Analysis', 'Connection to Decisions']
+
+        #self.append_optional(title6, list6, opt_list6)
+        self.append_required([title6], [list6])
+        
+
+
 
 class group_with_rst(group, section):
     def __init__(self, pathin, group_list=None, email_list=None, \
@@ -1590,6 +1710,52 @@ class design_report(proposal):
                           ordered_keys=ordered_keys, \
                           **kwargs)
 
+#---------------------------------
+#
+# Final report 2012
+#
+#---------------------------------
+weight_dict_final_report_2012 = {'Writing: Quick Read':0.1, \
+                                 'Introduction and Problem Statement':0.1, \
+                                 'Design': 0.2, \
+                                 'Analysis': 0.2, \
+                                 'Prototype Construction': 0.1, \
+                                 'Testing': 0.1, \
+                                 'Miscellaneous': 0.05, \
+                                 'Writing: Slow Read':0.15, \
+                                  #'Extra Credit':group_rst_parser.extra_credit, \
+                                  #'Penalty':group_rst_parser.penalty, \
+                                 }
+
+final_report_ordered_keys = ['Writing: Quick Read', \
+                             'Introduction and Problem Statement', \
+                             'Design', \
+                             'Analysis', \
+                             'Prototype Construction', \
+                             'Testing', \
+                             'Miscellaneous', \
+                             'Writing: Slow Read', \
+                             ]
+
+
+
+class final_report(design_report):
+    def __init__(self, pathin, weight_dict=weight_dict_final_report_2012, \
+                 ordered_keys=final_report_ordered_keys, \
+                 **kwargs):
+        design_report.__init__(self, pathin, weight_dict=weight_dict, \
+                               ordered_keys=ordered_keys, \
+                               **kwargs)
+
+
+    def compose_and_send_team_gmail(self):#, subject):#, ga):
+        self.pdfpath_checker()
+        subject = "ME 484: Final Report Grade"
+        body = "The attached pdf contains your team proposal grade and my feedback."
+
+        gmail_smtp.sendMail(self.emails, subject, body, self.pdfpath)
+
+#---------------------------------
     
 
 pres_weight_w_apperance_2011 = {'Appearance':0.05,\
@@ -1597,8 +1763,6 @@ pres_weight_w_apperance_2011 = {'Appearance':0.05,\
                                 'Speaking and Delivery':0.3, \
                                 'Slides':0.1,\
                                 'Listening to and Answering Questions':0.1}
-
-
 
 
 

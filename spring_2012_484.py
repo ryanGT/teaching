@@ -29,8 +29,8 @@ alts = {'Grahek':'Nick', \
         'Parker':'Logan', \
         'Donlan':'Zach', \
         'Hake':'Cliff', \
-        'Clabby':'Nate', \
-        'Raube':'Zach', \
+        #'Clabby':'Nate', \
+        'Raube':'Zack', \
         }
 
 inverse_alts = {'Kim':'Kimberly', \
@@ -40,6 +40,7 @@ inverse_alts = {'Kim':'Kimberly', \
                 'Matt':'Matthew', \
                 'Logan':'Richard', \
                 'Zach':'Zachary', \
+                'Zack':'Zachary', \
                 'Cliff':'Clifton', \
                 'Nate':'Nathan', \
                 }

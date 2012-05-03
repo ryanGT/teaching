@@ -19,7 +19,7 @@ alts = {'Grahek':'Nick', \
         'Parker':'Logan', \
         'Donlan':'Zach', \
         'Hake':'Cliff', \
-        'Clabby':'Nate', \
+        #'Clabby':'Nate', \
         'Raube':'Zach', \
         }
 

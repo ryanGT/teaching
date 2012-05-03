@@ -5,15 +5,15 @@ import glob, copy, os
 import spreadsheet
 reload(spreadsheet)
 
-import spring_2011_484
+import spring_2012_484
 import txt_mixin
 
-group_names = spring_2011_484.all_groups
-group_list = spring_2011_484.group_list
-alts = spring_2011_484.group_list
+group_names = spring_2012_484.all_groups
+group_list = spring_2012_484.group_list
+alts = spring_2012_484.group_list
 
 #csvpath = '/home/ryan/484_2010/final_presentations/judges_ratings'
-csvpath = '/home/ryan/484_2011/final_presentation_score_sheets/judges_scores'
+csvpath = '/home/ryan/484_2012/final_presentation_score_sheets/judges_scores'
 
 from IPython.Debugger import Pdb
 
