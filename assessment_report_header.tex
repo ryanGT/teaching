@@ -1,0 +1,120 @@
+\documentclass[12pt]{article}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\M}[1]{\mathbf{#1}}
+\newcommand{\myvector}[3]{\left\{\begin{array}{c}#1\\#2\\#3\end{array}\right\}}
+\addtolength{\textwidth}{1.25in}
+\addtolength{\textheight}{1.0in}
+\addtolength{\evensidemargin}{-0.75in}
+\addtolength{\oddsidemargin}{-0.75in}
+\addtolength{\topmargin}{-0.75in}
+%\usepackage{easybmat}
+\usepackage{fancyhdr}
+\RequirePackage{ifpdf}
+%test if using pdflatex or regular latex
+%\newif\ifpdf\ifx\pdfoutput\undefined\pdffalse\else\pdfoutput=1\pdftrue\fi
+%set up package use based on whether or not we are using pdflatex
+\ifpdf
+	%use these options with pdflatex
+	\usepackage[pdftex]{graphicx}
+	\DeclareGraphicsExtensions{.pdf,.jpg}
+	\usepackage{times}
+	\pdfpagewidth=\paperwidth
+	\pdfpageheight=\paperheight
+	\usepackage[pdfstartview=FitH, bookmarks=true,pdfpagemode=None, breaklinks=true, urlbordercolor={0 0 1}]{hyperref}
+\else
+	%use these options with regular latex
+	\usepackage{graphicx}
+	\DeclareGraphicsExtensions{.eps}
+	\usepackage[dvips,pdfstartview=FitH, bookmarks=true,pdfpagemode=None, breaklinks=true, urlbordercolor={0 0 1}]{hyperref}
+\fi
+%--------------------------------------------------------
+%
+%    hyperref options:
+%
+%   (details can be found in the hyperref manual which may
+%    have been included in your Tex distribution, otherwise
+%    try typing ``hyperref manual'' into Google)
+%
+%the breaklinks options allows links in the table of contents to break accross multiple lines.  This is important if you have long figure titles.  The link that it makes doesn't appear to work super well, at least with dvi->ps->pdf (the link is a thin line in between the two lines and it is hard to click on the line exactly.  The alternative, however is to have a long figure title forced onto one line and possibly going off the page.
+
+%deleting the pdfpagemode option or setting to pdfpagemode=UseOutlines will cause the bookmarks to be displayed when the document is first opened in Acrobat.
+%pdfpagemode=None
+%pdfpagemode=UseOutlines
+
+%pdfstartviewoptions:
+%pdfstartview=FitV  fit vertical (whole page is visible)
+%pdfstartview=FitH	fit horizontal (fit width)
+%pdfstartview=FitB	? fit both, fit badly (fairly small on my computer)
+%--------------------------------------------------------
+
+%end packages that switch
+\ifpdf
+	%\newcommand{\picA}[1]{\includegraphics[angle=90,width=2.8in]{#1}}
+	\newcommand{\picR}[2]{\includegraphics[angle=90, width=#2in]{#1}}
+\else
+	\newcommand{\picR}[2]{\includegraphics[width=#2in]{#1}}
+\fi
+\newcommand{\picNR}[2]{\includegraphics[width=#2in]{#1}}
+\usepackage{color}
+\definecolor{orange}{cmyk}{0,0.4,0.8,0.2}
+\definecolor{darkgreen}{rgb}{0,0.4,0.1}
+\definecolor{mygray}{gray}{0.8}
+\usepackage{listings}
+\lstset{
+%%%%Fernando + Ryan
+  language=Python,
+  numbers=left,
+%%%%  basicstyle=\ttfamily,
+  basicstyle=\small\sffamily,
+%%%%  basicstyle=\rmfamily,
+%%%%  basicstyle=\small\ttfamily,
+%%$  commentstyle=\ttfamily\color{blue},
+  stringstyle=\ttfamily\color{orange},
+%stringstyle=\ttfamily\color{red},
+  showstringspaces=false,
+  breaklines=true,
+%%%%  postbreak = \space\dots
+  postbreak = {},%\space,
+%  %Prabhu
+  commentstyle=\itshape\color{darkgreen},
+%commentstyle=\color{green}\itshape,
+%%  commentstyle=\textbf,
+%%% stringstyle=\color{darkgreen},
+ showstringspaces=false,
+%%% keywordstyle=\color{blue}\bfseries,
+ keywordstyle=\bfseries\color{blue},
+ escapeinside={(*}{*)},
+%%% emph={unknownparams},
+ emphstyle=\bfseries\color{blue},
+ emph={figure, clf, plot},
+ backgroundcolor=\color{mygray}
+}
+\usepackage{amsmath}
+\usepackage{mathrsfs}
+\newcommand{\e}[1]{\bar{e}_{#1}}
+\renewcommand{\r}[1]{\bar{r}_{#1}}
+\renewcommand{\deg}{^\circ}
+\lstdefinestyle{numbers}
+    {numbers=left, stepnumber=1, numberstyle=\tiny, numbersep=10pt}
+\lstdefinestyle{nonumbers}
+    {numbers=none}
+
+\usepackage[all]{hypcap}
+\newcommand{\inlinegraphic}[2]{\begin{center}\includegraphics[width=#1]{#2}\end{center}}
+\renewcommand{\vector}[1]{\M{#1}}
+\renewcommand{\i}{\vector{i}}
+\renewcommand{\j}{\vector{j}}
+\renewcommand{\r}{\vector{r}}
+\renewcommand{\v}{\vector{v}}
+\renewcommand{\a}{\vector{a}}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{tabularx}
+\pagestyle{fancy}
+    \lhead{ME 482/484}
+    \chead{Fall 2010-Spring 2011}
+    \rhead{Assessment Report}
+    \lfoot{2010-2011 AY}
+    \cfoot{\thepage}
+    \rfoot{Ryan Krauss}

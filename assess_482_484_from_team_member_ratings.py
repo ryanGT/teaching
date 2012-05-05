@@ -8,18 +8,16 @@ import rwkos
 import group_rst_parser
 reload(group_rst_parser)
 
-#folder = rwkos.FindFullPath('siue/classes/484/2011/team_member_ratings/ind_csv')
-folder = rwkos.FindFullPath('siue/classes/482/2010/team_ratings/final_482_ratings')
 
 import copy
 
-import spring_2011_484
-course_module = spring_2011_484
-#reload(spring_2011_484)
+import spring_2012_484
+course_module = spring_2012_484
+#reload(spring_2012_484)
 
 #import fall_2009_482
 
-project_names = spring_2011_484.group_list.Project_Name
+project_names = spring_2012_484.group_list.Project_Name
 #project_names = fall_2009_482.group_list.Project_Name
 ## project_names = ['Motorized Hand Truck', \
 ##                  'Cougar Baja',
@@ -314,24 +312,28 @@ class group(group_rst_parser.group_with_team_ratings):
         
         
 if __name__ == '__main__':
-    case = 1#1 = 482, 2 = 484
+    case = 2#1 = 482, 2 = 484
     if case == 1:
         areas = ['Attendance', \
                  'Participation']
-        course_path = rwkos.FindFullPath('siue/classes/482/2010/')
+        course_path = rwkos.FindFullPath('siue/classes/482/2011/')
         bb_in_name = 'bb_my_factor_and_white_paper_EC.csv'
         outname = 'assessment_from_482_team_member_ratings.csv'
+
+        folder = rwkos.FindFullPath('siue/classes/482/2011/team_ratings/final_482_ratings/ind_csv')
 
     else:
         areas = ['Teamwork', \
                  'Technical Contribution', \
                  'Project Management', \
                  'Contribution of Ideas']
-        course_path = rwkos.FindFullPath('siue/classes/484/2011/')
+        course_path = rwkos.FindFullPath('siue/classes/484/2012/')
         bb_in_name = 'bb_download_my_factor.csv'
         outname = 'assessment_from_484_team_member_ratings.csv'
 
-    outfolder = rwkos.FindFullPath('siue/classes/484/2011/')
+        folder = rwkos.FindFullPath('siue/classes/484/2012/team_member_ratings/ind_csv')
+        
+    outfolder = rwkos.FindFullPath('siue/classes/484/2012/')
 
         ## 'Accuracy',
         ## 'Dependability',

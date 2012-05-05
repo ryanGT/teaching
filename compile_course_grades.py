@@ -94,3 +94,27 @@ class course_grade_compiler(CSVSpreadSheet):
     def __init__(self, pathin=None, name_label='Student Name', **kwargs):
         CSVSpreadSheet.__init__(self, pathin=pathin, **kwargs)
         self.name_label = name_label
+
+
+class course_grade_compiler_team(course_grade_compiler):
+    def retrieve_multiple_grades(self, csvpath, column_labels, \
+                                 name_label=None):
+        if name_label is None:
+            name_label = self.name_label
+        retrieved_sheet = GradeSpreadSheetMany(csvpath, \
+                                               namelabel=name_label,
+                                               valuelabels=column_labels, \
+                                               split_names=False)
+        retrieved_sheet.ReadNamesandValues()
+        return retrieved_sheet
+
+
+    def retrieve_one_grade(self, csvpath, column_label, \
+                           name_label=None):
+        if name_label is None:
+            name_label = self.name_label
+        return course_grade_compiler.retrieve_one_grade(self, \
+                                                        csvpath, \
+                                                        column_label, \
+                                                        name_label=name_label)
+    
