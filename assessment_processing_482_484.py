@@ -23,7 +23,7 @@ import rwkos
 
 from spreadsheet import GradeSpreadSheetMany
 
-from IPython.Debugger import Pdb
+from IPython.core.debugger import Pdb
 
 project_names = group_names
 
@@ -37,7 +37,7 @@ def clean_csv(pathin):
     i = 0
 
     pat = re.compile('.*[;"]$')
-    
+
     while i < (N-1):
         line = myfile.list[i]
         q = pat.match(line)
@@ -50,7 +50,7 @@ def clean_csv(pathin):
             N = len(myfile.list)
         else:
             i += 1
-        
+
 
 
     myfile.replaceallre('(;"")+$','')
@@ -115,7 +115,7 @@ def summary_row(ave, num_exceeds, num_meets, num_does_not):
                  '\\end{tabular}']
     return latex_out
 
-    
+
 class assessment_item(object):
     def __init__(self, item_number, header1, header2, source):
         self.item_number = item_number
@@ -159,7 +159,7 @@ class assessment_item(object):
         if hasattr(self, 'question'):
             out('\\subsection*{Question}')
             out(self.question)
-            
+
 
         out('\\subsection*{Assessment}')
         table_lines = self.build_table(**kwargs)
@@ -212,7 +212,7 @@ class individual_item(assessment_item):
     def build_table(self, blanknames=True, breakrow=17, **kwargs):
         if hasattr(self, 'breakrow'):
             breakrow = self.breakrow
-            
+
         start_row = '\\begin{tabular}{|l|l|c|}'
         label_row = 'Last Name & \\ First Name & Score \\\\'
         list_out = [start_row, \
@@ -255,7 +255,7 @@ class survey_item(individual_item):
         individual_item.__init__(self, item_number, header1, header2, source, \
                                  lastnames, firstnames, scores)
         self.question = question
-        
+
 ################################################################
 #
 # New, automated assessment stuff starting in May 2012
@@ -330,7 +330,7 @@ class team_item_2012(assessment_item_2012):
         self.exceeds_cutoff = exceeds_cutoff
         self.meets_cutoff = meets_cutoff
         self.calc_scores()
-                
+
 
     def build_table(self, **kwargs):
         list_out = ['\\begin{tabular}{|l|c|c|}', \
@@ -435,7 +435,7 @@ class item_parser(txt_mixin.txt_file_with_list):
         self.clean_path = clean_path
         self.item_number = item_number
         self.type = None
-        
+
 
     def delete_rows_with_empty_first_col(self):
         mypat = '^"";.*'
@@ -456,7 +456,7 @@ class item_parser(txt_mixin.txt_file_with_list):
                 item = func(item)
             mycol.append(item)
         return mycol
-            
+
 
     def parse_data(self):
         """Parse the csv data (semicolon delimited) contained in
@@ -478,7 +478,7 @@ class item_parser(txt_mixin.txt_file_with_list):
         5. Determine if this is an individual or team assessment.
 
         6. Read in the data."""
-        
+
         self.header1 = self.list.pop(0)
         self.header2 = self.list.pop(0)
         self.delete_rows_with_empty_first_col()
@@ -531,7 +531,7 @@ class item_parser(txt_mixin.txt_file_with_list):
                     firstnames = None
             score_col = self.labels.index('"Assessment"')
             scores = self.get_col(score_col, func=int)
-            
+
             if self.type == "survey":
                 #item_number, header1, header2, source, question, lastnames
                 myitem = survey_item(self.item_number, self.header1, self.header2, self.source, \
@@ -583,7 +583,7 @@ class BB_file_482_assessment(spreadsheet.BlackBoardGBFile_v_8_0):
         self.assign_col_to_attr('Team Factor', 'team_factor')
 
 
-    
+
 if __name__ == '__main__':
     latex_out = ['\\input{report_header}', \
                  '\\begin{document}', \
@@ -602,7 +602,7 @@ if __name__ == '__main__':
     meets_row = ['','','Meets']
     does_not_row = ['','','Does Not Meet']
     total_row = ['','','Total']
-    
+
     for i in items:
         clean_path = clean_by_number(i)
 
@@ -617,11 +617,11 @@ if __name__ == '__main__':
         parsed_item = cur_item.parse_data()
 
         col_label = 'Item %i' % i
-        
+
         if isinstance(parsed_item, team_item):
             for group_name, score in zip(parsed_item.team_names, parsed_item.scores):
                cur_group = group(group_name, group_list, \
-                                 item_number=i, score=score, alts=alts) 
+                                 item_number=i, score=score, alts=alts)
                cur_group.insert_grades_into_bb(bb)
 
         else:
@@ -630,7 +630,7 @@ if __name__ == '__main__':
                                     verbosity=2)
 
 
-        
+
         attr = 'item_%i' % i
         bb.assign_col_to_attr(col_label, attr)
         cur_data = getattr(bb, attr)
@@ -639,7 +639,7 @@ if __name__ == '__main__':
         num_meets = len(where(cur_data==3)[0])
         num_does_not = len(where(cur_data==1)[0])
         total = num_exceeds + num_meets + num_does_not
-        
+
         ave_row.append(ave)
         exceeds_row.append(num_exceeds)
         meets_row.append(num_meets)
@@ -648,7 +648,7 @@ if __name__ == '__main__':
 
         if i > 0:
             latex_out.append('\\pagebreak')
-            
+
         latex_out.extend(parsed_item.to_latex())
         latex_out.extend(summary_row(ave, num_exceeds, \
                                      num_meets, num_does_not))

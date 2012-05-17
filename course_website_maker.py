@@ -5,7 +5,7 @@ reload(thumbnail_maker)
 
 from rst_creator import rst2html_fullpath
 
-from IPython.Debugger import Pdb
+from IPython.core.debugger import Pdb
 
 class course_website(object):
     def __init__(self, pathin, title, lecture_folders=['lectures'], \
@@ -28,12 +28,12 @@ class course_website(object):
         #need thumbnails made.  They will only be searched
         #for the files in extlist.
         self.other_folders = other_folders
-        self.index_rst_only_folders = index_rst_only_folders        
+        self.index_rst_only_folders = index_rst_only_folders
         self.toplevel_files = toplevel_files
         self.extlist = extlist
         self.teaching_root = teaching_root
 
-        
+
 
     def make_lecture_pages(self):
         lecture_pages = None
@@ -70,7 +70,7 @@ class course_website(object):
                 else:
                     pages.append(page)
         return pages
-        
+
 
     def make_other_pages(self):
         other_pages = self._make_other_pages(self.other_folders, \
@@ -93,8 +93,8 @@ class course_website(object):
                 rst2html_fullpath(curpath, add_up_link=add_back_link, \
                                   uplink_path='index.html')
 
-        
-    
+
+
     def make_toplevel_page(self):
         pat = os.path.join(self.pathin, 'index_*.rst')
         myfiles = glob.glob(pat)
@@ -103,7 +103,7 @@ class course_website(object):
             dst = os.path.join(self.pathin, 'index.rst')
             shutil.copyfile(src, dst)
             rst2html_fullpath(dst)
-            
+
 
     def go(self):
         self.make_lecture_pages()
@@ -126,7 +126,7 @@ class research_website(course_website):
                                 toplevel_files=toplevel_files, \
                                 extlist=extlist, \
                                 teaching_root=teaching_root)
-        
+
     def go(self):
         #self.make_lecture_pages()
         self.make_other_pages()
@@ -134,7 +134,7 @@ class research_website(course_website):
         self.make_index_rst_only_pages()
         self.run_top_level_rst()
 
-    
+
 if __name__ == '__main__':
     mypath = '/home/ryan/siue/classes/450/2010/'
     my_course_page = course_website(mypath, \
@@ -153,4 +153,4 @@ if __name__ == '__main__':
 ##     path2 = '/home/ryan/siue/classes/484/2010'
 ##     course2 = course_website(path2, 'ME 484')
 ##     course2.go()
-    
+

@@ -24,7 +24,7 @@ project_names = spring_2012_484.group_list.Project_Name
 ##                  'Solar Powered Refrigeration', \
 ##                  ]
 
-from IPython.Debugger import Pdb
+from IPython.core.debugger import Pdb
 
 def string_to_float(item):
     try:
@@ -62,7 +62,7 @@ def col_ave(arrayin):
 def clean_attr(attr_in):
     attr_out = attr_in.replace(' ','_')
     return attr_out
-    
+
 class student(spreadsheet.CSVSpreadSheet):
     def separate_labels_from_scores(self):
         nested_list = None
@@ -83,7 +83,7 @@ class student(spreadsheet.CSVSpreadSheet):
                 ind = self.names.index(student.firstname)
             except ValueError:
                 ind = self.names.index(student.alt_first)
-        else:            
+        else:
             try:
                 ind = self.names.index(student)
             except ValueError:
@@ -99,7 +99,7 @@ class student(spreadsheet.CSVSpreadSheet):
 
     def calc_self_mean(self):
         self.mean_self = masked_mean(self.scores_of_self)
-        
+
     def find_self_rating(self):
         self.scores_of_self = self.find_col()
         self.calc_self_mean()
@@ -154,7 +154,7 @@ class student(spreadsheet.CSVSpreadSheet):
                 self.csvpath = os.path.join(folder, self.csvname)
 
         assert os.path.exists(self.csvpath), "Cannot find %s" % self.csvpath
-            
+
         spreadsheet.CSVSpreadSheet.__init__(self, self.csvpath, \
                                              skiprows=4)
         self.ReadData()
@@ -199,7 +199,7 @@ class group(group_rst_parser.group_with_team_ratings):
         myattr = clean_attr(area) + '_ave'
         setattr(self, myattr, area_mean)
         return area_mean
-        
+
 
     def assess_one_area(self, area):
         """Calculate a student assessment factor for one area.  The
@@ -254,8 +254,8 @@ class group(group_rst_parser.group_with_team_ratings):
 
     ##     for student, tf in zip(self.students, self.team_factors):
     ##         student.team_factor = tf
-            
-            
+
+
 
     ## def calc_overall_ave(self):
     ##     self.means = array([student.mean for student in self.students])
@@ -266,7 +266,7 @@ class group(group_rst_parser.group_with_team_ratings):
     ##     for student in self.students:
     ##         if student.firstname == name:
     ##             return student
-            
+
     ## def get_data_for_student(self, name):
     ##     student_scores = None
     ##     for student in self.students:
@@ -306,11 +306,11 @@ class group(group_rst_parser.group_with_team_ratings):
     ##     if self.team_factors.min() < 0.8:
     ##         print('min team factor problem: ' + \
     ##               str(self.team_factors))
-        
+
     ## def get_self_ratings(self):
     ##     self.self_factors = [student.self_factor for student in self.students]
-        
-        
+
+
 if __name__ == '__main__':
     case = 2#1 = 482, 2 = 484
     if case == 1:
@@ -332,7 +332,7 @@ if __name__ == '__main__':
         outname = 'assessment_from_484_team_member_ratings.csv'
 
         folder = rwkos.FindFullPath('siue/classes/484/2012/team_member_ratings/ind_csv')
-        
+
     outfolder = rwkos.FindFullPath('siue/classes/484/2012/')
 
         ## 'Accuracy',
@@ -343,8 +343,8 @@ if __name__ == '__main__':
         ## 'Quantity of Work',
         ## 'Quality of Work',
         ## 'Overall Value to the Team']
-    
-    
+
+
     bb_in_path = os.path.join(course_path, bb_in_name)
     assessment_path = os.path.join(outfolder, 'assessment')
     outpath = os.path.join(assessment_path, outname)
@@ -378,7 +378,7 @@ if __name__ == '__main__':
                                      verbosity=1)
         ## InsertColFromList_v2(self.lastnames, self.firstnames, \
         ##                             key, val_list, \
-        ##                             verbosity=2)            
+        ##                             verbosity=2)
         bb.InsertColFromList_v2(cur_group.lastnames, cur_group.firstnames, \
                                 'Team Factor', \
                                 cur_group.team_factors, verbosity=1)

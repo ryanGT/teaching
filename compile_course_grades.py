@@ -7,7 +7,7 @@ from spreadsheet import CSVSpreadSheet, GradeSpreadSheetMany, \
 import txt_mixin
 import copy
 
-from IPython.Debugger import Pdb
+from IPython.core.debugger import Pdb
 
 class course_grade_compiler(CSVSpreadSheet):
     def retrieve_multiple_grades(self, csvpath, column_labels, \
@@ -30,7 +30,7 @@ class course_grade_compiler(CSVSpreadSheet):
             column_labels = column_label
         return self.retrieve_multiple_grades(csvpath, column_labels, \
                                              name_label=name_label)
-        
+
 
     def retrieve_quiz_grades(self, csvpath, N_quiz, \
                              label_pat='Quiz %d', **kwargs):
@@ -40,7 +40,7 @@ class course_grade_compiler(CSVSpreadSheet):
                                                         column_labels=quiz_labels, \
                                                         **kwargs)
         return self.quiz_sheet
-            
+
     def drop_lowest_quiz_grade_and_average(self):
         if not hasattr(self, 'quiz_sheet'):
             print('You must call retrieve_quiz_grades before calling\n'+\
@@ -57,7 +57,7 @@ class course_grade_compiler(CSVSpreadSheet):
             top_quizzes = numpy.delete(all_quizzes, imin)
             q_ave = top_quizzes.mean()
             qs.values[n, -1] = q_ave
-            
+
     def get_values_from_sheet(self, grade_sheet, valuelabel):
         """Retrieve one column from grade_sheet which is assumed to be
         a GradeSpreadSheetMany instance.  Use valuelabel to select the
@@ -84,12 +84,12 @@ class course_grade_compiler(CSVSpreadSheet):
             values[ind] = value
         setattr(self, attr, values)
         return values
-        
+
     def append_scores_to_BB_file(self, bb, destlabel, values, \
                                  splitnames=True):
         bb.AppendColFromList(self.lastnames, destlabel, values, \
                              splitnames=splitnames)
-                                 
+
 
     def __init__(self, pathin=None, name_label='Student Name', **kwargs):
         CSVSpreadSheet.__init__(self, pathin=pathin, **kwargs)
@@ -117,4 +117,4 @@ class course_grade_compiler_team(course_grade_compiler):
                                                         csvpath, \
                                                         column_label, \
                                                         name_label=name_label)
-    
+

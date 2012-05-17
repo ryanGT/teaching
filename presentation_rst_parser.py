@@ -5,7 +5,7 @@ reload(gmail_smtp)
 
 from scipy import mean
 
-from IPython.Debugger import Pdb
+from IPython.core.debugger import Pdb
 
 grade_pat = re.compile(':grade:`(.*)`')
 
@@ -64,7 +64,7 @@ class section(txt_mixin.txt_list):
                 self.grade = None
             else:
                 self.grade = mean(filt_grades)
-        
+
     def __repr__(self):
         outstr = self.title+'\n' + \
                  self.dec_line +'\n'+ \
@@ -81,8 +81,8 @@ class member(object):
         self.lastname = lastname
         self.firstname = firstname
         self.email = email
-        
-    
+
+
 class speaker(object):
     def __init__(self, linesin, parent):
         self.parent = parent
@@ -108,7 +108,7 @@ class speaker(object):
         poutpath = self.parent.outpath
         pne, ext = os.path.splitext(poutpath)
         self.outpath = pne + '_' + self.name + ext
-        
+
     def build_rst(self):
         self.rst = copy.copy(self.parent.header)
         self.rst.append('')
@@ -133,7 +133,7 @@ class speaker(object):
         self.build_rst()
         self.save_rst()
         self.run_rst()
-        
+
     def send_email(self, subject):
         email = self.email
         #addresses = ['ryanwkrauss@gmail.com', 'ryanlists@gmail.com', 'ryanwkrauss@att.net']
@@ -146,7 +146,7 @@ class speaker(object):
                'The most likely problem is that you have not run latex.'
         gmail_smtp.sendMail(email, subject, body, self.pdfpath)
 
-        
+
 class pres_rst_parser(txt_mixin.txt_file_with_list):
     def __init__(self, filepath, group_list=None, alts=None):
         txt_mixin.txt_file_with_list.__init__(self, filepath)
@@ -164,9 +164,9 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
         self.get_timing_grade()
         self.find_members()
         self.pop_notes()
-        self.get_section_labels()        
-        
-        
+        self.get_section_labels()
+
+
     def get_group_name_from_path(self):
         folder, filename = os.path.split(self.pathin)
         fno, ext = os.path.splitext(filename)
@@ -178,7 +178,7 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
             self.header.append('')
             self.header.append('.. role:: grade')
             self.header.append('')
-            
+
 
     def break_into_sections(self, pat='^-+$'):
         inds = self.findallre(pat)
@@ -222,7 +222,7 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
                                      #be in the first column
                 return section.content
 
-        
+
     def get_speaking_lines(self):
         for n, section in enumerate(self.sec_list):
             if section.title == 'Speaking and Delivery':
@@ -237,7 +237,7 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
             if q1:
                 self.notes = self.sec_list.pop(n)
                 break
-                
+
 
     def build_speaking_rst(self, runlatex=1):
         self.speaking_lines = txt_mixin.txt_list(self.get_speaking_lines())
@@ -261,8 +261,8 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
                 speaker_list.append(curspeaker)
             prev_ind = ind
         self.speaker_list = speaker_list
-        
-    
+
+
 
     def find_time_string(self, linesin):
         pat = re.compile('(\\d+:\\d+)')
@@ -290,7 +290,7 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
             else:
                 penalty = 0.0
             self.time_penalty = penalty
-    
+
 
     def get_section_labels(self):
         labels = ['Group Name']
@@ -365,7 +365,7 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
     def set_pdfpath(self):
         pne, ext = os.path.splitext(self.outpath)
         self.pdfpath = pne+'.pdf'
-        
+
     def rst_team(self):
         cmd = 'rst2latex_rwk.py -c 2 ' + self.outpath
         os.system(cmd)
@@ -389,7 +389,7 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
         self.members = members
         self.emails = email_list.get_emails(lastnames)
         return self.emails
-        
+
 
     def compose_and_send_team_gmail(self, subject):#, ga):
         """ga is a gmail account instance from libgmail that has
@@ -408,7 +408,7 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
 ##             print('pdf does not exist: '+self.pdfpath)
 ##             print('You need to run latex.')
 ##             return
-        
+
         #emails = self.get_emails()
         emails = self.emails
         #print('emails=' + str(emails))
@@ -418,7 +418,7 @@ class pres_rst_parser(txt_mixin.txt_file_with_list):
         body = "The attached pdf contains your team grade and my feedback."
 
         gmail_smtp.sendMail(emails, subject, body, self.pdfpath)
-        
+
 ##         msg = libgmail.GmailComposedMessage(addresses, subject, body, \
 ##                                             filenames=[self.pdfpath])
 
@@ -439,16 +439,16 @@ class update_pres_parser(pres_rst_parser):
             else:
                 penalty = 0.0
             self.time_penalty = penalty
-        
-    
+
+
 def myfilt(pathin):
     folder, filename = os.path.split(pathin)
     if filename.lower() == 'order.rst':
         return 0
     else:
         return 1
-    
-        
+
+
 if __name__ == '__main__':
     from optparse import OptionParser
 
@@ -483,14 +483,14 @@ if __name__ == '__main__':
     full_subject = "ME 482 Grade: " + subject
     individual_subject = "ME 482 Individual Speaking Grade: " + subject
 
-    
+
     import glob
 
     pat = os.path.join(folder, '*.rst')
     paths = glob.glob(pat)
 
     paths = filter(myfilt, paths)
-    
+
     sendmail = options.send
 
 ##     if sendmail:
@@ -506,7 +506,7 @@ if __name__ == '__main__':
     csv_name = csv_name.replace('__','_')
     csv_name += '.csv'
     csv_outpath = os.path.join(folder,csv_name)#'presentation_grades.csv')
-    
+
     rst_out_dir = 'team_rst_output'
     out_dir = os.path.join(folder, rst_out_dir)
     if not os.path.exists(out_dir):
@@ -548,5 +548,5 @@ if __name__ == '__main__':
             curfile.compose_and_send_team_gmail(full_subject)
             for curspeaker in curfile.speaker_list:
                 curspeaker.send_email(individual_subject)
-        
+
     spreadsheet.WriteMatrixtoCSV(nested_list, csv_outpath, labels=first_row)

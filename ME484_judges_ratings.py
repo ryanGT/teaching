@@ -15,7 +15,7 @@ alts = spring_2012_484.group_list
 #csvpath = '/home/ryan/484_2010/final_presentations/judges_ratings'
 csvpath = '/home/ryan/484_2012/final_presentation_score_sheets/judges_scores'
 
-from IPython.Debugger import Pdb
+from IPython.core.debugger import Pdb
 
 def gen_judges_csv(overwrite=False):
     if not os.path.exists(csvpath):
@@ -27,7 +27,7 @@ def gen_judges_csv(overwrite=False):
                   'Conclusions', \
                   'Slide Quality', \
                   'Prototype Quality']
-    
+
     for team_name in group_names:
         listout = [team_name]
         judges_list = ['""'] + ['"Judge %i"' % (item + 1) \
@@ -58,7 +58,7 @@ class judges_ratings_sheet(spreadsheet.CSVSpreadSheet):
             cur_col = self.get_col(i)
             col_data = cur_col[self.start_row:]
             self.collist.append(col_data)
-            
+
 
     def get_judge_aves(self):
         self.ave_list = []
@@ -70,7 +70,7 @@ class judges_ratings_sheet(spreadsheet.CSVSpreadSheet):
         self.overall_ave = average(self.ave_list[1:])#ignore me for now
         self.krauss_ave = self.ave_list[0]
         self.combined_ave = 0.75*self.overall_ave + 0.25*self.krauss_ave
-        
+
 
     def append_judge_aves(self):
         ave_row = ['Judges Averages'] + [str(item) for item \
@@ -95,7 +95,7 @@ class judges_ratings_sheet(spreadsheet.CSVSpreadSheet):
         except ValueError:
             ind = -1
         return ind
-    
+
 
     def row_ave(self, label):
         ind = self.find_row(label)
@@ -111,8 +111,8 @@ class judges_ratings_sheet(spreadsheet.CSVSpreadSheet):
         self.delivery = self.row_ave('Presentation: Speaking/Delivery')
         self.speaking_ave = 0.5*self.clarity_and_eff + \
                             0.5*self.delivery
-        
-        
+
+
     def __init__(self, team_name):
         filename = team_name.replace(' ','_') + '.csv'
         csv_in_path = os.path.join(csvpath, filename)
@@ -157,20 +157,20 @@ class big_spreadsheet(spreadsheet.CSVSpreadSheet):
             mylist.append(curval)
         setattr(self, propname, mylist)
         return mylist
-    
+
 
     def append_props(self, proplist):
         for propname in proplist:
             curlist = self.get_prop(propname)
             self.AppendCol(propname, curlist)
-            
+
 
     def process_sheets(self):
         self.sheets = []
         for team_name in self.team_names:
             cur_sheet = judges_ratings_sheet(team_name)
             self.sheets.append(cur_sheet)
-            
+
 
     def save(self, pathout=None):
         if pathout is None:
@@ -202,7 +202,7 @@ if __name__ == '__main__':
     ##                     'Cougar Baja', \
     ##                     'Green Pedaling', \
     ##                    ]
-    
+
 ##     group_names = ['Autonomous Vehicle', \
 ##                    'Hydraulic Bicycle Transmission', \
 ##                   ]

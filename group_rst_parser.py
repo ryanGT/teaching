@@ -11,7 +11,7 @@ from numpy import array, where
 
 from scipy import mean
 
-from IPython.Debugger import Pdb
+from IPython.core.debugger import Pdb
 
 grade_pat = re.compile(':grade:`(.*)`')
 timing_pat = re.compile('^Tim(ing|e)[: ]*$')
@@ -80,13 +80,13 @@ class section(txt_mixin.txt_list):
         q = grade_pat.search(line)
         cur_grade = float(q.group(1))
         return cur_grade
-        
+
 
     def get_grade_from_ind(self, ind):
         grade_line = self.content[ind]
         return self.get_grade_from_line(grade_line)
-    
-        
+
+
     def break_into_sections(self):
         inds = self.content.findallre(self.subre)
         if len(inds) == 0:
@@ -149,8 +149,8 @@ class section(txt_mixin.txt_list):
                 new_grade = self.max_grade
             new_grade_line = grade_fmt % new_grade
             self.content[ind] = new_grade_line
-            
-        
+
+
     def __repr__(self):
         outstr = ""
         if self.title is not None:
@@ -196,14 +196,14 @@ class section_level_1(section):
                 self.labels.append(curtitle)
         self.labels.append(self.title)
         return self.labels
-    
+
     def create_rst(self):
         rst_out = [self.title]
         rst_out.append(self.dec_line)
         rst_out.extend(self.content)
         self.rst = rst_out
         return self.rst
-        
+
 
 class lit_review(section_level_1):
     def __init__(self, *args, **kwargs):
@@ -246,7 +246,7 @@ class extra_credit(lit_review):
 class penalty(extra_credit):
     def __init__(self, *args, **kwargs):
         section_level_1.__init__(self, *args, **kwargs)
-        self.weight = 0.1    
+        self.weight = 0.1
 
     def create_rst(self):
         rst_out = [self.title]
@@ -259,7 +259,7 @@ class penalty(extra_credit):
         return self.rst
 
 
-    
+
 class quick_read(section_level_1):
     ## def __init__(self, *args, **kwargs):
     ##     section_level_1.__init__(self, *args, **kwargs)
@@ -276,7 +276,7 @@ class quick_read(section_level_1):
                            'Introduction':1.0, \
                            'Conclusion':1.0, \
                            }
-        
+
 
     def create_rst(self):
         section_level_1.create_rst(self)
@@ -286,7 +286,7 @@ class quick_read(section_level_1):
         self.rst.append(':grade:`%0.3g`' % self.grade)
         return self.rst
 
-        
+
 class slow_read(quick_read):
     ## def __init__(self, *args, **kwargs):
     ##     section_level_1.__init__(self, *args, **kwargs)
@@ -451,15 +451,15 @@ class miscellaneous(quick_read):
                            'Budget': 1.0, \
                            'Computers and Software': 1.0, \
                            }
-    
+
 
 class member(object):
     def __init__(self, lastname, firstname, email):
         self.lastname = lastname
         self.firstname = firstname
         self.email = email
-        
-    
+
+
 class speaker(object):
     """Class for getting feedback to an individual speaker in a group
     presentation."""
@@ -489,7 +489,7 @@ class speaker(object):
         clean_name = self.name.replace(' ','_')
         clean_name = clean_name.replace('.','')
         self.outpath = pne + '_' + clean_name + ext
-        
+
     def build_rst(self):
         self.rst = copy.copy(self.parent.header)
         self.rst.append('')
@@ -514,14 +514,14 @@ class speaker(object):
         self.build_rst()
         self.save_rst()
         self.run_rst()
-        
+
     def send_email(self, subject, debug=0):
         if debug:
             email = 'ryanlists@gmail.com'
         else:
             email = self.email
         #addresses = ['ryanwkrauss@gmail.com', 'ryanlists@gmail.com', 'ryanwkrauss@att.net']
-        body = self.name + ', \n\n' 
+        body = self.name + ', \n\n'
         body += "The attached pdf contains feedback on your individual speaking and delivery grade."
         body += mysig
         gmail_smtp.sendMail(email, subject, body, self.pdfpath)
@@ -555,8 +555,8 @@ class group(object):
         for n, lastname in enumerate(self.lastnames):
             if self.alts.has_key(lastname):
                 self.alt_firstnames[n] = self.alts[lastname]
-        
-        
+
+
     def build_names_tuples(self):
         if not hasattr(self, 'lastnames'):
             self.get_first_and_last_names()
@@ -565,8 +565,8 @@ class group(object):
             curtup = (first, last)
             names.append(curtup)
         self.names = names
-            
-    
+
+
     def find_members(self):
         self.get_first_and_last_names()
         self.find_alt_firstnames()
@@ -736,7 +736,7 @@ class group_with_team_ratings(group):
     def check_team_factors_ave(self):
         if not hasattr(self, 'team_factors'):
             self.calc_team_factor_average()
-            
+
         self.team_factor_ave = self.team_factors.mean()
         if abs(1.0 - self.team_factor_ave) > 1e-7:
             print('possible problem with self.team_factor_ave: ' + \
@@ -837,7 +837,7 @@ class grade_subsection(object):
     def __init__(self, title, optional):
         self.title = title
         self.optional = optional
-        
+
 
 class grade_major_section(object):
     """A major section that has optional subsections, subsection_dict
@@ -894,7 +894,7 @@ class proposal_grade_map_2011(object):
     def append_no_sub(self, title):
         cursub = grade_major_section_no_subs(title)
         self.major_sections.append(cursub)
-        
+
 
     def append_optional(self, title, sublist, optlist):
         cursec = grade_major_section(title,sublist, optlist)
@@ -926,7 +926,7 @@ class proposal_grade_map_2011(object):
         list3 = ['Literature Review','Background Research']
 
         self.append_required([title3], [list3])
-        
+
 
 
     def _append_analysis(self):
@@ -954,7 +954,7 @@ class proposal_grade_map_2011(object):
                  'Grammar and Spelling']
 
         self.append_required([title8], [list8])
-        
+
 
     def _append_design_strategy(self):
         title5 = 'Design Strategy'
@@ -965,8 +965,8 @@ class proposal_grade_map_2011(object):
 
         self.append_optional(title5, list5, opt_list5)
 
-        
-        
+
+
     def __init__(self):
 
         self.major_sections = []#you must do this before calling the _append* methods
@@ -974,7 +974,7 @@ class proposal_grade_map_2011(object):
         self._append_quick_read()
         self._append_introduction_and_prob_statement()
         self._append_lit_review_and_back_res()
-        
+
         title4 = 'Contemporary Issues'
         self.append_no_sub(title4)
 
@@ -983,8 +983,8 @@ class proposal_grade_map_2011(object):
         self._append_misc()
         self._append_slow_read()
 
-        
-        
+
+
     def build_row(self, group_with_rst, missing_val=''):
         """Intelligently pull grades out of a group_with_rst instance,
         allowing some to be missing."""
@@ -1029,7 +1029,7 @@ class design_report_grade_map_2011(proposal_grade_map_2011):
         self._append_quick_read()
         self._append_introduction_and_prob_statement()
         #self._append_lit_review_and_back_res()
-        
+
         self._append_design()
         self._append_analysis()
         self._append_misc()
@@ -1131,13 +1131,13 @@ class final_report_grade_map_2012(design_report_grade_map_2011):
 
         #self.append_optional(title6, list6, opt_list6)
         self.append_required([title6], [list6])
-        
+
 
 
 
 class group_with_rst(group, section):
     def __init__(self, pathin, group_list=None, email_list=None, \
-                 class_dict=None, subre='^-+$', alts={}, 
+                 class_dict=None, subre='^-+$', alts={},
                  subclass=section_level_1):
         self.pathin = pathin
         self.group_list = group_list
@@ -1160,13 +1160,13 @@ class group_with_rst(group, section):
             grade_dict[key] = cursec.grade
         self.grades = grade_dict
 
-        
+
     def get_group_name_from_path(self):
         folder, filename = os.path.split(self.pathin)
         fno, ext = os.path.splitext(filename)
         self.group_name = fno.replace('_',' ')
         return self.group_name
-    
+
 
     def break_into_sections(self, verbosity=1):
         ## if self.class_dict is None:
@@ -1236,7 +1236,7 @@ class group_with_rst(group, section):
                 self.time_ind = n + 1#plus one because group name will
                 #be in the first column
                 return section.content
-            
+
     ## def get_time_lines(self):
     ##     for n, section in enumerate(self.sec_list):
     ##         if section.title == 'Timing':
@@ -1244,7 +1244,7 @@ class group_with_rst(group, section):
     ##                                  #be in the first column
     ##             return section.content
 
-        
+
     def get_speaking_lines(self):
         for n, section in enumerate(self.sec_list):
             if section.title == 'Speaking and Delivery':
@@ -1273,8 +1273,8 @@ class group_with_rst(group, section):
                 speaker_list.append(curspeaker)
             prev_ind = ind
         self.speaker_list = speaker_list
-        
-    
+
+
 
     def find_time_string(self, linesin):
         pat = re.compile('(\\d+:\\d+)')
@@ -1299,7 +1299,7 @@ class group_with_rst(group, section):
         else:
             penalty = 0.0
         self.time_penalty = penalty
-    
+
 
     def get_section_labels(self):
         labels = ['Group Name']
@@ -1379,7 +1379,7 @@ class group_with_rst(group, section):
     def set_pdfpath(self):
         pne, ext = os.path.splitext(self.outpath)
         self.pdfpath = pne+'.pdf'
-        
+
     def rst_team(self, clean=False):
         if clean:
             cmd = 'rst2latex_rwk.py -c 2 ' + self.outpath
@@ -1396,7 +1396,7 @@ class group_with_rst(group, section):
         if not os.path.exists(self.pdfpath):
             print('pdf does not exist: '+self.pdfpath)
             return
-        
+
 
     def compose_and_send_team_gmail(self, subject, debug=0):#, ga):
         """ga is a gmail account instance from libgmail that has
@@ -1407,7 +1407,7 @@ class group_with_rst(group, section):
         if not os.path.exists(self.pdfpath):
             print('pdf does not exist: '+self.pdfpath)
             return
-        
+
         #emails = self.get_emails()
         if debug:
             emails = ['ryanlists@gmail.com']
@@ -1422,7 +1422,7 @@ class group_with_rst(group, section):
         body += mysig
 
         gmail_smtp.sendMail(emails, subject, body, self.pdfpath)
-        
+
 ##         msg = libgmail.GmailComposedMessage(addresses, subject, body, \
 ##                                             filenames=[self.pdfpath])
 
@@ -1454,7 +1454,7 @@ class group_rst_needing_grade_correction(group_with_rst):
                 os.mkdir(outfolder)
         self.outfolder = outfolder
         self.outpath = os.path.join(self.outfolder, name)
-        
+
 
     def save_rst(self):
         #self.get_rst_name()
@@ -1468,7 +1468,7 @@ class group_rst_needing_grade_correction(group_with_rst):
             corrected_grade = raw_grade*value
             self.corrected_grades[key] = corrected_grade
 
-                 
+
     def build_corrected_rst_output(self):
         if not hasattr(self, 'corrected_grades'):
             self.calc_correct_grades()
@@ -1492,7 +1492,7 @@ class group_rst_needing_grade_correction(group_with_rst):
         ## overall_title = mysecdec('Overall Grade')
         ## self.corrected_rst.extend(overall_title)
         ## self.corrected_rst.append(':grade:`%0.3g`' % self.overall_grade)
-    
+
 weight_dict_proposal_2011 = {'Writing: Quick Read':0.10, \
                              'Introduction and Problem Statement':0.2, \
                              'Literature Review and Background Research':0.05, \
@@ -1541,7 +1541,7 @@ class proposal(group_with_rst):
             print('before penalty, overall_grade='+str(self.overall_grade))
             self.overall_grade *= multiplier
             print('after penalty, overall_grade='+str(self.overall_grade))
-            
+
         return self.overall_grade
 
 
@@ -1581,7 +1581,7 @@ class proposal(group_with_rst):
             else:
                 myline = line_fmt % (weight, title)
             eq_out(myline)
-            
+
         eq_out('\\newcommand{\\myrule}{\\rule{0pt}{1EM}}')
         eq_out(r'\begin{equation*}\begin{split}')
         ## eq_out(r'\textrm{grade} = & 10 \left( \myrule 0.05(\textrm{Contemporary Issues}) \right. \\')
@@ -1654,7 +1654,7 @@ class proposal(group_with_rst):
         if self.penalty is not None:
             eq_out(r'\times (1 + \textrm{Penalty}/100)')
         eq_out(r'\end{split}\end{equation*}')
-        
+
 
     def build_team_rst_output(self):
         """Note that all grades must be calculated before calling this
@@ -1756,7 +1756,7 @@ class final_report(design_report):
         gmail_smtp.sendMail(self.emails, subject, body, self.pdfpath)
 
 #---------------------------------
-    
+
 
 pres_weight_w_apperance_2011 = {'Appearance':0.05,\
                                 'Content and Organization':0.45, \
@@ -1772,7 +1772,7 @@ class presentation_with_appearance(group_with_rst):
 #    Speaking and Delivery
 #    Slides
 #    Listening to and Answering Questions
- 
+
     def __init__(self, pathin, max_time=10.0, \
                  min_time=8.0, grace=0.25, \
                  **kwargs):
@@ -1780,7 +1780,7 @@ class presentation_with_appearance(group_with_rst):
         self.max_time = max_time
         self.min_time = min_time
         self.grace = grace
-        
+
         if kwargs.has_key('weight_dict'):
             weight_dict = kwargs['weight_dict']
         else:
@@ -1789,7 +1789,7 @@ class presentation_with_appearance(group_with_rst):
         self.get_timing_grade()
 
 
-    
+
     def calc_overall_score(self):
         self.overall_grade = 0.0
         for key, weight in self.weight_dict.iteritems():
@@ -1855,7 +1855,7 @@ class presentation_needing_grade_correction(group_rst_needing_grade_correction):
         #group_with_rst.__init__(self, *args, **kwargs)
         group_rst_needing_grade_correction.__init__(self, *args, **kwargs)
         self.weight_dict = pres_weight_w_apperance_2011
-    
+
 
 class update_presentation(presentation_with_appearance):
 #    Appearance
@@ -1891,7 +1891,7 @@ class update_presentation(presentation_with_appearance):
                 return True
         return False
 
-        
+
     def get_timing_grade(self):
         time_lines = self.get_time_lines()
         if self._check_time_NA(time_lines):
@@ -1935,7 +1935,7 @@ class update_presentation_no_timing_penalty(update_presentation):
         ##     num_steps = int((5.0-time)/0.5)
         ##     penalty = -0.15*num_steps
         self.time_penalty = penalty
-    
+
 
 
 class proposal_presentation_no_appearance(update_presentation):
@@ -1953,4 +1953,4 @@ class proposal_presentation_no_appearance(update_presentation):
             penalty = -0.075*num_steps
         self.time_penalty = penalty
 
-    
+

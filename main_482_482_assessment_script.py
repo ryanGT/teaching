@@ -2,7 +2,7 @@ import numpy
 
 from numpy import where
 
-from IPython.Debugger import Pdb
+from IPython.core.debugger import Pdb
 
 import assessment_processing_482_484 as AP
 reload(AP)
@@ -271,14 +271,14 @@ column_label_dict = {1:'Design Strategy', \
                      21:'Is prepared to engage in LLL (assessment)', \
                      22:'Computers and Software', \
                      }
-                   
-    
+
+
 items = range(1,23)
 
 team_item = info_sheet.team_item.astype(float)
 survey_item = info_sheet.survey_item.astype(float)
 individual_item = info_sheet.individual_item.astype(float)
-                                                    
+
 for item in items:
     i = item-1
     cur_csv_path = csv_path_dict[item]
@@ -325,9 +325,9 @@ for item in items:
                                         firstnames=bb.firstnames, \
                                         **kwargs)
 
-    
+
     big_item_list.append(item1)
-    
+
 
 def _csv_quote_string(str_in):
     str_out = copy.copy(str_in)
@@ -338,11 +338,11 @@ def _csv_quote_string(str_in):
     if str_out[-1] in quote_list:
         str_out = str_out[0:-1]
     return '"' + str_out + '"'
-        
+
 
 def build_summary_row(i, cur_item, ave, \
                       num_exceeds, num_meets, num_does_not_meet):
-    prev_ave = last_years_ave[i-1]    
+    prev_ave = last_years_ave[i-1]
     big_row = ['%i' % i, \
                _csv_quote_string(cur_item.subtitle), \
                _csv_quote_string(cur_item.exceeds_criteria), \
@@ -379,20 +379,20 @@ def dumpcsv(nested_list, pathout):
 if __name__ == '__main__':
     scr_dir = '/home/ryan/git/teaching/'
     header_name = 'assessment_report_header.tex'
-    
+
     dst_path = os.path.join(assessment_folder, header_name)
     if not os.path.exists(dst_path):
         src_path = os.path.join(scr_dir, header_name)
         import shutil
         shutil.copyfile(src_path, dst_path)
-    
+
     latex_out = ['\\input{assessment_report_header}', \
                  '\\begin{document}', \
                  '\\flushleft']
 
     big_spreadsheet_list = []
     big_spreadsheet_list.append(big_csv_labels)
-    
+
     csvoutname = 'assessment_482_484_%s_%s_ind_mapped.csv' % (prev_year_str, year_str)
     csvoutpath = os.path.join(assessment_folder, csvoutname)
     #items = range(1,23)
@@ -418,7 +418,7 @@ if __name__ == '__main__':
         if isinstance(cur_item, AP.team_item_2012):
             for group_name, score in zip(cur_item.team_names, cur_item.scores):
                 cur_group = AP.group(group_name, group_list, \
-                                     item_number=i, score=score, alts=alts) 
+                                     item_number=i, score=score, alts=alts)
                 cur_group.insert_grades_into_bb(bb)
 
         else:
@@ -446,9 +446,9 @@ if __name__ == '__main__':
         big_row = build_summary_row(i, cur_item, ave, \
                                     num_exceeds, num_meets, \
                                     num_does_not)
-        
+
         big_spreadsheet_list.append(big_row)
-        
+
         if i > 0:
             latex_out.append('\\pagebreak')
 
@@ -478,4 +478,4 @@ if __name__ == '__main__':
     big_summary_out_name = 'assessment_summary_482_484_%s_%s.csv' % (prev_year_str, year_str)
     big_summary_path = os.path.join(assessment_folder, big_summary_out_name)
     dumpcsv(big_spreadsheet_list, big_summary_path)
-    
+

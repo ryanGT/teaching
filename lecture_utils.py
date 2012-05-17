@@ -11,7 +11,7 @@ firstday = datetime.date(2012, 1, 9)
 import pdb
 import txt_mixin
 
-from IPython.Debugger import Pdb
+from IPython.core.debugger import Pdb
 
 from pygimp_lecture_utils import lecturerc_path
 
@@ -53,7 +53,7 @@ def get_valid_date(date=None, force_next=False):
             today += datetime.timedelta(days=1)
         return today
 
-    
+
 class course(object):
     def __init__(self, path):
         self.path = rwkos.FindFullPath(path)
@@ -72,7 +72,7 @@ class course(object):
     def next_lecture_date(self, date=None, force_next=False):
         raise NotImplementedError
 
-    
+
     def previous_lecture_date(self, date=None, force_next=False):
         raise NotImplementedError
 
@@ -130,8 +130,8 @@ class course(object):
                 mylist.extend(mydec(section))
                 mylist.append('')
                 txt_mixin.dump(rstpath, mylist)
-        
-        
+
+
     def create_rsts(self):
         title_list = ['Outline','Announcements','Reminders']
         for title in title_list:
@@ -187,7 +187,7 @@ class course(object):
         if prev_ann_list is not None:
             cur_rst.replace_section('Reminders', prev_ann_list)
         txt_mixin.dump(cur_outline_path, cur_rst.list)
-        
+
 
     def copy_prev_outline(self):
         prev_exclude_path = os.path.join(self.prev_lecture_path, 'exclude')
@@ -198,7 +198,7 @@ class course(object):
         else:
             print('did not find previous outline: '+prev_outline_path)
 
-        
+
     def run(self, date=None, build_previous=True, force_next=False):
         self.next_lecture_date(date=date, force_next=force_next)
         self.build_lecture_path_string()
@@ -215,9 +215,9 @@ class course(object):
             #self.copy_announcements_forward()
             self.copy_announcements_rst2gimp()
         #self.create_rsts()
-        
-        
-        
+
+
+
 class course_458(course):
     def __init__(self, path=None, forward=False):
         if path is None:
@@ -262,7 +262,7 @@ class course_458(course):
         date_pat = self.next_lecture.strftime('%m_%d_%y')
         self.pat = 'ME458_' + date_pat + '_%0.4i.xcf'
         self.search_pat = 'ME458_' + date_pat
-        
+
 
 class tuesday_thursday_course(course):
     def next_lecture_date(self, date=None, force_next=False):
@@ -294,7 +294,7 @@ class tuesday_thursday_course(course):
         self.prev_lecture = today + datetime.timedelta(days=delta)
         return self.prev_lecture
 
-    
+
 class course_482(tuesday_thursday_course):
     def run(self, date=None, build_previous=False):
         course.run(self, date=date, build_previous=build_previous)

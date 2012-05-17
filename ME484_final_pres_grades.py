@@ -14,7 +14,7 @@ alts = spring_2012_484.group_list
 
 csvpath = '/home/ryan/484_2012/'
 
-from IPython.Debugger import Pdb
+from IPython.core.debugger import Pdb
 
 def blank_time_and_appearance_csv(overwrite=False):
     if not os.path.exists(csvpath):
@@ -90,7 +90,7 @@ class big_sheet(spreadsheet.TrueCSVSpreadSheet):
         self.judges_sheet = judges_sheet
         self.team_name = judges_sheet.team_name
         self.judges_score = judges_sheet.judges_score.astype(float)
-        
+
         map2 = {'Team Name':'team_name', \
                 'Appearance':'appearance', \
                 'Time':'time'}
@@ -108,7 +108,7 @@ class big_sheet(spreadsheet.TrueCSVSpreadSheet):
         times = ['']*N
         time_penalty = zeros(N)
         other_team_list = txt_mixin.txt_list(self.time_app_sheet.team_name)
-        
+
         for i, name in enumerate(self.team_name):
             ind = other_team_list.find(name)
             times[i] = self.time_app_sheet.time[ind]
@@ -123,7 +123,7 @@ class big_sheet(spreadsheet.TrueCSVSpreadSheet):
     def calc_pres_grades(self):
         self.pres_grades = 0.05*self.appearance + \
                            0.95*(self.judges_score + self.time_penalties)*10.0
-        
+
 
     def save(self):
         outname = 'presentation_grades.csv'

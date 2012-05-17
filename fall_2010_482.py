@@ -5,7 +5,7 @@ import txt_mixin
 import group_rst_parser
 reload(group_rst_parser)
 
-from IPython.Debugger import Pdb
+from IPython.core.debugger import Pdb
 
 class_folder = rwkos.FindFullPath('siue/classes/482/2010/')
 group_path = os.path.join(class_folder, 'group_list.csv')
@@ -37,7 +37,7 @@ inverse_alts = {'Joe':'Joseph', \
 email_path = rwkos.FindFullPath('siue/classes/482/2010/email_list_editted.csv')
 email_list = spreadsheet.email_list(email_path)
 
-from IPython.Debugger import Pdb
+from IPython.core.debugger import Pdb
 
 
 def file_name_from_group_name(group_name, ext='.rst'):
@@ -172,13 +172,13 @@ design_paper_dict = {'Problem Statement':problem_statement, \
                      'Budget':budget, \
                      'Writing: Quick Read':quick_read, \
                      'Writing: Slow Read':slow_read}
-        
+
 
 class design_paper_rst(group_with_rst):
     def __init__(self, *args, **kwargs):
         kwargs['class_dict'] = design_paper_dict
         group_with_rst.__init__(self, *args, **kwargs)
-        
+
 
     def calc_overall_score(self, debug=0):
         grades = None

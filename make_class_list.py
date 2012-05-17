@@ -1,7 +1,7 @@
 import os
 import txt_mixin, spreadsheet
 
-from IPython.Debugger import Pdb
+from IPython.core.debugger import Pdb
 
 class class_list_maker(txt_mixin.txt_file_with_list):
     def replace_tabs(self):
@@ -14,18 +14,18 @@ class class_list_maker(txt_mixin.txt_file_with_list):
 
     def clean_number_from_front(self):
         self.list.replaceallre('^[0-9]+,','')
-        
+
 
     def clean_spaces(self):
         self.list.replaceallre(' *, *',',')
 
-        
+
     def pop_blanks(self):
         last = ''
         while not last:
             last = self.list.pop()
         self.list.append(last)
-        
+
 
     def insert_labels(self):
         self.list.insert(0,'Lastname,Firstname,student ID')
@@ -33,7 +33,7 @@ class class_list_maker(txt_mixin.txt_file_with_list):
 
     def drop_confidentials(self):
         self.list.replaceall(' Confidential','')
-        
+
 
     def run(self, pathout=None):
         self.replace_tabs()
@@ -45,7 +45,7 @@ class class_list_maker(txt_mixin.txt_file_with_list):
         self.clean_spaces()
         if pathout is not None:
             self.save(pathout)
-        
+
 
 
 class class_list_for_emails(spreadsheet.CSVSpreadSheet):
@@ -92,14 +92,14 @@ class class_list_for_emails(spreadsheet.CSVSpreadSheet):
                 if verbosity > 1:
                     print('found: ' + str(curemail))
                 return curemail
-            
+
         if verbosity > 0:
             # we would only get this far if we did not find the email at all
             print('did not find email for: ' + first + ' ' + last)
 
 
     def find_all_emails(self):
-        emails_out = []    
+        emails_out = []
         for last, first in zip(self.lastname, self.firstname):
             first = first.strip()
             last = last.strip()
@@ -109,7 +109,7 @@ class class_list_for_emails(spreadsheet.CSVSpreadSheet):
             else:
                 emails_out.append('')
         self.emails_out = emails_out
-        self.AppendCol('Emails',self.emails_out)        
+        self.AppendCol('Emails',self.emails_out)
         return emails_out
 
 
@@ -133,7 +133,7 @@ def load_email_list(pathin):
     out_list = txt_mixin.txt_list(clean_list)
     return out_list
 
-        
+
 if __name__ == '__main__':
     case = 2
     if case == 1:
@@ -156,4 +156,4 @@ if __name__ == '__main__':
     class_list.add_note(note)
     final_path = os.path.join(root, 'class_list_with_mapped_emails.csv')
     class_list.save(final_path)
-    
+

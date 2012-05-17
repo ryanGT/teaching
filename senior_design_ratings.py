@@ -14,7 +14,7 @@ import txt_mixin
 
 import glob, copy, os
 
-from IPython.Debugger import Pdb
+from IPython.core.debugger import Pdb
 
 alternates1 = {'Matt':'Matthew', 'Brent':'Brenton', \
               'Zach':'Zachary', 'Pat':'Patrick', \
@@ -100,7 +100,7 @@ class one_rating(object):
             col = extract_col(self.rows, n+1)
             mycol = student_col(col, self.categories)
             self.ratings[name] = mycol
-        
+
 class ratings_sheet(spreadsheet.CSVSpreadSheet):
     def __init__(self, path):
         spreadsheet.CSVSpreadSheet.__init__(self, path)
@@ -157,7 +157,7 @@ class ratings_sheet(spreadsheet.CSVSpreadSheet):
                             cur_match += 1
                             cur_first_names.remove(cur_alt)
         return cur_match
-        
+
     def get_last_names(self, teams, alts=alternates1):
         """Find the lastnames of the team members by matching a team
         that has the right first names."""
@@ -185,7 +185,7 @@ class ratings_sheet(spreadsheet.CSVSpreadSheet):
                 last_dict = {first:cur_last}
         self.last_names = last_names
         self.last_dict = last_dict
-        
+
     def average_ratings(self):
         """This method will average the ratings for each student in
         each category as rated by each member of their team."""
@@ -210,7 +210,7 @@ class team(object):
             self.last_names = [item.capitalize() for item in temp2]
         else:
             self.last_names = last_names
-        
+
     def get_first_names(self, bbsheet):
         self.first_names = [bbsheet.Firstname_from_Last(item) for item in self.last_names]
 
@@ -232,7 +232,7 @@ class team(object):
                             if cur_alt in cur_first_names:
                                 cur_match += 1
                                 cur_first_names.remove(cur_alt)
-                                
+
             matches.append(cur_match)
             left_overs.append(cur_first_names)
         inds = range(len(ratings_sheets))
@@ -264,12 +264,12 @@ class team(object):
             return True
         else:
             return False
-        
+
 
 class ME482_team_grade_sheet(spreadsheet.CSVSpreadSheet):
     def __init__(self, path):
         spreadsheet.CSVSpreadSheet.__init__(self, path)
-        self.labelrow = 0 
+        self.labelrow = 0
         self.ReadData()
         team_nums_str = [item for item in self.get_col(0) if item]
         self.team_nums = [int(item) for item in team_nums_str]
@@ -336,7 +336,7 @@ def build_teams(team_path, bbfile=None):
         for cur_team in teams:
             cur_team.get_first_names(bbfile)
     return teams
-    
+
 def load_all(glob_pat):
     csv_list = glob.glob(glob_pat)
     csv_list = [item for item in csv_list if item.find('template')==-1]
@@ -410,7 +410,7 @@ def summarize(assessment, label):
 def save_assessment(outpath, names, values, assessment, labels):
     data = column_stack([names, values, assessment])
     spreadsheet.WriteMatrixtoCSV(data, outpath, labels)
-    
+
 def assess_one_area(ratings_path, value_label, exceeds_value, \
                     meets_value, outpath, name_label='Names'):
     grade_sheet = spreadsheet.GradeSpreadSheet(ratings_path, \
@@ -425,7 +425,7 @@ def assess_one_area(ratings_path, value_label, exceeds_value, \
     labels = [name_label, value_label, ass_label]
     save_assessment(outpath, names, values, assessment, labels)
     return assessment
-    
+
 if __name__ == '__main__':
     #compile 482 ratings info
     path482 = '/home/ryan/siue/classes/482'
