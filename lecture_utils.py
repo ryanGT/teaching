@@ -6,7 +6,8 @@ reload(rst_utils)
 #firstday = datetime.date(2010, 8, 23)
 #firstday = datetime.date(2011, 1, 10)
 #firstday = datetime.date(2011, 5, 23)
-firstday = datetime.date(2012, 1, 9)
+#firstday = datetime.date(2012, 1, 9)
+firstday = datetime.date(2012, 5, 22)
 
 import pdb
 import txt_mixin
@@ -474,3 +475,20 @@ class course_452(tuesday_thursday_course):
         date_pat = self.next_lecture.strftime('%m_%d_%y')
         self.pat = 'ME452_' + date_pat + '_%0.4i.xcf'
         self.search_pat = 'ME452_' + date_pat
+
+
+class course_454(tuesday_thursday_course):
+    def __init__(self, path=None, forward=True):
+        if path is None:
+            today = datetime.date.today()
+            path = '~/siue/classes/454/' + today.strftime('%Y')#4 digit year
+            path += '/lectures/'
+        self.path = rwkos.FindFullPath(path)
+        self.course_num = '454'
+        self.forward = forward
+
+
+    def build_pat(self):
+        date_pat = self.next_lecture.strftime('%m_%d_%y')
+        self.pat = 'ME454_' + date_pat + '_%0.4i.xcf'
+        self.search_pat = 'ME454_' + date_pat

@@ -13,7 +13,8 @@ class course_website(object):
                  index_rst_only_folders=['projects'], \
                  toplevel_files=['syllabus.pdf'], \
                  extlist=['html','pdf','py','m','txt'], \
-                 teaching_root = '../../index.html'):
+                 teaching_root = '../../index.html', \
+                 skiplist=[]):
         #teaching_root assumes that the courses will be in folders by
         #course number and year, i.e. 482/2009 so that the root to all
         #classes is two levels up in ~/siue/classes
@@ -32,11 +33,12 @@ class course_website(object):
         self.toplevel_files = toplevel_files
         self.extlist = extlist
         self.teaching_root = teaching_root
-
+        self.skiplist = skiplist
 
 
     def make_lecture_pages(self):
         lecture_pages = None
+
         for folder in self.lecture_folders:
             print('folder='+folder)
             folder_path = os.path.join(self.pathin, folder)
@@ -44,7 +46,8 @@ class course_website(object):
             lecture_page = thumbnail_maker.MainPageMaker2(folder_path, \
                                                           title=title, \
                                                           DirectoryPageclass=thumbnail_maker.DirectoryPage, \
-                                                          extlist=self.extlist)
+                                                          extlist=self.extlist, \
+                                                          skiplist=self.skiplist)
                                                           #DirectoryPageclass=thumbnail_maker.DirectoryPage_courses)
             lecture_page.Go(top_level_link='../index.html')
             if lecture_pages is None:
