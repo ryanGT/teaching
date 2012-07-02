@@ -33,3 +33,11 @@ def HTz(theta, Px=0.0, Py=0.0, Pz=0.0):
     R = Rz(theta)
     T = HT(R, Px, Py, Pz)
     return T
+
+
+def DH(alpha, a, theta, d):
+    T = Matrix([[cos(theta),-sin(theta), 0, a], \
+                [sin(theta)*cos(alpha), cos(theta)*cos(alpha),-sin(alpha),-sin(alpha)*d], \
+                [sin(theta)*sin(alpha), cos(theta)*sin(alpha), cos(alpha), cos(alpha)*d],\
+                [0,0,0,1]])
+    return T
