@@ -5,7 +5,7 @@ reload(thumbnail_maker)
 
 from rst_creator import rst2html_fullpath
 
-from IPython.core.debugger import Pdb
+#from IPython.core.debugger import Pdb
 
 class course_website(object):
     def __init__(self, pathin, title, lecture_folders=['lectures'], \

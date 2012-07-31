@@ -12,7 +12,7 @@ firstday = datetime.date(2012, 5, 22)
 import pdb
 import txt_mixin
 
-from IPython.core.debugger import Pdb
+#from IPython.core.debugger import Pdb
 
 from pygimp_lecture_utils import lecturerc_path
 

@@ -7,7 +7,7 @@ from spreadsheet import CSVSpreadSheet, GradeSpreadSheetMany, \
 import txt_mixin
 import copy
 
-from IPython.core.debugger import Pdb
+#from IPython.core.debugger import Pdb
 
 class course_grade_compiler(CSVSpreadSheet):
     def retrieve_multiple_grades(self, csvpath, column_labels, \
