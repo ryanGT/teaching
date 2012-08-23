@@ -1,5 +1,5 @@
 import datetime, os, rwkos, sys, copy, rwkmisc, time, rst_creator, \
-       rst_utils, shutil
+       rst_utils, shutil, pdb
 
 reload(rst_utils)
 
@@ -7,7 +7,7 @@ reload(rst_utils)
 #firstday = datetime.date(2011, 1, 10)
 #firstday = datetime.date(2011, 5, 23)
 #firstday = datetime.date(2012, 1, 9)
-firstday = datetime.date(2012, 5, 22)
+firstday = datetime.date(2012, 8, 20)
 
 import pdb
 import txt_mixin
@@ -57,7 +57,10 @@ def get_valid_date(date=None, force_next=False):
 
 class course(object):
     def __init__(self, path):
+        rwkos.make_dirs_recrusive(path)
         self.path = rwkos.FindFullPath(path)
+        assert self.path, "Problem with finding/creating path: %s" % path
+        rwkos.make_dir(self.path)
 
 
     def format_date(self, date=None, attr='date_str'):
@@ -186,7 +189,10 @@ class course(object):
         cur_rst = rst_utils.rst_file(cur_outline_path)
         prev_ann_list = prev_filein.get_section_contents('Announcements')
         if prev_ann_list is not None:
-            cur_rst.replace_section('Reminders', prev_ann_list)
+            list2 = [item.strip() for item in prev_ann_list]
+            filt_list = filter(None, list2)
+            if filt_list:
+                cur_rst.replace_section('Reminders', prev_ann_list)
         txt_mixin.dump(cur_outline_path, cur_rst.list)
 
 
@@ -223,9 +229,11 @@ class course_458(course):
     def __init__(self, path=None, forward=False):
         if path is None:
             today = datetime.date.today()
-            path = '~/siue/classes/mechatronics/' + today.strftime('%Y')#4 digit year
+            path = '~/siue/classes/458/' + today.strftime('%Y')#4 digit year
             path += '/lectures/'
-        self.path = rwkos.FindFullPath(path)
+        course.__init__(self, path)
+        ## self.path = rwkos.FindFullPath(path)
+        ## rwkos.make_dir(self.path)
         self.course_num = '458'
         self.forward = forward
 
@@ -297,15 +305,16 @@ class tuesday_thursday_course(course):
 
 
 class course_482(tuesday_thursday_course):
-    def run(self, date=None, build_previous=False):
-        course.run(self, date=date, build_previous=build_previous)
+    ## def run(self, date=None, build_previous=False):
+    ##     course.run(self, date=date, build_previous=build_previous)
 
-    def __init__(self, path=None, forward=False):
+    def __init__(self, path=None, forward=True):
         if path is None:
             today = datetime.date.today()
             path = '~/siue/classes/482/' + today.strftime('%Y')#4 digit year
             path += '/lectures/'
-        self.path = rwkos.FindFullPath(path)
+        #self.path = rwkos.FindFullPath(path)
+        tuesday_thursday_course.__init__(self, path)
         self.forward = forward
         self.course_num = '482'
 
@@ -346,6 +355,27 @@ class course_482(tuesday_thursday_course):
         self.search_pat = 'ME482_' + date_pat
 
 
+class course_IME_106(tuesday_thursday_course):
+    ## def run(self, date=None, build_previous=False):
+    ##     course.run(self, date=date, build_previous=build_previous)
+
+    def __init__(self, path=None, forward=False):
+        if path is None:
+            today = datetime.date.today()
+            path = '~/siue/classes/IME_106/' + today.strftime('%Y')#4 digit year
+            path += '/lectures/'
+        #self.path = rwkos.FindFullPath(path)
+        tuesday_thursday_course.__init__(self, path)
+        self.forward = forward
+        self.course_num = '106'
+
+
+    def build_pat(self):
+        date_pat = self.next_lecture.strftime('%m_%d_%y')
+        self.pat = 'IME106_' + date_pat + '_%0.4i.xcf'
+        self.search_pat = 'IME106_' + date_pat
+    
+
 class course_492(course_458):#tuesday_thursday_course):
     def __init__(self, path=None, forward=False):
         if path is None:
@@ -353,7 +383,8 @@ class course_492(course_458):#tuesday_thursday_course):
             path = '~/siue/classes/mobile_robotics/' + \
                    today.strftime('%Y')#4 digit year
             path += '/lectures/'
-        self.path = rwkos.FindFullPath(path)
+        #self.path = rwkos.FindFullPath(path)
+        tuesday_thursday_course.__init__(self, path)
         self.course_num = '492'
         self.forward = forward
 
@@ -387,7 +418,8 @@ class nonlinear_controls(tuesday_thursday_course):
             today = datetime.date.today()
             path = '~/siue/classes/nonlinear_controls/' + today.strftime('%Y')#4 digit year
             path += '/lectures/'
-        self.path = rwkos.FindFullPath(path)
+        #self.path = rwkos.FindFullPath(path)
+        tuesday_thursday_course.__init__(self, path)
         self.course_num = '592'
         self.forward = forward
 
@@ -405,7 +437,8 @@ class course_484(course_458):#<-- I am using 458 as a base class for MW classes
             today = get_valid_date()
             path = '~/siue/classes/484/' + today.strftime('%Y')#4 digit year
             path += '/lectures/'
-        self.path = rwkos.FindFullPath(path)
+        #self.path = rwkos.FindFullPath(path)
+        course_458.__init__(self, path)
         self.course_num = '484'
         self.forward = forward
 
@@ -418,7 +451,8 @@ class course_450(course_458):
             today = get_valid_date()
             path = '~/siue/classes/450/' + today.strftime('%Y')#4 digit year
             path += '/lectures/'
-        self.path = rwkos.FindFullPath(path)
+        #self.path = rwkos.FindFullPath(path)
+        course_458.__init__(self, path)
         self.course_num = '450'
         self.forward = forward
 
@@ -466,7 +500,8 @@ class course_452(tuesday_thursday_course):
             today = datetime.date.today()
             path = '~/siue/classes/452/' + today.strftime('%Y')#4 digit year
             path += '/lectures/'
-        self.path = rwkos.FindFullPath(path)
+        #self.path = rwkos.FindFullPath(path)
+        tuesday_thursday_course.__init__(self, path)
         self.course_num = '452'
         self.forward = forward
 
@@ -483,7 +518,8 @@ class course_454(tuesday_thursday_course):
             today = datetime.date.today()
             path = '~/siue/classes/454/' + today.strftime('%Y')#4 digit year
             path += '/lectures/'
-        self.path = rwkos.FindFullPath(path)
+        #self.path = rwkos.FindFullPath(path)
+        tuesday_thursday_course.__init__(self, path)
         self.course_num = '454'
         self.forward = forward
 

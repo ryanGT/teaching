@@ -10,9 +10,14 @@ def get_names_from_Banner_txt(filename):
 
 def combined_names_from_all_sections(fnlist):
     all_names = []
-
+    poplist = ['Student Name']
+    
     for fn in fnlist:
         names = get_names_from_Banner_txt(fn)
+ 
+        if names[0] in poplist:
+            names.pop(0)
+ 
         all_names.extend(names)
 
     all_names.sort()
@@ -23,7 +28,7 @@ def combined_names_from_all_sections(fnlist):
 def split_names(name_list, drop_middle=True):
     first_names = []
     last_names = []
-
+        
     for name in name_list:
         last, first = name.split(',', 1)
         last = last.strip()
@@ -56,7 +61,8 @@ def _get_names(csvlist):
 def make_class_list(csvlist, extra_col_labels=None, \
                     fmt_str=None, vrule='\\rule{0pt}{14pt}', \
                     hrule=None, headerpath=None, outpath=None, \
-                    course='', semester='', students_per_page=20):
+                    course='', semester='', section='', \
+                    students_per_page=20):
 
     last_names, first_names = _get_names(csvlist)
     
@@ -84,7 +90,7 @@ def make_class_list(csvlist, extra_col_labels=None, \
     ws = ' '*4
     out(ws + '\\lhead{%s}' % course)
     out(ws + '\\rhead{%s}' % semester)
-    out(ws + '\\chead{}')
+    out(ws + '\\chead{%s}' % section)
     out(ws + '\\rfoot{\\thepage}')
     out(ws + '\\lfoot{Ryan Krauss}')
     out(ws + '\\cfoot{}')

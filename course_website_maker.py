@@ -49,6 +49,7 @@ class course_website(object):
                                                           extlist=self.extlist, \
                                                           skiplist=self.skiplist)
                                                           #DirectoryPageclass=thumbnail_maker.DirectoryPage_courses)
+            #pdb.set_trace()
             lecture_page.Go(top_level_link='../index.html')
             if lecture_pages is None:
                 lecture_pages = [lecture_page]
