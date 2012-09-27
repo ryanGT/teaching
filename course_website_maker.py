@@ -14,7 +14,8 @@ class course_website(object):
                  toplevel_files=['syllabus.pdf'], \
                  extlist=['html','pdf','py','m','txt'], \
                  teaching_root = '../../index.html', \
-                 skiplist=[]):
+                 skiplist=[], \
+                 lecture_pat="ME*_%0.4i"):
         #teaching_root assumes that the courses will be in folders by
         #course number and year, i.e. 482/2009 so that the root to all
         #classes is two levels up in ~/siue/classes
@@ -34,6 +35,7 @@ class course_website(object):
         self.extlist = extlist
         self.teaching_root = teaching_root
         self.skiplist = skiplist
+        self.lecture_pat = lecture_pat
 
 
     def make_lecture_pages(self):
@@ -47,9 +49,9 @@ class course_website(object):
                                                           title=title, \
                                                           DirectoryPageclass=thumbnail_maker.DirectoryPage, \
                                                           extlist=self.extlist, \
-                                                          skiplist=self.skiplist)
+                                                          skiplist=self.skiplist, \
+                                                          lecture_pat=self.lecture_pat)
                                                           #DirectoryPageclass=thumbnail_maker.DirectoryPage_courses)
-            #pdb.set_trace()
             lecture_page.Go(top_level_link='../index.html')
             if lecture_pages is None:
                 lecture_pages = [lecture_page]
@@ -151,7 +153,6 @@ if __name__ == '__main__':
                                                    ]\
                                     )
     #my_course_page.go()
-    #Pdb().set_trace()
     my_course_page.make_other_pages()
 
 ##     path2 = '/home/ryan/siue/classes/484/2010'

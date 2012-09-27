@@ -302,7 +302,7 @@ class slow_read(quick_read):
     def __init__(self, *args, **kwargs):
         section_level_1.__init__(self, *args, **kwargs)
         self.weight = 0.15
-        self.subweights = {'Organization and Flow': 0.5, \
+        self.subweights = {'Organization and Flow': 1.0, \
                            'Clarity and Tone': 1.0, \
                            'Format/Style': 1.0, \
                            'Technical Language': 1.0, \
@@ -344,6 +344,68 @@ class intro_and_problem_statement_final_report(quick_read):
                            'Design Goals': 1.0, \
                            'Constraints': 1.0, \
                            }
+
+class intro_and_bg_reading_mini_project(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.1
+        self.subweights = {'Background Reading': 1.0, \
+                           'Definition of Engineering Design': 1.0, \
+                           'Convergent and Divergent Thinking': 1.0, \
+                           'The Role of Analysis': 1.0, \
+                           'What Did You Learn?': 1.0, \
+                           }
+
+class design_methodology_mini_project(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.15
+        self.subweights = {'Discussion': 1.0, \
+                           'Validity of the Approach': 1.0, \
+                           }
+
+
+class analysis_mini_project(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.2
+        self.subweights = {'Thoroughness and Approach': 1.0, \
+                           'Explanation': 1.0, \
+                           'Connection to Decisions': 1.0, \
+                           }
+
+
+class final_design_mini_project(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.1
+        self.subweights = {'Explanation': 1.0, \
+                           }
+
+
+class budget_mini_project(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.1
+        self.subweights = {'Explanation': 1.0, \
+                           }
+
+class performance_mini_project(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.05
+        self.subweights = {'Explanation': 1.0, \
+                           'Expectations': 0.5, \
+                           }
+
+class conclussions_mini_project(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.05
+        self.subweights = {'Effectiveness': 1.0, \
+                           }
+
+
 
 class lit_review_and_br(quick_read):
     def __init__(self, *args, **kwargs):
@@ -1134,6 +1196,80 @@ class final_report_grade_map_2012(design_report_grade_map_2011):
 
 
 
+class mini_project_report_map(proposal_grade_map_2011):
+    def __init__(self):
+        self.major_sections = []#you must do this before calling the _append* methods
+
+        self._append_quick_read()
+        self._append_introduction_and_bg_reading()
+        self._append_design_methodology()
+        self._append_analysis()
+        self._append_final_design()
+        self._append_budget()
+        self._append_performance()
+        self._append_conclussions()
+        self._append_slow_read()
+
+
+    def _append_introduction_and_bg_reading(self):
+        mytitle = 'Introduction and Background Reading'
+        mylist = ['Background Reading', \
+                  'Definition of Engineering Design', \
+                  'Convergent and Divergent Thinking', \
+                  'The Role of Analysis', \
+                  'What Did You Learn?', \
+                 ]
+        self.append_required([mytitle], [mylist])
+
+
+    def _append_design_methodology(self):
+        mytitle = 'Design Methodology'
+        mylist = ['Discussion', \
+                  'Validity of the Approach', \
+                 ]
+        self.append_required([mytitle], [mylist])
+
+
+    def _append_analysis(self):
+        mytitle = 'Analysis'
+        mylist = ['Thoroughness and Approach', \
+                  'Explanation', \
+                  'Connection to Decisions', \
+                 ]
+        self.append_required([mytitle], [mylist])
+
+
+    def _append_final_design(self):
+        mytitle = 'Final Design'
+        mylist = ['Explanation', \
+                 ]
+        self.append_required([mytitle], [mylist])
+
+
+    def _append_budget(self):
+        mytitle = 'Budget'
+        mylist = ['Explanation', \
+                 ]
+        self.append_required([mytitle], [mylist])
+
+
+    def _append_performance(self):
+        mytitle = 'Performance'
+        mylist = ['Explanation', \
+                  'Expectations', \
+                 ]
+        self.append_required([mytitle], [mylist])
+
+
+    def _append_conclussions(self):
+        mytitle = 'Conclusions'
+        mylist = ['Effectiveness', \
+                 ]
+        self.append_required([mytitle], [mylist])
+
+
+
+
 
 class group_with_rst(group, section):
     def __init__(self, pathin, group_list=None, email_list=None, \
@@ -1755,6 +1891,42 @@ class final_report(design_report):
 
         gmail_smtp.sendMail(self.emails, subject, body, self.pdfpath)
 
+
+weight_dict_mini_project = {'Writing: Quick Read':0.1, \
+                            'Introduction and Background Reading':0.1, \
+                            'Design Methodology':0.15, \
+                            'Analysis':0.2, \
+                            'Final Design':0.1, \
+                            'Budget':0.1, \
+                            'Performance':0.05, \
+                            'Conclusions':0.05, \
+                            'Writing: Slow Read':0.15, \
+                            }
+
+mini_project_ordered_keys = ['Writing: Quick Read', \
+                             'Introduction and Background Reading', \
+                             'Design Methodology', \
+                             'Analysis', \
+                             'Final Design', \
+                             'Budget', \
+                             'Performance', \
+                             'Conclusions', \
+                             'Writing: Slow Read', \
+                             ]
+
+
+class mini_project_report(design_report):
+    def __init__(self, pathin, weight_dict=weight_dict_mini_project, \
+                 ordered_keys=mini_project_ordered_keys, \
+                 **kwargs):
+        design_report.__init__(self, pathin, weight_dict=weight_dict, \
+                               ordered_keys=ordered_keys, \
+                               **kwargs)
+
+
+    def compose_and_send_team_gmail(self):#, subject):#, ga):
+        raise NotImplementedError
+    
 #---------------------------------
 
 

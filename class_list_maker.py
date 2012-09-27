@@ -8,6 +8,15 @@ def get_names_from_Banner_txt(filename):
     return names
 
 
+def get_banner_ids(filename):
+    mysheet = spreadsheet.TabDelimSpreadSheet(filename)
+    mysheet.ReadData()
+    ids = mysheet.get_col(2)
+    if ids[0].lower() == 'id':
+        ids.pop(0)
+    return ids
+    
+
 def combined_names_from_all_sections(fnlist):
     all_names = []
     poplist = ['Student Name']
