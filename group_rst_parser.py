@@ -24,7 +24,7 @@ mysig = """
 
 --
 Ryan Krauss, Ph.D.
-Assistant Professor
+Associate Professor
 Mechanical Engineering
 Southern Illinois University Edwardsville"""
 
@@ -1534,33 +1534,36 @@ class group_with_rst(group, section):
             return
 
 
-    def compose_and_send_team_gmail(self, subject, debug=0):#, ga):
-        """ga is a gmail account instance from libgmail that has
-        already been logged into."""
+    def _compose_and_send_team_gmail(self, subject, body, debug=0, \
+                                     attach_sig=True):
         if not hasattr(self,'pdfpath'):
             print('you must call pres_rst_parser.rst_team before sending team email')
             return
         if not os.path.exists(self.pdfpath):
             print('pdf does not exist: '+self.pdfpath)
             return
-
-        #emails = self.get_emails()
+        
         if debug:
             emails = ['ryanlists@gmail.com']
         else:
             emails = self.emails
 
-        #print('emails=' + str(emails))
-        #addresses = emails.replace(';',',')
-        #addresses = ['ryanwkrauss@gmail.com', 'ryanlists@gmail.com']
-
-        body = "The attached pdf contains your team grade and my feedback."
-        body += mysig
-
+        if attach_sig:
+            body += '\n' + mysig
+            
         gmail_smtp.sendMail(emails, subject, body, self.pdfpath)
 
-##         msg = libgmail.GmailComposedMessage(addresses, subject, body, \
-##                                             filenames=[self.pdfpath])
+
+
+    def compose_and_send_team_gmail(self, subject, debug=0):#, ga):
+        """ga is a gmail account instance from libgmail that has
+        already been logged into."""
+
+        body = "The attached pdf contains your team grade and my feedback."
+        
+        self._compose_and_send_team_gmail(subject, body, debug=debug)
+
+
 
 
     def find_section(self, title):
@@ -1924,8 +1927,15 @@ class mini_project_report(design_report):
                                **kwargs)
 
 
-    def compose_and_send_team_gmail(self):#, subject):#, ga):
-        raise NotImplementedError
+    def compose_and_send_team_gmail(self, debug=0):#, subject):#, ga):
+        """ga is a gmail account instance from libgmail that has
+        already been logged into."""
+
+        subject = 'ME 482: Mini-Project Grade'
+        body = "The attached pdf contains your team grade and my feedback " + \
+               "for the mini-project written report."
+        self._compose_and_send_team_gmail(subject, body, debug=debug)
+
     
 #---------------------------------
 
