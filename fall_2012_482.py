@@ -13,6 +13,7 @@ class_folder = rwkos.FindFullPath('siue/classes/482/2012/')
 
 alts = {'Bahrns':'Chris', \
         'Barnes':'Alex', \
+        'Casey':'Jeff', \
         'Knauer':'Chris', \
         'Phillips':'Joe', \
         'Rickert':'Chris'

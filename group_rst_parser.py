@@ -555,6 +555,10 @@ class speaker(object):
     def build_rst(self):
         self.rst = copy.copy(self.parent.header)
         self.rst.append('')
+        self.rst.append('')
+        self.rst.append('.. sectnum::')
+        self.rst.append('    :depth: 0')
+        self.rst.append('')
         self.rst.append(self.line1)
         self.rst.append(self.dec_line)
         self.rst.extend(self.content)
@@ -2136,3 +2140,23 @@ class proposal_presentation_no_appearance(update_presentation):
         self.time_penalty = penalty
 
 
+class mini_project_presentation(update_presentation):
+    def get_timing_grade(self):
+        time_lines = self.get_time_lines()
+        #Pdb().set_trace()
+        time_str = self.find_time_string(time_lines)
+        time = self.parse_time_string(time_str)
+        penalty = 0.0
+        if time > 5.51:
+            num_steps = int((time-5.51)/0.5)
+            penalty = -0.1*num_steps
+        elif time < 3.5:
+            num_steps = int((3.5-time)/0.5)
+            penalty = -0.1*num_steps
+        self.time_penalty = penalty
+
+
+    def compose_and_send_team_gmail(self, subject, debug=0):#, subject):#, ga):
+        body = "The attached pdf contains your team grade and my feedback " + \
+               "for the mini-project presentation."
+        self._compose_and_send_team_gmail(subject, body, debug=debug)
