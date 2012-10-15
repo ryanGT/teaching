@@ -12,7 +12,7 @@ class course_website(object):
                  other_folders=['homework','labs'], \
                  index_rst_only_folders=['projects'], \
                  toplevel_files=['syllabus.pdf'], \
-                 extlist=['html','pdf','py','m','txt'], \
+                 extlist=['html','pdf','py','m','txt','pkl'], \
                  teaching_root = '../../index.html', \
                  skiplist=[], \
                  lecture_pat="ME*_%0.4i"):
