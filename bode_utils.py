@@ -8,7 +8,7 @@ def find_dB_mag_and_phase(Gjw):
 
     
 def bode_plot(freq, dB_mag, phase, fignum=1, clear=True, xlim=None, \
-              label=None, fmt='-'):
+              label=None, fmt='-', grid=True, **kwargs):
     """This function plots a very nice Bode plot.  freq is a vector in
     Hz.  dB_mag and phase are vectors with the same length as freq."""
     plt.figure(fignum)
@@ -16,16 +16,22 @@ def bode_plot(freq, dB_mag, phase, fignum=1, clear=True, xlim=None, \
         plt.clf()
 
     plt.subplot(211)
-    plt.semilogx(freq, dB_mag, fmt, label=label)
+    plt.semilogx(freq, dB_mag, fmt, label=label, **kwargs)
     plt.ylabel('dB Mag.')
+
+    if grid:
+        plt.grid(1)
 
     if xlim:
         plt.xlim(xlim)
 
     plt.subplot(212)
-    plt.semilogx(freq, phase, fmt, label=label)
+    plt.semilogx(freq, phase, fmt, label=label, **kwargs)
     plt.ylabel('Phase (deg.')
     plt.xlabel('Freq. (Hz)')
+
+    if grid:
+        plt.grid(1)
 
     if xlim:
         plt.xlim(xlim)
