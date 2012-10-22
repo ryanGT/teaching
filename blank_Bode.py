@@ -1,12 +1,14 @@
 from matplotlib.pyplot import *
 from scipy import *
 
+rcParams['figure.subplot.bottom'] = 0.15
+
 fig = figure(1)
 fig.clf()
 ax1 = subplot(211)
 ax1.set_xscale('log')
 grid(1)
-ax1.set_ylabel('dB Mag.\n')
+ax1.set_ylabel('dB Mag.\n\n')
 
 def blank_x_labels(ax):
     myticks = ax.get_xticks()
@@ -26,8 +28,8 @@ blank_y_labels(ax1)
 ax2 = subplot(212)
 ax2.set_xscale('log')
 grid(1)
-ax2.set_ylabel('Phase (deg.)\n')
-ax2.set_xlabel('\n Freq. (Hz)')
+ax2.set_ylabel('Phase (deg.)\n\n')
+ax2.set_xlabel('\n\n Freq. (Hz)')
 
 blank_x_labels(ax2)
 blank_y_labels(ax2)
