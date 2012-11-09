@@ -44,7 +44,7 @@ subsec_dec = rst_creator.rst_section_dec()
 
 class section(txt_mixin.txt_list):
     def __init__(self, raw_list, subre=None, subclass=None, \
-                 has_title=True, max_grade=10.0):
+                 has_title=True, max_grade=10.0, verbosity=1):
         #print('raw_list=')
         #print('\n'.join(raw_list))
         self.max_grade = max_grade#used for checking grade corrections
@@ -63,7 +63,12 @@ class section(txt_mixin.txt_list):
             for ind in grade_inds:
                 grade_line = self.content[ind]
                 q = grade_pat.search(grade_line)
-                cur_grade = float(q.group(1))
+                try:
+                    cur_grade = float(q.group(1))
+                except ValueError:
+                    if verbosity > 0:
+                        print('warning, found empty grade')
+                    cur_grade = 0.0
                 if grades is None:
                     grades = [cur_grade]
                 else:
@@ -919,7 +924,14 @@ class grade_major_section(object):
             self.subsections.append(cursub)
 
 
-class grade_major_section_no_subs(object):
+    def get_labels(self):
+        mylist = [sub.title for sub in self.subsections]
+        mylist.append(self.title)
+        return mylist
+        
+
+
+class grade_major_section_no_subs(grade_major_section):
     """A major section such as Contemporary Issues that has no
     subsections."""
     def __init__(self, title):
@@ -927,7 +939,7 @@ class grade_major_section_no_subs(object):
         self.subsections = []
 
 
-class grade_major_section_all_subs_required(object):
+class grade_major_section_all_subs_required(grade_major_section):
     """class for a major section where all the subsections are
     required.  subsection_titles is simply a list of the titles of the
     subsections."""
@@ -950,6 +962,16 @@ class proposal_grade_map_2011(object):
     grade_subsection, grade_major_section,
     grade_major_section_no_subs, and
     grade_major_section_all_subs_required"""
+    def get_labels(self):
+        mylist = []
+
+        for section in self.major_sections:
+            curlist = section.get_labels()
+            mylist.extend(curlist)
+
+        return mylist
+
+    
     def append_required(self, titles, lists):
         for curtitle, curlist in zip(titles, lists):
             cursec = grade_major_section_all_subs_required(curtitle, \
@@ -1001,7 +1023,8 @@ class proposal_grade_map_2011(object):
                  'Preliminary Analysis', \
                  'Feasibility Calculations', \
                  'Connection to Decisions']
-        opt_list6 = ['Preliminary Analysis', 'Connection to Decisions']
+        opt_list6 = ['Preliminary Analysis', 'Connection to Decisions', \
+                     'Feasibility Calculations']
 
         self.append_optional(title6, list6, opt_list6)
 

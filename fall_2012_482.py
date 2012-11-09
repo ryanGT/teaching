@@ -8,10 +8,10 @@ reload(group_rst_parser)
 from IPython.core.debugger import Pdb
 
 class_folder = rwkos.FindFullPath('siue/classes/482/2012/')
-#group_path = os.path.join(class_folder, 'group_list.csv')
-#group_list = spreadsheet.group_list_2010(group_path)
-group_path = os.path.join(class_folder, 'planning/mini_project/team_list.csv')
-group_list = spreadsheet.mini_project_group_list(group_path)
+group_path = os.path.join(class_folder, 'group_list.csv')
+group_list = spreadsheet.group_list_2010(group_path)
+#group_path = os.path.join(class_folder, 'planning/mini_project/team_list.csv')
+#group_list = spreadsheet.mini_project_group_list(group_path)
 
 alts = {'Bahrns':'Chris', \
         'Barnes':'Alex', \

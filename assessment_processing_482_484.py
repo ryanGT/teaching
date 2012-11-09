@@ -3,12 +3,29 @@ from numpy import where
 import spreadsheet
 reload(spreadsheet)
 
-import spring_2011_484
+spring = 1#set to 0 if previewing assessment in the fall, 1 if doing
+          #the final assessment in the spring
+
+import rwkmisc
+
+if spring:
+    modname = 'spring_2011_484'
+    mymod = rwkmisc.my_import(modname)
+    group_names = mymod.all_groups
+else:
+    modname = 'fall_2012_482'
+    mymod = rwkmisc.my_import(modname)
+    group_names = mymod.group_list.Project_Name
+    
 import txt_mixin
 
-group_names = spring_2011_484.all_groups
-group_list = spring_2011_484.group_list
-alts = spring_2011_484.alts
+#group_names = spring_2011_484.all_groups
+#group_list = spring_2011_484.group_list
+#alts = spring_2011_484.alts
+
+group_list = mymod.group_list
+alts = mymod.alts
+
 
 import compile_course_grades as ccg
 reload(ccg)
