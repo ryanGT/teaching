@@ -18,7 +18,12 @@ alts = {'Bahrns':'Chris', \
         'Casey':'Jeff', \
         'Knauer':'Chris', \
         'Phillips':'Joe', \
-        'Rickert':'Chris'
+        'Rickert':'Chris', \
+        'Fehrenbacher':'Joe', \
+        'Coleman':'Matt', \
+        'Tripp':'Matt', \
+        'Sprehe':'Dan', \
+        'Strackeljahn':'Dan', \
         }
 
 inverse_alts = {'Chris':'Christopher', \

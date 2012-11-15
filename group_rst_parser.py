@@ -541,13 +541,29 @@ class speaker(object):
         self.get_email()
 
     def get_email(self):
-        try:
-            me = self.parent.members[self.name]
-        except ValueError:
-            print('could not find self.name in parent.firstnames')
-            print('    self.name=' + str(self.name))
-            print('    parent.firstnames=' + str(self.parent.firstnames))
-            print('    parent.lastnames=' + str(self.parent.lastnames))
+        if self.name.find(' ') > -1:
+            first, last = self.name.split(' ',1)
+            me = self.parent.find_member(first, last)
+        else:
+            me = self.parent.find_member(self.name)
+        ## try:
+        ##     me = self.parent.find_member(first, last)
+        ## except:
+        ##     bad = False
+        ##     if self.name.find(' ') > -1:
+        ##         try:
+        ##             first, last = self.name.split(' ',1)
+        ##             me = self.parent.members[first]
+        ##         except ValueError:
+        ##             bad = True
+        ##     else:
+        ##         bad = True
+        ##     if bad:
+        ##         print('could not find self.name in parent.firstnames')
+        ##         print('    self.name=' + str(self.name))
+        ##         print('    parent.firstnames=' + str(self.parent.firstnames))
+        ##         print('    parent.lastnames=' + str(self.parent.lastnames))
+        ##         return
         self.email = me.email
 
     def get_rst_name(self):
@@ -598,6 +614,20 @@ class speaker(object):
         gmail_smtp.sendMail(email, subject, body, self.pdfpath)
 
 
+def find_min_last_initials(last, other_lasts):
+    N = len(last)
+
+    for i in range(1,N):
+        test = last[0:i]
+        found = 0
+        for olast in other_lasts:
+            if olast.find(test) > -1:
+                found = 1
+                break
+        if not found:
+            return test
+
+
 class group(object):
     def __init__(self, group_name, group_list=None, email_list=None, \
                  alts={}):
@@ -645,17 +675,21 @@ class group(object):
         members = None
         emails = []
 
-        for last, first in zip(self.lastnames, self.alt_firstnames):
+        for last, first, last_initials in \
+                zip(self.lastnames, self.alt_firstnames, self.last_initials):
             try:
                 email = self.email_list.get_email(last)
             except AssertionError:
                 email = self.email_list.get_email(last, first)
             emails.append(email)
             curmember = member(last, first, email)
+            key = first
+            if last_initials:
+                key += ' ' + last_initials + '.'
             if members is None:
-                members = {first:curmember}
+                members = {key:curmember}
             else:
-                members[first] = curmember
+                members[key] = curmember
         self.members = members
         self.emails = emails#self.email_list.get_emails(lastnames)
         return self.emails
@@ -667,15 +701,56 @@ class group(object):
         self.firstnames = txt_mixin.txt_list(self.firstnames)
         self.raw_firstnames = copy.copy(self.firstnames)
         N = len(self.firstnames)
+        self.last_initials = ['']*N
         for i in range(N):
             first = self.firstnames[i]
             inds = self.firstnames.findall(first)
             if len(inds) > 1:
+                matching_last = [self.lastnames[ind] for ind in inds]
                 for j in inds:
                     first = self.firstnames[j]
                     last = self.lastnames[j]
-                    first += ' ' + last[0] + '.'
+                    other_lasts = [olast for olast in matching_last \
+                                   if (olast != last)]
+                    last_initials = find_min_last_initials(last, other_lasts)
+                    self.last_initials[j] = last_initials
+                    first += ' ' + last_initials + '.'
                     self.firstnames[j] = first
+
+    def find_member(self, first, last=None):
+        """This method seeks to find the correct student corresponding
+        to the first and last name.  This should be easy if there is
+        only one student with a given first name.  It gets tricky if
+        there are multiple students with the same name and especially
+        the same last initial."""
+        mykeys = txt_mixin.txt_list(self.members.keys())
+        inds = mykeys.findall(first)
+        if len(inds) == 1:
+            #we found exactly one student with a matching firstname
+            ind = inds[0]
+            key = mykeys[ind]
+            return self.members[key]
+        elif len(inds) == 0:
+            raise ValueError, '%s not found in self.members.keys(): %s' % \
+                  (first, self.members.keys())
+        elif len(inds) > 1:
+            assert last, "Found more than one first name match, but last name not specified."
+            #we have more than one match for first
+            #keep adding last initials until there is only one match
+            matching_keys = [mykeys[ind] for ind in inds]
+            match_with_intials = []
+            for key in matching_keys:
+                first, last_init = key.split(' ',1)
+                if last_init[-1] == '.':
+                    last_init = last_init[0:-1]#drop trailing period
+                if last.find(last_init) == 0:
+                    match_with_intials.append(key)
+            assert len(match_with_intials) > 0, \
+                   "Did not find a last initials match"
+            assert len(match_with_intials) == 1, \
+                   "Found more than one last initials match"
+            return self.members[match_with_intials[0]]
+        
 
 
 
@@ -707,7 +782,6 @@ class group_with_team_ratings(group):
 
     def fix_team_factors(self):
         #algorithm modified 4/29/11
-        #Pdb().set_trace()
         above_inds = where(self.team_factors >= 1.1)[0]
         m = float(len(above_inds))
         rest_inds = where(self.team_factors < 1.1)[0]
@@ -1501,7 +1575,6 @@ class group_with_rst(group, section):
             #blank
             cur_grades = grade_map.build_row(self)
             row_out.extend(cur_grades)
-        #Pdb().set_trace()
         if look_for_penalty:
             if self.find_section('Penalty') is None:
                 row_out.append(0.0)
@@ -1668,7 +1741,7 @@ weight_dict_proposal_2011 = {'Writing: Quick Read':0.10, \
                              'Miscellaneous': 0.05, \
                              'Writing: Slow Read':0.15, \
                              #'Extra Credit':group_rst_parser.extra_credit, \
-                             #'Penalty':group_rst_parser.penalty, \
+                             #'Penalty':1.0,\
                              }
 
 proposal_ordered_keys = ['Writing: Quick Read', \
@@ -1695,7 +1768,8 @@ class proposal(group_with_rst):
         self.overall_grade = 0.0
         for key, weight in self.weight_dict.iteritems():
             cursec = self.find_section(key)
-            self.overall_grade += weight*cursec.grade*10.0
+            if cursec is not None:
+                self.overall_grade += weight*cursec.grade*10.0
         ec = self.find_section('Extra Credit')
         if ec is not None:
             print('before ec, overall_grade='+str(self.overall_grade))
@@ -1982,8 +2056,8 @@ class presentation_with_appearance(group_with_rst):
 #    Slides
 #    Listening to and Answering Questions
 
-    def __init__(self, pathin, max_time=10.0, \
-                 min_time=8.0, grace=0.25, \
+    def __init__(self, pathin, max_time=15.0, \
+                 min_time=5.0, grace=0.25, \
                  **kwargs):
         group_with_rst.__init__(self, pathin, **kwargs)
         self.max_time = max_time
@@ -2133,7 +2207,6 @@ class update_presentation_no_timing_penalty(update_presentation):
 
     def get_timing_grade(self):
         time_lines = self.get_time_lines()
-        #Pdb().set_trace()
         time_str = self.find_time_string(time_lines)
         time = self.parse_time_string(time_str)
         penalty = 0.0
@@ -2150,7 +2223,6 @@ class update_presentation_no_timing_penalty(update_presentation):
 class proposal_presentation_no_appearance(update_presentation):
     def get_timing_grade(self):
         time_lines = self.get_time_lines()
-        #Pdb().set_trace()
         time_str = self.find_time_string(time_lines)
         time = self.parse_time_string(time_str)
         penalty = 0.0
@@ -2166,7 +2238,6 @@ class proposal_presentation_no_appearance(update_presentation):
 class mini_project_presentation(update_presentation):
     def get_timing_grade(self):
         time_lines = self.get_time_lines()
-        #Pdb().set_trace()
         time_str = self.find_time_string(time_lines)
         time = self.parse_time_string(time_str)
         penalty = 0.0
