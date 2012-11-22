@@ -1,6 +1,8 @@
 import txt_mixin, os
 from numpy import where, zeros, array, append, column_stack, row_stack
 
+from spreadsheet_mapper import clean_quotes, delimited_grade_spreadsheet
+
 #####################################################################
 #
 # The big need here is to be able to take a spreadsheet file that
@@ -39,36 +41,6 @@ class team_grade_dict(txt_mixin.delimited_txt_file):
             mydict[name] = score
 
         self.dict = mydict
-
-
-def clean_quotes(stringin):
-    if stringin.startswith('"') and stringin.endswith('"'):
-        stringout = stringin[1:-1]
-    else:
-        stringout = stringin
-    return stringout
-
-
-class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file):
-    """This class represents a delimited_txt_file where the first
-    column contains student lastnames and the second column contains
-    student first names.  The first row of this file contains column
-    labels and the remaining rows contain the data."""
-    def _get_labels_and_data(self):
-        self.labels = self.array[0]
-        self.data = self.array[1:]
-
-
-    def clean_quotes(self,vect):
-        vectout = map(clean_quotes, vect)
-        return vectout
-
-    def _get_student_names(self):
-        if not hasattr(self, 'data'):
-            self._get_labels_and_data()
-            
-        self.lastnames = self.clean_quotes(self.data[:,0])
-        self.firstnames = self.clean_quotes(self.data[:,1])
 
 
 class ind_mapper(delimited_grade_spreadsheet):
