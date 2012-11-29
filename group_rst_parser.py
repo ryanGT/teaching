@@ -752,6 +752,17 @@ class group(object):
             return self.members[match_with_intials[0]]
         
 
+    def compose_and_send_team_gmail(self, subject, body, debug=0, \
+                                    attach_sig=True):
+        if debug:
+            emails = ['ryanlists@gmail.com']
+        else:
+            emails = self.emails
+            
+        if attach_sig:
+            body += '\n' + mysig
+
+        gmail_smtp.send_mail_siue(emails, subject, body)
 
 
 class group_with_team_ratings(group):
