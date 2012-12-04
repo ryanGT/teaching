@@ -672,6 +672,7 @@ class group(object):
         self.get_first_and_last_names()
         self.find_alt_firstnames()
         self.append_initials_to_firstnames()
+        self.append_initials_to_alt_firsts()
         members = None
         emails = []
 
@@ -691,6 +692,7 @@ class group(object):
             else:
                 members[key] = curmember
         self.members = members
+        self.N = len(self.members)
         self.emails = emails#self.email_list.get_emails(lastnames)
         return self.emails
 
@@ -716,6 +718,39 @@ class group(object):
                     self.last_initials[j] = last_initials
                     first += ' ' + last_initials + '.'
                     self.firstnames[j] = first
+
+
+    def append_initials_to_alt_firsts(self):
+        """For the name for of the latex team member rating sheets, I
+        need Dan St. and Dan Sp.  These are alt first plus initials."""
+        if not hasattr(self, 'last_initials'):
+            self.append_initials_to_firstnames()
+            
+        alts_with_initials = []
+        for alt, initials in zip(self.alt_firstnames, self.last_initials):
+            out = alt
+            if initials:
+                out += ' ' + initials + '.'
+            alts_with_initials.append(out)
+        self.alts_with_initials = alts_with_initials
+        return self.alts_with_initials
+
+
+    def get_firstname_no_initials(self, first, last=None):
+        """I am still trying to kill all bugs stemminf from Daniel
+        Sprehe and Daniel Strackeljahn being on the same team.
+        self.names now has keys like (Daniel Sp., Sprehe) and I need
+        Dan_Sprehe.tex for my filename.  How do I get from Daniel
+        Sp. back to Dan?  My approach is to drop the middle initials
+        and just return that unless last is not None and is in the
+        self.alts dictionary."""
+        if first.find(' ') > -1:
+            first, middle = first.split(' ',1)
+        if last is not None:
+            if self.alts.has_key(last):
+                first = self.alts[last]
+        return first
+    
 
     def find_member(self, first, last=None):
         """This method seeks to find the correct student corresponding
@@ -825,7 +860,9 @@ class group_with_team_ratings(group):
 
 
     def build_name_str(self):
-        N = len(self.students)
+        N = len(self.members)
+        if not hasattr(self, 'names'):
+            self.build_names_tuples()
         if N == 1:
             self.name_str = ' '.join(self.names[0])
         else:
@@ -835,7 +872,10 @@ class group_with_team_ratings(group):
                     name_str +=', '
                 if n == (N-1):
                     name_str += 'and '
-                name_str += pair[0] + ' ' + pair[1]
+                firstname = pair[0]
+                lastname = pair[1]
+                clean_first = self.get_firstname_no_initials(firstname,lastname)
+                name_str +=  clean_first + ' ' + lastname
             self.name_str = name_str
 
 
