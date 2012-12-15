@@ -43,7 +43,7 @@ def save_case(filename, A, B):
 
 if __name__ == '__main__':
     #folder = rwkos.FindFullPath('mechatronics_2009/homework/encoders')
-    folder = rwkos.FindFullPath('~/458_2012/quizzes/quiz_05')
+    folder = rwkos.FindFullPath('~/458_2012/final_exam/figs')
     outpat = 'encoders_case_%0.2d.txt'
 
 ##     # case 11
@@ -57,9 +57,9 @@ if __name__ == '__main__':
 ##     save_case(outpath, A, B)
 
 ##     # case 12
-##     case = 12
-##     A_list = [0.1, 0.3, 0.7, 0.9]
-##     B_list = [0.2, 0.4, 0.6, 0.8]
+    case = 12
+    A_list = [0.1, 0.3, 0.7, 0.9]
+    B_list = [0.2, 0.4, 0.6, 0.8]
 ##     A, B = create_case(A_list, B_list, 1, 0)
 ##     plot_case(A, B, case)
 ##     curname = outpat % case
@@ -100,9 +100,9 @@ if __name__ == '__main__':
     ## B_list = [0.1, 0.3, 0.5, 0.7]
     ## A_list = [0.4, 0.6, 0.8, 0.9]
 
-    case = 18
-    B_list = [0.1, 0.3, 0.5, 0.8]
-    A_list = [0.2, 0.4, 0.6, 0.7]
+    ## case = 18
+    ## B_list = [0.1, 0.3, 0.5, 0.8]
+    ## A_list = [0.2, 0.4, 0.6, 0.7]
 
     A, B = create_case(A_list, B_list, 0, 1)
     A_shift = A + 0.0075

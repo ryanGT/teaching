@@ -9,6 +9,8 @@ def get_names_from_Banner_txt(filename):
 
 
 def get_banner_ids(filename):
+    if type(filename) == list:
+        filename = filename[0]
     mysheet = spreadsheet.TabDelimSpreadSheet(filename)
     mysheet.ReadData()
     ids = mysheet.get_col(2)
@@ -155,13 +157,17 @@ def make_class_list(csvlist, extra_col_labels=None, \
     return latex_out
 
 
-def dumpcsv(outpath, csvlist, extra_col_labels=None):
+def dumpcsv(outpath, csvlist, ids=False, extra_col_labels=None):
     last_names, first_names = _get_names(csvlist)
     N = len(last_names)
 
     vector_list = [last_names, first_names]
     
     labels = ['Last Name', 'First Name']
+    if ids:
+        banner_ids = get_banner_ids(csvlist)
+        vector_list.append(banner_ids)
+        labels.append('ID')
 
     if extra_col_labels is not None:
         labels.extend(extra_col_labels)

@@ -39,7 +39,7 @@ ylabel('Phase (degrees) \n')
 
 
 filename = 'blank_FRF.eps'
-outdir = '/home/ryan/siue/classes/452/2011/final_exam/'
+outdir = '/home/ryan/458_2012/final_exam/figs'
 outpath = os.path.join(outdir, filename)
 pylab_util.mysave(outpath)
 

@@ -1,7 +1,8 @@
 import txt_mixin, os
 from numpy import where, zeros, array, append, column_stack, row_stack
 
-from spreadsheet_mapper import clean_quotes, delimited_grade_spreadsheet
+from spreadsheet_mapper import clean_quotes, delimited_grade_spreadsheet, \
+     source_spreadsheet_first_and_lastnames
 
 #####################################################################
 #
@@ -58,6 +59,7 @@ class ind_mapper(delimited_grade_spreadsheet):
         self.output_path = output_path
         self.team_id_column_label = team_id_column_label
         self.team_grade = team_grade
+        #this should be fixed to use open_delimited_with_sniffer_and_check from delimited_file_utils
         txt_mixin.delimited_txt_file.__init__(self, ind_input_file_path, delim=delim)
         self._get_student_names()
         self.team_id_col = where(self.labels==self.team_id_column_label)[0][0]
@@ -102,9 +104,6 @@ class student_to_team_mapper(delimited_grade_spreadsheet):
         self.data = self.array[1:]
         self.team_id_column_label = team_id_column_label
         self.team_id_col = where(self.labels==self.team_id_column_label)[0][0]
-        test_bool = self.labels[0:2] == ['Last Name','First Name']
-        assert test_bool.all(), \
-               "student_to_team_mapper file violates the name expectations of columns 0 and 1"
         self._get_student_names()
         self.teams = self.data[:,self.team_id_col]
         self._build_dict()
@@ -161,7 +160,7 @@ class ind_grade_mapper_v2(delimited_grade_spreadsheet):
                  output_path, delim=','):
         self.ind_input_file_path = ind_input_file_path
         self.output_path = output_path
-        txt_mixin.delimited_txt_file.__init__(self, ind_input_file_path, delim=delim)
+        delimited_grade_spreadsheet.__init__(self, ind_input_file_path, delim=delim)
         self._get_student_names()
         self.team_mapper = team_mapper
         self.team_grades = team_grades
@@ -178,7 +177,11 @@ class ind_grade_mapper_v2(delimited_grade_spreadsheet):
                 score = '-1'
             else:
                 team = self.team_mapper.dict[key]
-                score = team_grade.dict[team]
+                if not team_grade.dict.has_key(team) and len(team) < 3:
+                    try_team = 'Team ' + team.strip()
+                    score = team_grade.dict[try_team]
+                else:
+                    score = team_grade.dict[team]
             ind_grades.append(score)
 
         return array(ind_grades)

@@ -1,0 +1,31 @@
+\documentclass{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+
+%%%<
+\usepackage{verbatim}
+\usepackage[active,tightpage]{preview}
+\PreviewEnvironment{tikzpicture}
+\setlength\PreviewBorder{5pt}%
+%%%>
+\begin{document}
+\def \myd {3.5}
+\def \myleft {-1.0}
+\def \myleftA {-0.3}
+\def \myA {0.3}
+\pgfmathparse{\myd+\myA}
+\let\myL\pgfmathresult
+\def \myR {5.0}
+\pgfmathparse{\myR+\myA}
+\let\myRA\pgfmathresult
+\begin{tikzpicture}
+%\draw[step=.5cm,dashed,very thin] (\myleft,-\myd) grid (\myR,\myd);
+\draw[<->, thick] (\myleftA,0) -- (\myRA,0)  
+         node[below, pos=0.5, yshift=-0.5cm] {Freq. (Hz)};
+\draw[<->, thick] (0,-\myA) -- (0,\myL) 
+         node[above, rotate=90, pos=0.5, yshift=0.5cm] {FFT Mag.};
+\end{tikzpicture}
+
+\end{document}

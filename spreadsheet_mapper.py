@@ -1,5 +1,6 @@
 import txt_mixin, os
 from numpy import where, zeros, array, append, column_stack, row_stack
+from delimited_file_utils import open_delimited_with_sniffer_and_check
 
 import copy
 
@@ -47,6 +48,14 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file):
     column contains student lastnames and the second column contains
     student first names.  The first row of this file contains column
     labels and the remaining rows contain the data."""
+    def _set_name_cols(self):
+        test_bool = self.labels[0:2] == ['Last Name','First Name']
+        assert test_bool.all(), \
+               "source_spreadsheet_first_and_lastnames file violates the name expectations of columns 0 and 1"
+        self.lastnamecol = 0
+        self.firstnamecol = 1
+
+    
     def _get_labels_and_data(self):
         self.labels = self.array[0]
         self.data = self.array[1:]
@@ -70,6 +79,9 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file):
     def _get_student_names(self):
         if not hasattr(self, 'data'):
             self._get_labels_and_data()
+
+        if not hasattr(self, 'lastnamecol'):
+            self._set_name_cols()
 
         self.lastnames = self.clean_quotes(self.data[:,self.lastnamecol])
         self.firstnames = self.clean_quotes(self.data[:,self.firstnamecol])
@@ -96,7 +108,16 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file):
         mylist = [None]*N
 
         for key, ind in self.rowdict.iteritems():
-            value = source_sheet.valuesdict[key]
+            if source_sheet.valuesdict.has_key(key):
+                value = source_sheet.valuesdict[key]
+            else:
+                #try only first initial
+                last, first = key.split(',',1)
+                alt_key = last + ',' + first[0:1] + '.'
+                if source_sheet.valuesdict.has_key(alt_key):
+                    value = source_sheet.valuesdict[alt_key]
+                else:
+                    raise KeyError, 'cannot find %s or %s in source_sheet.valuesdict' % (key, alt_key)
             if func is not None:
                 value = func(value)
             mylist[ind] = value
@@ -131,6 +152,8 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file):
                  delim='\t', **kwargs):
         txt_mixin.delimited_txt_file.__init__(self, pathin, delim=delim, \
                                               **kwargs)
+        myarray = open_delimited_with_sniffer_and_check(pathin)
+        self.array = myarray
         self.lastnamecol = lastnamecol
         self.firstnamecol = firstnamecol
         self._get_labels_and_data()
