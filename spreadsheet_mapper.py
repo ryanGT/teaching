@@ -190,3 +190,64 @@ class source_spreadsheet_first_and_lastnames(delimited_grade_spreadsheet):
         self.sourcecollabel = sourcecollabel
         self.find_source_col()
         self.make_values_dict()
+
+
+
+class group_delimited_grade_spreadsheet(delimited_grade_spreadsheet):
+    """This is the group version of delimited_grade_spreadsheet where
+    only the group name is needed and firstnames are irrelevant."""
+    def _set_name_cols(self):
+        test_bool = self.labels[0:1] == ['Group Name']
+        assert test_bool.all(), \
+               "source_spreadsheet_first_and_lastnames file violates the name expectations of column 0 for a group sheet"
+        self.lastnamecol = 0
+        self.firstnamecol = None
+
+
+
+    def clean_firstnames(self):
+        return None
+
+
+    def _get_student_names(self):
+        if not hasattr(self, 'data'):
+            self._get_labels_and_data()
+
+        if not hasattr(self, 'lastnamecol'):
+            self._set_name_cols()
+
+        self.lastnames = self.clean_quotes(self.data[:,self.lastnamecol])
+        self.firstnames = None
+
+
+    def make_keys_and_dict(self):
+        N = len(self.lastnames)
+        keys = [None]*N
+        i_vect = range(N)
+        for i, last in zip(i_vect, self.lastnames):
+            key = last
+            keys[i] = key
+
+        self.keys = keys
+        self.inds = i_vect
+        self.rowdict = dict(zip(self.keys, self.inds))
+
+
+
+class group_source_spreadsheet(group_delimited_grade_spreadsheet,\
+                               source_spreadsheet_first_and_lastnames):
+    """This class exists to copy a column from one spreadsheet to
+    another where both sheets contain a column called 'Group Name'.
+    The keys for both sheets will be lastname which is the Group Name."""
+    def __init__(self, pathin=None, sourcecollabel=None, \
+                 lastnamecol=0, firstnamecol=None, \
+                 delim='\t', **kwargs):
+        group_delimited_grade_spreadsheet.__init__(self, pathin, \
+                                                   lastnamecol=lastnamecol, \
+                                                   firstnamecol=firstnamecol, \
+                                                   delim=delim, \
+                                                   **kwargs)
+        self.sourcecollabel = sourcecollabel
+        self.find_source_col()
+        self.make_values_dict()
+
