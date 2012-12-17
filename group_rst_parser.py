@@ -7,7 +7,7 @@ import txt_mixin, spreadsheet, rst_creator, rwkos
 import re, os
 import gmail_smtp
 reload(gmail_smtp)
-from numpy import array, where
+from numpy import array, where, zeros
 
 from scipy import mean
 
@@ -828,6 +828,7 @@ class group_with_team_ratings(group):
 
     def fix_team_factors(self):
         #algorithm modified 4/29/11
+        self.copy_team_factors_to_raw()
         above_inds = where(self.team_factors >= 1.1)[0]
         m = float(len(above_inds))
         rest_inds = where(self.team_factors < 1.1)[0]
@@ -850,7 +851,8 @@ class group_with_team_ratings(group):
 
         self.team_factor_ave = self.team_factors.mean()
 
-        N = len(self.names)
+        N = len(self.members)
+
         self.team_factor_ave_vect = array([self.team_factor_ave]*N)
         assert self.team_factor_ave > 0.92, "Team with really low average: %s: %0.4g" % (self.group_name, self.team_factor_ave)
         assert self.team_factor_ave < 1.03, "Team with really high average: %s: %0.4g" % (self.group_name, self.team_factor_ave)
@@ -989,15 +991,15 @@ class group_with_team_ratings(group):
         return self.table
 
 
-    def build_out_path(self):
+    def build_out_path(self, outfolder=''):
         outname = self.group_name.replace(' ','_') + '_team_evals.tex'
         pathout = os.path.join(outfolder, outname)
         self.tex_path = pathout
         return pathout
 
 
-    def latex_summary(self, runlatex=0):
-        pathout = self.build_out_path()
+    def latex_summary(self, runlatex=0, outfolder=''):
+        pathout = self.build_out_path(outfolder=outfolder)
         self.latex = ['\\input{../../header}']
         out = self.latex.append
         out(r'\pagestyle{fancy}')
@@ -1969,7 +1971,7 @@ class proposal(group_with_rst):
         subject = "ME 482: Proposal Grade"
         body = "The attached pdf contains your team proposal grade and my feedback."
 
-        gmail_smtp.sendMail(self.emails, subject, body, self.pdfpath)
+        gmail_smtp.send_mail_siue(self.emails, subject, body, self.pdfpath)
 
 
 
@@ -2000,6 +2002,13 @@ class design_report(proposal):
         proposal.__init__(self, pathin, weight_dict=weight_dict, \
                           ordered_keys=ordered_keys, \
                           **kwargs)
+
+    def compose_and_send_team_gmail(self):#, subject):#, ga):
+        self.pdfpath_checker()
+        subject = "ME 482: Design Report Grade"
+        body = "The attached pdf contains your team proposal grade and my feedback."
+
+        gmail_smtp.send_mail_siue(self.emails, subject, body, self.pdfpath)
 
 #---------------------------------
 #
