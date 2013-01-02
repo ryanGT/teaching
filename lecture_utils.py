@@ -7,7 +7,7 @@ reload(rst_utils)
 #firstday = datetime.date(2011, 1, 10)
 #firstday = datetime.date(2011, 5, 23)
 #firstday = datetime.date(2012, 1, 9)
-firstday = datetime.date(2012, 8, 20)
+firstday = datetime.date(2013, 1, 7)
 
 import pdb
 import txt_mixin

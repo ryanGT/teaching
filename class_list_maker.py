@@ -1,19 +1,22 @@
-import spreadsheet, txt_mixin, os, misc_utils
+import txt_mixin, os, misc_utils, txt_database
 from numpy import column_stack, row_stack
 
 def get_names_from_Banner_txt(filename):
-    mysheet = spreadsheet.TabDelimSpreadSheet(filename)
-    mysheet.ReadData()
-    names = mysheet.get_col(1)
+    #this approach assumes labels are in the top row (1 row of labels
+    #only) and that the column label for the student names is "Student Name"
+    mydb = txt_database.db_from_file(filename)
+    names = mydb.Student_Name
     return names
 
 
 def get_banner_ids(filename):
     if type(filename) == list:
         filename = filename[0]
-    mysheet = spreadsheet.TabDelimSpreadSheet(filename)
-    mysheet.ReadData()
-    ids = mysheet.get_col(2)
+    #mysheet = spreadsheet.TabDelimSpreadSheet(filename)
+    #mysheet.ReadData()
+    #ids = mysheet.get_col(2)
+    mydb = txt_database.db_from_file(filename)
+    ids = mydb.ID
     if ids[0].lower() == 'id':
         ids.pop(0)
     return ids
@@ -178,6 +181,7 @@ def dumpcsv(outpath, csvlist, ids=False, extra_col_labels=None):
 
     data = column_stack(vector_list)
     data2 = row_stack([labels, data])
-    spreadsheet.WriteMatrixtoCSV(data2, outpath)
+    txt_mixin.dump_delimited(outpath, data2, delim=',', fmt='%s')
+    #spreadsheet.WriteMatrixtoCSV(data2, outpath)
     
         
