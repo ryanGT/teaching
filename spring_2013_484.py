@@ -20,7 +20,7 @@ all_groups = monday_groups + wednesday_groups
 
 class_folder = rwkos.FindFullPath('siue/classes/484/2013')
 group_path = os.path.join(class_folder, 'group_list.csv')
-group_list = spreadsheet.group_list(group_path)
+group_list = spreadsheet.group_list_2010(group_path)
 
 alts = {'Bahrns':'Chris', \
         'Barnes':'Alex', \

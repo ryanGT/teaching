@@ -611,7 +611,7 @@ class speaker(object):
         body = self.name + ', \n\n'
         body += "The attached pdf contains feedback on your individual speaking and delivery grade."
         body += mysig
-        gmail_smtp.sendMail(email, subject, body, self.pdfpath)
+        gmail_smtp.send_mail_siue(email, subject, body, self.pdfpath)
 
 
 def find_min_last_initials(last, other_lasts):
@@ -760,6 +760,12 @@ class group(object):
         the same last initial."""
         mykeys = txt_mixin.txt_list(self.members.keys())
         inds = mykeys.findall(first)
+        if len(inds) == 0 and last is not None:
+            #try searching by last initial
+            if last[-1] == '.':
+                last = last[0:-1]
+            temp_list = txt_mixin.txt_list(self.last_initials)
+            inds = temp_list.findall(last)
         if len(inds) == 1:
             #we found exactly one student with a matching firstname
             ind = inds[0]
@@ -1704,7 +1710,7 @@ class group_with_rst(group, section):
         if attach_sig:
             body += '\n' + mysig
             
-        gmail_smtp.sendMail(emails, subject, body, self.pdfpath)
+        gmail_smtp.send_mail_siue(emails, subject, body, self.pdfpath)
 
 
 
