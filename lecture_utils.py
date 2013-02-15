@@ -122,12 +122,38 @@ class course(object):
             txt_mixin.dump(rstpath, mylist)
 
 
+    def create_date_stamp_logo(self):
+        dsl_lines = ['.. raw:: latex', \
+                     '']
+
+        def out(line, level=1):
+            ws = '    '
+            dsl_lines.append(ws*level + line)
+        out('\\logo{%')
+        out('\\makebox[\\paperwidth]{%', level=2)
+        cn = str(self.course_num)
+        if cn == '106':
+            cn_str = 'IME ' + cn
+        else:
+            cn_str = 'ME ' + cn
+        date_str = self.next_lecture.strftime('%m/%d/%y')
+        print('date_str = ' + date_str)
+        date_line = '\\hspace{7pt}{\\footnotesize %s; %s}' % (cn_str, date_str)
+        out(date_line, level=3)
+        out('\\hfill%', level=3)
+        out('}%', level=2)
+        out('}')
+        return dsl_lines
+
+
     def create_rst2gimp_rst(self, force=0):
         rstname = 'outline.rst'
         rstpath = os.path.join(self.exclude_path, rstname)
         if not os.path.exists(rstpath) or force:
             mylist = [rst_line1,'']
             mydec = rst_creator.rst_section_level_2()
+            date_stamp_logo_lines = self.create_date_stamp_logo()
+            mylist.extend(date_stamp_logo_lines)
             sections = ['Outline', 'Announcements', 'Reminders']
             for section in sections:
                 mylist.append('')
