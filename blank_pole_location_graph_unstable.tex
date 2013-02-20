@@ -1,0 +1,29 @@
+\documentclass{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+
+%%%<
+\usepackage{verbatim}
+\usepackage[active,tightpage]{preview}
+\PreviewEnvironment{tikzpicture}
+\setlength\PreviewBorder{5pt}%
+%%%>
+\begin{document}
+\def \myd {5.0}
+\def \myleft {-2.0}
+\def \myleftA {-2.3}
+\def \myA {0.3}
+\pgfmathparse{\myd+\myA}
+\let\myL\pgfmathresult
+\def \myR {5.0}
+\pgfmathparse{\myR+\myA}
+\let\myRA\pgfmathresult
+\begin{tikzpicture}
+\draw[step=1.0cm,dashed,very thin] (\myleft,-\myd) grid (\myR,\myd);
+\draw[<->, very thick] (\myleftA,0) -- (\myRA,0)  node[right] {\Large{Real}};
+\draw[<->, very thick] (0,-\myL) -- (0,\myL) node[above] {\Large{Imag.}};
+\end{tikzpicture}
+
+\end{document}
