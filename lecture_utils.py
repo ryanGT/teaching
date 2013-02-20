@@ -143,6 +143,7 @@ class course(object):
         out('\\hfill%', level=3)
         out('}%', level=2)
         out('}')
+        dsl_lines.append('')#blank line with no white space
         return dsl_lines
 
 
