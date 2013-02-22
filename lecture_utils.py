@@ -180,6 +180,7 @@ class course(object):
         mydict['search_pat'] = self.search_pat
         mydict['course_num'] = self.course_num
         mydict['png_name'] = ''#used for auto png loading or filename suggesting
+        mydict['outline_pat'] = 'outline_%0.4i.png'
         rwkmisc.SavePickle(mydict, lecturerc_path)
 
 
