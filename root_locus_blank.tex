@@ -1,0 +1,35 @@
+\documentclass{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+
+%%%<
+\usepackage{verbatim}
+\usepackage[active,tightpage]{preview}
+\PreviewEnvironment{tikzpicture}
+\setlength\PreviewBorder{5pt}%
+%%%>
+\begin{document}
+\def \myd {4.0}
+\def \myleft {-7.0}
+\def \myleftA {-7.3}
+\def \myA {0.3}
+\pgfmathparse{\myd+\myA}
+\let\myL\pgfmathresult
+\def \myR {2.0}
+\pgfmathparse{\myR+\myA}
+\let\myRA\pgfmathresult
+\begin{tikzpicture}
+\draw[step=1.0cm,dashed,very thin] (\myleft,-\myd) grid (\myR,\myd);
+\draw[<->, very thick] (\myleftA,0) -- (\myRA,0)  node[right] {\Large{Real}};
+\draw[<->, very thick] (0,-\myL) -- (0,\myL) node[above] {\Large{Imag.}};
+
+%add specific poles and stuff
+% \tikzstyle{pole}=[draw,thick,minimum width=7pt,minimum height=7pt,fill=white]
+% \draw[fill]  (-2,2) circle (3pt) node[yshift=2ex, xshift=-1.5ex] (s1) {$s_1$};\
+% \node (rect) at (0,0) [pole] {};
+% \node (rect) at (-2,0) [pole] {};
+\end{tikzpicture}
+
+\end{document}
