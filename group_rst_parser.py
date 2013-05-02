@@ -6,7 +6,7 @@ for emailing and compiling grades on the written proposals."""
 import txt_mixin, spreadsheet, rst_creator, rwkos
 import re, os
 import gmail_smtp
-reload(gmail_smtp)
+#reload(gmail_smtp)
 from numpy import array, where, zeros
 
 from scipy import mean
@@ -18,7 +18,7 @@ timing_pat = re.compile('^Tim(ing|e)[: ]*$')
 notes_pat = re.compile('^Notes*[: ]*$')
 
 import copy
-reload(spreadsheet)
+#reload(spreadsheet)
 
 mysig = """
 

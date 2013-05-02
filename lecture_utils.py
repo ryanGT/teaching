@@ -14,10 +14,13 @@ import txt_mixin
 
 #from IPython.core.debugger import Pdb
 
-from pygimp_lecture_utils import lecturerc_path
+#from pygimp_lecture_utils import lecturerc_path
+from pygimp_lecture_pickle_path import lecturerc_path
 
 
-rst_line1 = '.. include:: /home/ryan/git/report_generation/beamer_header.rst'
+home_dir = os.path.expanduser('~')
+
+rst_line1 = '.. include:: %s/git/report_generation/beamer_header.rst' % home_dir
 rst_title_line = '`\mytitle{@@TITLE@@}`'
 
 rst_list = txt_mixin.txt_list([rst_line1, '', rst_title_line, ''])
@@ -69,6 +72,7 @@ class course(object):
                 self.next_lecture_date()
             date = self.next_lecture
         date_str = date.strftime('%m_%d_%y')
+        print('date_str = ' + date_str)
         setattr(self, attr, date_str)
         return date_str
 
@@ -120,6 +124,28 @@ class course(object):
             mylist = copy.copy(rst_list)
             mylist.replaceall('@@TITLE@@', title)
             txt_mixin.dump(rstpath, mylist)
+
+    def course_number_stamp(self):
+        cn = str(self.course_num)
+        if cn == '106':
+            cn_str = 'IME ' + cn
+        else:
+            cn_str = 'ME ' + cn
+        self.cn_str = cn_str
+        return self.cn_str
+    
+
+    def date_stamp(self):
+        self.date_stamp = self.next_lecture.strftime('%m/%d/%y')
+        print('date_stamp = ' + self.date_stamp)
+        return self.date_stamp
+
+    def course_date_stamp(self):
+        date_stamp = self.date_stamp()
+        cn = self.course_number_stamp()
+        stamp = '%s; %s' % (date_stamp, cn)
+        self.stamp = stamp
+        return self.stamp
 
 
     def create_date_stamp_logo(self):

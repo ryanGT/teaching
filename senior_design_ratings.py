@@ -5,7 +5,7 @@ for assessment and certain average ratings for exceeding, meeting, or
 not meeting the assessment expectations."""
 
 import spreadsheet
-reload(spreadsheet)
+#reload(spreadsheet)
 from spreadsheet import GradeSpreadSheetMany
 
 from scipy import *

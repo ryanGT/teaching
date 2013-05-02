@@ -135,6 +135,20 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file):
         self.new_data = new_data
 
 
+    def map_from_path(self, pathin, sourcecollabel, destlabel, \
+                      attr=None, \
+                      source_class=None):
+        """This is a convienence function for using map_from_source.
+        Most of my code that used map_from_source to assemble student
+        grades repeated the same 4 lines of code to accomplish this
+        common task.  The method combines those 4 things into one."""
+        if source_class is None:
+            source_class = source_spreadsheet_first_and_lastnames
+        source_sheet = source_class(pathin,sourcecollabel=sourcecollabel)
+        self.map_from_source(source_sheet,destlabel, attr=attr)
+        self.replace_with_new()
+
+
     def replace_with_new(self):
         self.data = self.new_data
         self.labels = self.new_labels
@@ -233,6 +247,15 @@ class group_delimited_grade_spreadsheet(delimited_grade_spreadsheet):
         self.rowdict = dict(zip(self.keys, self.inds))
 
 
+    def map_from_path(self, pathin, sourcecollabel, destlabel, \
+                      attr=None, \
+                      source_class=None):
+        if source_class is None:
+            source_class = group_source_spreadsheet
+        
+        return delimited_grade_spreadsheet.map_from_path(self, pathin, sourcecollabel, destlabel, \
+                                                         attr=attr, source_class=source_class)
+        
 
 class group_source_spreadsheet(group_delimited_grade_spreadsheet,\
                                source_spreadsheet_first_and_lastnames):
@@ -250,4 +273,5 @@ class group_source_spreadsheet(group_delimited_grade_spreadsheet,\
         self.sourcecollabel = sourcecollabel
         self.find_source_col()
         self.make_values_dict()
+
 
