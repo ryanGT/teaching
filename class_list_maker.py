@@ -25,7 +25,7 @@ def get_banner_ids(filename):
 def combined_names_from_all_sections(fnlist):
     all_names = []
     poplist = ['Student Name']
-    
+
     for fn in fnlist:
         names = get_names_from_Banner_txt(fn)
  
@@ -94,7 +94,7 @@ def make_class_list(csvlist, extra_col_labels=None, \
         if os.path.exists('header.tex'):
             headerpath = 'header.tex'
         else:
-            headerpath = '/home/ryan/git/report_generation/class_list_header.tex'
+            headerpath = '/Users/rkrauss/git/report_generation/class_list_header.tex'
 
     headerline = '\\input{%s}' % headerpath
     startline = '\\begin{tabular}{%s}' % fmt_str

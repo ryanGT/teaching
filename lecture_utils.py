@@ -7,7 +7,8 @@ reload(rst_utils)
 #firstday = datetime.date(2011, 1, 10)
 #firstday = datetime.date(2011, 5, 23)
 #firstday = datetime.date(2012, 1, 9)
-firstday = datetime.date(2013, 1, 7)
+#firstday = datetime.date(2013, 1, 7)
+firstday = datetime.date(2013, 5, 20)
 
 import pdb
 import txt_mixin
@@ -173,14 +174,39 @@ class course(object):
         return dsl_lines
 
 
+    def create_date_stamp_section(self):
+        """Put date stamp in section rather than logo."""
+        dss_lines = []
+        out = dss_lines.append
+        out('dummy')
+        out('++++++++++++')
+        out('')
+        out('dummy')
+        out('~~~~~~~~~~~~~~')
+        out('')
+        
+        cn = str(self.course_num)
+        if cn == '106':
+            cn_str = 'IME ' + cn
+        else:
+            cn_str = 'ME ' + cn
+        date_str = self.next_lecture.strftime('%m/%d/%y')
+
+        stamp_line = '%s; %s' % (cn_str, date_str)
+        out(stamp_line)
+        out('-----------------------------------------------------------')
+        return dss_lines
+    
+
     def create_rst2gimp_rst(self, force=0):
         rstname = 'outline.rst'
         rstpath = os.path.join(self.exclude_path, rstname)
         if not os.path.exists(rstpath) or force:
             mylist = [rst_line1,'']
             mydec = rst_creator.rst_section_level_2()
-            date_stamp_logo_lines = self.create_date_stamp_logo()
-            mylist.extend(date_stamp_logo_lines)
+            #date_stamp = self.create_date_stamp_logo()
+            date_stamp = self.create_date_stamp_section()
+            mylist.extend(date_stamp)
             sections = ['Outline', 'Announcements', 'Reminders']
             for section in sections:
                 mylist.append('')
@@ -566,14 +592,16 @@ class course_452(tuesday_thursday_course):
         self.search_pat = 'ME452_' + date_pat
 
 
-class course_454(tuesday_thursday_course):
+#class course_454(tuesday_thursday_course):
+class course_454(course_458):
     def __init__(self, path=None, forward=True):
         if path is None:
             today = datetime.date.today()
             path = '~/siue/classes/454/' + today.strftime('%Y')#4 digit year
             path += '/lectures/'
         #self.path = rwkos.FindFullPath(path)
-        tuesday_thursday_course.__init__(self, path)
+        #tuesday_thursday_course.__init__(self, path)
+        course_458.__init__(self, path)
         self.course_num = '454'
         self.forward = forward
 

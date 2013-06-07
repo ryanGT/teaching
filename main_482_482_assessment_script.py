@@ -29,7 +29,7 @@ import compile_course_grades
 import copy
 
 #load last year's summary file
-last_years_path = '/home/ryan/siue/classes/484/2011/assessment/rwk_assessment_482_484_2010_2011_summary.csv'
+last_years_path = '/Users/rkrauss/siue/classes/484/2012/assessment/assessment_summary_482_484_2011_2012.csv'
 colmap = {'Item':'item','Ave. Score':'ave_score', \
           'Exceeds':'num_exceeds',\
           'Meets':'num_meets',\
@@ -193,7 +193,7 @@ final_report_path = os.path.join(root_484, final_report_relpath)
 ethics_relpath = 'group_grades/ethical_issues_and_societal_impacts.csv'
 ethics_path = os.path.join(root_482, ethics_relpath)
 
-speaking_and_delivery_relpath = 'assessment/speaking_and_delivery_final_assessment.csv'
+speaking_and_delivery_relpath = 'assessment/speaking_and_delivery_assessment.csv'
 speaking_and_delivery_path = os.path.join(root_484, speaking_and_delivery_relpath)
 
 LLL_csv_relpath = 'LLL_grading_and_assessment.csv'
@@ -317,6 +317,7 @@ for item in items:
                                     **kwargs)
 
     elif individual_item[i]:
+        print('item: %s' % item)
         item1 = AP.individual_item_2012(item, \
                                         bb.lastnames, \
                                         raw_scores_1, \
@@ -377,7 +378,7 @@ def dumpcsv(nested_list, pathout):
 
 #output csv and latex
 if __name__ == '__main__':
-    scr_dir = '/home/ryan/git/teaching/'
+    scr_dir = '/Users/rkrauss/git/teaching/'
     header_name = 'assessment_report_header.tex'
 
     dst_path = os.path.join(assessment_folder, header_name)
