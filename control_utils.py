@@ -1,4 +1,4 @@
-from pylab import *
+from matplotlib.pyplot import *
 from numpy import *
 
 font_size = 20.0
@@ -167,3 +167,50 @@ def plot_points_and_angles(fignum, s1, P, ms=8, msp=10, \
 
     label_test_point(s1, dr=dr, di=di*0.5)
     return psi_list, phi_list
+
+
+def create_swept_sine_signal(fmax=20.0, fmin=0.0, \
+                             tspan=10.0, dt=1.0/500, \
+                             t=None, deadtime=0.0):
+    """Create a sweptsine signal
+
+    u = sin(2*pi*f*t)
+    
+    whose frequency fstarts at fmin and ends at fmax.  The signal will
+    have a time span of tspan and a time step of dt.  Alternatvely,
+    passing in a t vector sets tspan and dt.  deadtime would most
+    likely be used experimentally to provide time at the start and end
+    of the test where u is zero (basically padding the input with
+    deadtime)."""
+    if t is not None:
+        dt = t[1] - t[0]
+        tspan = t.max() - t.min() + dt - deadtime*2.0
+    else:
+        t = arange(0,tspan,dt)
+        
+    slope = (fmax-fmin)/tspan
+    f = fmin + slope*t
+    u = sin(2*pi*f*t)
+
+    if deadtime> 0.0:
+        deadt = arange(0,deadtime, dt)
+        zv = zeros_like(deadt)
+        u = r_[zv, u, zv]
+        N = len(u)
+        nvect = arange(N)
+        t = dt*nvect
+
+    return u, t
+
+    
+def create_freq_vect(timevect):
+    tspan = timevect.max()-timevect.min()
+    N = timevect.shape[0]
+    dt = tspan/(N-1)
+    fs = 1.0/dt
+    T = tspan+dt
+    df = 1.0/T
+    nvect = arange(N)
+    f = df*nvect
+    return f
+
