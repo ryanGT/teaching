@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 from scipy import log10, angle, squeeze, r_, where
 
 def find_dB_mag_and_phase(Gjw):
@@ -6,35 +5,42 @@ def find_dB_mag_and_phase(Gjw):
     phase = angle(Gjw,1)
     return dB_mag, phase
 
+
+def _get_fig(fig=None, fignum=1):
+    if fig is None:
+        import matplotlib.pyplot as plt
+        fig = plt.figure(fignum)
+    return fig
+
     
-def bode_plot(freq, dB_mag, phase, fignum=1, clear=True, xlim=None, \
+def bode_plot(freq, dB_mag, phase, fig=None, fignum=1, clear=True, xlim=None, \
               label=None, fmt='-', grid=True, **kwargs):
     """This function plots a very nice Bode plot.  freq is a vector in
     Hz.  dB_mag and phase are vectors with the same length as freq."""
-    plt.figure(fignum)
+    fig = _get_fig(fig, fignum)
     if clear:
-        plt.clf()
+        fig.clf()
 
-    plt.subplot(211)
-    plt.semilogx(freq, dB_mag, fmt, label=label, **kwargs)
-    plt.ylabel('dB Mag.')
-
-    if grid:
-        plt.grid(1)
-
-    if xlim:
-        plt.xlim(xlim)
-
-    plt.subplot(212)
-    plt.semilogx(freq, phase, fmt, label=label, **kwargs)
-    plt.ylabel('Phase (deg.)')
-    plt.xlabel('Freq. (Hz)')
+    ax = fig.add_subplot(211)
+    ax.semilogx(freq, dB_mag, fmt, label=label, **kwargs)
+    ax.set_ylabel('dB Mag.')
 
     if grid:
-        plt.grid(1)
+        ax.grid(1)
 
     if xlim:
-        plt.xlim(xlim)
+        ax.set_xlim(xlim)
+
+    ax2 = fig.add_subplot(212)
+    ax2.semilogx(freq, phase, fmt, label=label, **kwargs)
+    ax2.set_ylabel('Phase (deg.)')
+    ax2.set_xlabel('Freq. (Hz)')
+
+    if grid:
+        ax2.grid(1)
+
+    if xlim:
+        ax2.set_xlim(xlim)
 
 
 def bode_plot2(freq, Gjw, *args, **kwargs):
