@@ -52,6 +52,20 @@ def bode_plot2(freq, Gjw, *args, **kwargs):
     return dB_mag, phase
 
 
+def bode_plot3(freq, inst, *args, **kwargs):
+    """call bode_plot after extracting dBmag and phase from inst.  In
+    theory, any instance that has a dBmag and phase property would
+    work, but this was created to make it easy to pass in an rwkbode
+    instance to bode_plot."""
+    if callable(inst.dBmag):
+        dB_mag = inst.dBmag()
+    else:
+        dB_mag = inst.dBmag
+    phase = inst.phase
+    bode_plot(freq,dB_mag,phase,*args,**kwargs)
+    return dB_mag, phase
+
+
 def calc_db_mag_and_phase(Gjw):
     dB = 20.0*log10(abs(Gjw))
     phase = angle(Gjw, 1)

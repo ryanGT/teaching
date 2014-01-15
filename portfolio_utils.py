@@ -1,10 +1,12 @@
 import pytexutils, txt_mixin
 
+#from IPython.core.debugger import Pdb
 
 def seperator_sheet(pathin, line1, line2='', line3='', \
-                    headerpath='/home/ryan/siue/tenure/header.tex', \
+                    headerpath='/Users/rkrauss/siue/dossiers/tenure/header.tex', \
                     runlatex=1, space2='1.5in'):
     myline = '\\coverpagevar{%s}{%s}{%s}{%s}' % (line1, line2, line3, space2)
+    #Pdb().set_trace()
     myfile = txt_mixin.txt_file_with_list(pathin=None)
     myfile.append_file_to_list(headerpath)
     myfile.list.append('\\begin{document}')
