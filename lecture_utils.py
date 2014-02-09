@@ -8,7 +8,8 @@ reload(rst_utils)
 #firstday = datetime.date(2011, 5, 23)
 #firstday = datetime.date(2012, 1, 9)
 #firstday = datetime.date(2013, 1, 7)
-firstday = datetime.date(2013, 5, 20)
+#firstday = datetime.date(2013, 5, 20)
+firstday = datetime.date(2014, 1, 13)
 
 import pdb
 import txt_mixin
@@ -20,11 +21,13 @@ from pygimp_lecture_pickle_path import lecturerc_path
 
 
 home_dir = os.path.expanduser('~')
+lecture_outline_css_path = rwkos.FindFullPath('git/report_generation/lecture_outline.css')
 
-rst_line1 = '.. include:: %s/git/report_generation/beamer_header.rst' % home_dir
-rst_title_line = '`\mytitle{@@TITLE@@}`'
+#rst_line1 = '.. include:: %s/git/report_generation/beamer_header.rst' % home_dir
+#rst_title_line = '`\mytitle{@@TITLE@@}`'
 
-rst_list = txt_mixin.txt_list([rst_line1, '', rst_title_line, ''])
+#rst_list = txt_mixin.txt_list([rst_line1, '', rst_title_line, ''])
+rst_list = txt_mixin.txt_list([])
 #replaceall(self, findpat, rep, forcestart=0):
 
 def date_string_to_datetime(string):
@@ -178,12 +181,12 @@ class course(object):
         """Put date stamp in section rather than logo."""
         dss_lines = []
         out = dss_lines.append
-        out('dummy')
-        out('++++++++++++')
-        out('')
-        out('dummy')
-        out('~~~~~~~~~~~~~~')
-        out('')
+        ## out('dummy')
+        ## out('++++++++++++')
+        ## out('')
+        ## out('dummy')
+        ## out('~~~~~~~~~~~~~~')
+        ## out('')
         
         cn = str(self.course_num)
         if cn == '106':
@@ -202,7 +205,7 @@ class course(object):
         rstname = 'outline.rst'
         rstpath = os.path.join(self.exclude_path, rstname)
         if not os.path.exists(rstpath) or force:
-            mylist = [rst_line1,'']
+            mylist = ['']
             mydec = rst_creator.rst_section_level_2()
             #date_stamp = self.create_date_stamp_logo()
             date_stamp = self.create_date_stamp_section()
@@ -292,6 +295,8 @@ class course(object):
         self.make_lecture_dir()
         self.make_exclude_dir()
         print('lecture_path = ' + self.lecture_path)
+        #copy css for rst2html outline
+        shutil.copy2(lecture_outline_css_path,self.exclude_path)
         if build_previous:
             self.build_previous_lecture_path(date=date, force_next=force_next)
             print('previous lecture_path = ' + self.prev_lecture_path)
