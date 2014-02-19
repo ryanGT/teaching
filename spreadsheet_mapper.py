@@ -1,4 +1,4 @@
-import txt_mixin, os
+import txt_mixin, os, txt_database
 from numpy import where, zeros, array, append, column_stack, row_stack
 from delimited_file_utils import open_delimited_with_sniffer_and_check
 
@@ -43,17 +43,65 @@ def strip(stringin):
     return stringout
 
 
-class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file):
+class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
+                                  txt_database.txt_database):
     """This class represents a delimited_txt_file where the first
     column contains student lastnames and the second column contains
     student first names.  The first row of this file contains column
     labels and the remaining rows contain the data."""
+    def _search_for_label(self, search_label, print_msg=True):
+        search_list = txt_mixin.txt_list(self.labels)
+        indices = search_list.findall(search_label)
+        if len(indices) == 0:
+            if print_msg:
+                print("did not find %s" % search_label)
+            return None
+        elif len(indices) == 1:
+            return indices[0]
+        else:
+            if print_msg:
+                print("found more than one match for %s" % search_label)
+            return None
+
+    def _search_for_first_match(self, search_list):
+        """Search for each item in search_list using
+        self._search_for_label.  Stop after the first match.  Matches
+        must match exactly one label."""
+        for item in search_list:
+            ind = self._search_for_label(item, print_msg=False)
+            if ind is not None:
+                return ind
+
+        #if we reached this point, no items were found
+        print('did not find any of these items : ' + str(search_list))
+
+
+    def _find_last_name_col(self):
+        search_list = ['Last Name','Lastname','LName']
+        return self._search_for_first_match(search_list)
+
+
+    def _find_first_name_col(self):
+        search_list = ['First Name','Firstname','FName']
+        return self._search_for_first_match(search_list)
+
+    
+        
     def _set_name_cols(self):
         test_bool = self.labels[0:2] == ['Last Name','First Name']
-        assert test_bool.all(), \
-               "source_spreadsheet_first_and_lastnames file violates the name expectations of columns 0 and 1"
-        self.lastnamecol = 0
-        self.firstnamecol = 1
+        ## assert test_bool.all(), \
+        ##        "source_spreadsheet_first_and_lastnames file violates the name expectations of columns 0 and 1"
+        if test_bool.all():
+            self.lastnamecol = 0
+            self.firstnamecol = 1
+        else:
+            lastcol = self._find_last_name_col()
+            assert lastcol is not None, "Could not find a lastname column label."
+            self.lastnamecol = lastcol
+
+            firstcol = self._find_first_name_col()
+            assert firstcol is not None, "Could not find a firstname column label."
+            self.firstnamecol = firstcol
 
     
     def _get_labels_and_data(self):
@@ -168,12 +216,20 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file):
                                               **kwargs)
         myarray = open_delimited_with_sniffer_and_check(pathin)
         self.array = myarray
-        self.lastnamecol = lastnamecol
-        self.firstnamecol = firstnamecol
+        ## self.lastnamecol = lastnamecol
+        ## self.firstnamecol = firstnamecol
         self._get_labels_and_data()
+        self._set_name_cols()
         self._get_student_names()
         self.clean_firstnames()
         self.make_keys_and_dict()
+
+        #from txt_database.__init__
+        self.N_cols = len(self.labels)
+        inds = range(self.N_cols)
+        self.col_inds = dict(zip(self.labels, inds))
+        self._col_labels_to_attr_names()
+        self.map_cols_to_attr()
 
 
 class source_spreadsheet_first_and_lastnames(delimited_grade_spreadsheet):

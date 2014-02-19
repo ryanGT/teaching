@@ -8,6 +8,18 @@ from numpy import array
 from bs4 import BeautifulSoup
 
 from IPython.core.debugger import Pdb
+
+def parse_one_name(string_in):
+    last, rest = string_in.split(',',1)
+    last = last.strip()
+    rest = rest.strip()
+    if rest.find(' ') > -1:
+        first, rest2 = rest.split(' ',1)
+        first = first.strip()
+    else:
+        first = rest
+    return last, first
+
     
 class classlist_parser(txt_mixin.txt_file_with_list):
     def find_inds(self):
@@ -88,6 +100,51 @@ class classlist_parser(txt_mixin.txt_file_with_list):
         txt_mixin.txt_file_with_list.__init__(self, *args, **kwargs)
         self.col_labels = ['#','Name','StudentID','Stat','Lvl','Grade','e-Mail Address']
         self.parse()
+
+
+    def parse_names(self):
+        self.name_strs = self.get_col(1)
+        lastnames = []
+        firstnames = []
+
+        for item in self.name_strs:
+            last, first = parse_one_name(item)
+            lastnames.append(last)
+            firstnames.append(first)
+
+        self.lastnames = lastnames
+        self.firstnames = firstnames
+        
+        
+    def build_csv_classlist(self):
+        #Last Name,First Name,ID,Please Call Me,Email Address
+        #Bailey,Adam,800512776,,
+        #Burley,Keith,800486675,,
+        #Dickinson,Alexander,800508999,,
+        self.parse_names()
+        self.banner_ids = self.get_banner_ids()
+
+        nested_out = []
+        
+        for last, first, banner_id in zip(self.lastnames, self.firstnames, self.banner_ids):
+            rowout = [last, first, banner_id, '', '']
+            nested_out.append(rowout)
+
+        return nested_out
+
+
+    def save_csv_classlist(self, pathout=None):
+        if pathout is None:
+            fno, ext = os.path.splitext(self.pathin)
+            pathout = fno + '_out.csv'
+
+        mylist = self.build_csv_classlist()
+        labels = ['Last Name','First Name', 'ID', 'Please Call Me','Email Address']
+
+        txt_mixin.dump_delimited(pathout, mylist, delim=',', labels=labels)
+        
+            
+        
 
 
 
