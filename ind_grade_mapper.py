@@ -4,6 +4,7 @@ from numpy import where, zeros, array, append, column_stack, row_stack
 from spreadsheet_mapper import clean_quotes, delimited_grade_spreadsheet, \
      source_spreadsheet_first_and_lastnames
 
+import copy
 #####################################################################
 #
 # The big need here is to be able to take a spreadsheet file that
@@ -208,8 +209,32 @@ class ind_grade_mapper_v2(delimited_grade_spreadsheet):
         self.all_data = column_stack([self.data, self.new_data])
         return self.all_labels, self.all_data
 
+
+    def map_another_set(self, team_grades):
+        """In an effort to get all the grades into one spreadsheet,
+        this method takes a new set of team grades that needs to be
+        mapped and makes that happen by reseting internal variables so
+        that the class acts like the previous mapped grades are
+        already in."""
+        #how do I do this while properly handling new_labels and such?
+        #
+        #  - am I ok with having this only work when saving appended data?
+        #
+        #    - I think so
+        if not hasattr(self, 'all_labels'):
+            self.append_grades()
+
+        self.labels = copy.copy(self.all_labels)
+        self.data = copy.copy(self.all_data)
+        
+        self.team_grades = team_grades
+        self.map_grades()
+        self.append_grades()
+        
             
     def save(self, append=True, delim=None):
+        """Note that you must save appended data if you map more than
+        one set"""
         if append:
             if not hasattr(self, 'all_labels'):
                 self.append_grades()

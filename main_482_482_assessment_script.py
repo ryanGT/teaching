@@ -11,11 +11,17 @@ import os, rwkos, spreadsheet, time, txt_mixin
 
 year_str = time.strftime('%Y')
 year_int = int(year_str)
+sem2_str = 'Fall_2014'
 prev_year = year_int - 1
 prev_year_str = '%i' % prev_year
+prev_year_str = 'Spring_2014'
+sem1_str = prev_year_str
 
-relpath_482 = 'siue/classes/482/' + prev_year_str
-relpath_484 = 'siue/classes/484/' + year_str
+#relpath_482 = 'siue/classes/482/' + prev_year_str
+#relpath_484 = 'siue/classes/484/' + year_str
+relpath_482 = 'siue/classes/482/Spring_2014'
+relpath_484 = 'siue/classes/484/Fall_2014'
+
 root_482 = rwkos.FindFullPath(relpath_482)
 root_484 = rwkos.FindFullPath(relpath_484)
 
@@ -29,8 +35,8 @@ import compile_course_grades
 import copy
 
 #load last year's summary file
-last_years_path = '/Users/rkrauss/siue/classes/484/2012/assessment/assessment_summary_482_484_2011_2012.csv'
-colmap = {'Item':'item','Ave. Score':'ave_score', \
+last_years_path = '/Users/rkrauss/siue/classes/484/2013/assessment/assessment_summary_482_484_2012_2013.csv'
+colmap = {'Item #':'item','Ave. Score':'ave_score', \
           'Exceeds':'num_exceeds',\
           'Meets':'num_meets',\
           'Does Not Meet':'num_does_not_meet'}
@@ -58,7 +64,8 @@ last_years_ave = last_years_sheet.ave_score.astype('float')
 
 #make a dictionary with the number of members in each group
 import rwkmisc
-modname = 'spring_%s_484' % year_str
+#modname = 'spring_%s_484' % year_str
+modname = 'fall_%s_484' % year_str
 mymod = rwkmisc.my_import(modname)
 
 group_list = mymod.group_list
@@ -279,6 +286,8 @@ team_item = info_sheet.team_item.astype(float)
 survey_item = info_sheet.survey_item.astype(float)
 individual_item = info_sheet.individual_item.astype(float)
 
+debug = 0
+
 for item in items:
     i = item-1
     cur_csv_path = csv_path_dict[item]
@@ -287,6 +296,10 @@ for item in items:
     gc = compile_course_grades.course_grade_compiler_team(cur_csv_path, \
                                                           name_label=name_label)
 
+    if debug:
+        print('cur_csv_path: ' + cur_csv_path)
+        print('column_label: ' + column_label)
+        
     sheet_1 = gc.retrieve_one_grade(cur_csv_path, column_label)
     raw_scores_1 = numpy.squeeze(sheet_1.values)
 
@@ -394,7 +407,7 @@ if __name__ == '__main__':
     big_spreadsheet_list = []
     big_spreadsheet_list.append(big_csv_labels)
 
-    csvoutname = 'assessment_482_484_%s_%s_ind_mapped.csv' % (prev_year_str, year_str)
+    csvoutname = 'assessment_482_484_%s_%s_ind_mapped.csv' % (sem1_str, sem2_str)
     csvoutpath = os.path.join(assessment_folder, csvoutname)
     #items = range(1,23)
     #items = [1]
@@ -476,7 +489,7 @@ if __name__ == '__main__':
     txt_mixin.dump(texoutpath, latex_out)
     bb.save(csvoutpath)
 
-    big_summary_out_name = 'assessment_summary_482_484_%s_%s.csv' % (prev_year_str, year_str)
+    big_summary_out_name = 'assessment_summary_482_484_%s_%s.csv' % (sem1_str, sem2_str)
     big_summary_path = os.path.join(assessment_folder, big_summary_out_name)
     dumpcsv(big_spreadsheet_list, big_summary_path)
 

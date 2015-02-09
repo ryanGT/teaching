@@ -21,7 +21,7 @@ folder:
 - assessment_from_484_team_member_ratings.csv
 
 These files contain ratio of each student to the team average.  These
-ratios have to be processed to convert them to 1,3, or 5 scores.
+ratios have to be processed to convert them to 1, 3, or 5 scores.
 
 
 

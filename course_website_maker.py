@@ -12,7 +12,8 @@ class course_website(object):
                  other_folders=['homework','labs'], \
                  index_rst_only_folders=['projects'], \
                  toplevel_files=['syllabus.pdf'], \
-                 extlist=['html','m4v','mov','pdf','py','m','txt','pkl'], \
+                 extlist=['html','m4v','mov','mp3','m4a','pdf',\
+                          'py','m','txt','pkl','xls','xlsx'], \
                  teaching_root = '../../index.html', \
                  skiplist=[], \
                  lecture_pat="ME*_%0.4i"):
@@ -123,7 +124,7 @@ class research_website(course_website):
                  other_folders=[], \
                  index_rst_only_folders=[], \
                  toplevel_files=[], \
-                 extlist=['html','pdf','py','m','txt','zip'], \
+                 extlist=['html','pdf','py','m','m4a','mp3','txt','zip'], \
                  teaching_root = '../../index.html'):
         course_website.__init__(self, pathin, title, \
                                 lecture_folders=[], \

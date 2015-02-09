@@ -6,18 +6,18 @@ def find_dB_mag_and_phase(Gjw):
     return dB_mag, phase
 
 
-def _get_fig(fig=None, fignum=1):
+def _get_fig(fig=None, fignum=1, figsize=None):
     if fig is None:
         import matplotlib.pyplot as plt
-        fig = plt.figure(fignum)
+        fig = plt.figure(fignum, figsize=figsize)
     return fig
 
     
 def bode_plot(freq, dB_mag, phase, fig=None, fignum=1, clear=True, xlim=None, \
-              label=None, fmt='-', grid=True, **kwargs):
+              label=None, fmt='-', grid=True, figsize=None, **kwargs):
     """This function plots a very nice Bode plot.  freq is a vector in
     Hz.  dB_mag and phase are vectors with the same length as freq."""
-    fig = _get_fig(fig, fignum)
+    fig = _get_fig(fig, fignum, figsize=figsize)
     if clear:
         fig.clf()
 

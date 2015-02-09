@@ -43,7 +43,9 @@ def save_case(filename, A, B):
 
 if __name__ == '__main__':
     #folder = rwkos.FindFullPath('mechatronics_2009/homework/encoders')
-    folder = rwkos.FindFullPath('~/458_2012/final_exam/figs')
+    #folder = rwkos.FindFullPath('/Users/rkrauss/siue/classes/458/Fall_2014/homework/encoders/')
+    folder = rwkos.FindFullPath('/Users/rkrauss/siue/classes/458/Fall_2014/quizzes/quiz_4/')
+    #folder = rwkos.FindFullPath('~/458_2012/final_exam/figs')
     outpat = 'encoders_case_%0.2d.txt'
 
 ##     # case 11
@@ -57,9 +59,9 @@ if __name__ == '__main__':
 ##     save_case(outpath, A, B)
 
 ##     # case 12
-    case = 12
-    A_list = [0.1, 0.3, 0.7, 0.9]
-    B_list = [0.2, 0.4, 0.6, 0.8]
+    case = 93
+    A_list = [0.4, 0.6, 0.8, 0.9]
+    B_list = [0.2, 0.3, 0.5, 0.7]
 ##     A, B = create_case(A_list, B_list, 1, 0)
 ##     plot_case(A, B, case)
 ##     curname = outpat % case
@@ -104,17 +106,22 @@ if __name__ == '__main__':
     ## B_list = [0.1, 0.3, 0.5, 0.8]
     ## A_list = [0.2, 0.4, 0.6, 0.7]
 
-    A, B = create_case(A_list, B_list, 0, 1)
+    A, B = create_case(A_list, B_list, 1, 0)
     A_shift = A + 0.0075
     plot_case(A_shift, B, fignum=case, bsty='--', linewidth=2.0)
     grid(1)
     ylim([-0.1,1.3])
     legend(['A','B'])
     curname = outpat % case
-    fno, ext = os.path.splitext(curname)
-    pdfname = fno + '.pdf'
-    pdfpath = os.path.join(folder, pdfname)
-    outpath = os.path.join(folder, curname)
-    save_case(outpath, A, B)
-    pylab_util.mysave(pdfpath)
+
+    resave = 1
+
+    if resave:
+        fno, ext = os.path.splitext(curname)
+        pdfname = fno + '.pdf'
+        pdfpath = os.path.join(folder, pdfname)
+        outpath = os.path.join(folder, curname)
+        save_case(outpath, A, B)
+        pylab_util.mysave(pdfpath)
+
     show()

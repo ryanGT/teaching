@@ -9,7 +9,7 @@ reload(rst_utils)
 #firstday = datetime.date(2012, 1, 9)
 #firstday = datetime.date(2013, 1, 7)
 #firstday = datetime.date(2013, 5, 20)
-firstday = datetime.date(2014, 1, 13)
+firstday = datetime.date(2015, 1, 12)
 
 import pdb
 import txt_mixin
@@ -132,7 +132,7 @@ class course(object):
     def course_number_stamp(self):
         cn = str(self.course_num)
         if cn == '106':
-            cn_str = 'IME ' + cn
+            cn_str = 'IE ' + cn
         else:
             cn_str = 'ME ' + cn
         self.cn_str = cn_str
@@ -163,7 +163,7 @@ class course(object):
         out('\\makebox[\\paperwidth]{%', level=2)
         cn = str(self.course_num)
         if cn == '106':
-            cn_str = 'IME ' + cn
+            cn_str = 'IE ' + cn
         else:
             cn_str = 'ME ' + cn
         date_str = self.next_lecture.strftime('%m/%d/%y')
@@ -190,7 +190,7 @@ class course(object):
         
         cn = str(self.course_num)
         if cn == '106':
-            cn_str = 'IME ' + cn
+            cn_str = 'IE ' + cn
         else:
             cn_str = 'ME ' + cn
         date_str = self.next_lecture.strftime('%m/%d/%y')
@@ -389,6 +389,38 @@ class tuesday_thursday_course(course):
         return self.prev_lecture
 
 
+class thursday_only_course(course):
+    def next_lecture_date(self, date=None, force_next=False):
+        today = get_valid_date(date=date, force_next=force_next)
+        #lectures are on weekdays 1 and 3 (Tuesday and Thursday)
+        weekday = today.weekday()
+        if weekday == 3:
+            self.next_lecture = today
+        elif weekday in [0,1,2]:
+            td = 3-weekday
+            self.next_lecture = today + datetime.timedelta(days=td)
+        else:
+            self.next_lecture = find_next_day(today, \
+                                              des_day=3)#find next Thursday
+        return self.next_lecture
+
+
+    def previous_lecture_date(self, date=None, force_next=False):
+        today = get_valid_date(date=date, force_next=force_next)
+        #lectures are on weekdays 1 and 3 (Tuesday and Thursday)
+        weekday = today.weekday()
+        ## if weekday == 6:#Sunday --> prev. Thurs..
+        ##     self.prev_lecture = today + datetime.timedelta(days=-3)
+        if weekday in [0,1,2]:#Monday or Tuesday --> prev. Thurs.
+            delta = -3 - weekday
+        elif weekday == 3:#Wed. or Thurs. --> Tues.
+            delta = -7
+        elif weekday in [4,5,6]:#backup to Thurs.
+            delta = 3 - weekday
+        self.prev_lecture = today + datetime.timedelta(days=delta)
+        return self.prev_lecture
+
+
 class course_482(tuesday_thursday_course):
     ## def run(self, date=None, build_previous=False):
     ##     course.run(self, date=date, build_previous=build_previous)
@@ -440,14 +472,14 @@ class course_482(tuesday_thursday_course):
         self.search_pat = 'ME482_' + date_pat
 
 
-class course_IME_106(tuesday_thursday_course):
+class course_IE_106(tuesday_thursday_course):
     ## def run(self, date=None, build_previous=False):
     ##     course.run(self, date=date, build_previous=build_previous)
 
     def __init__(self, path=None, forward=False):
         if path is None:
             today = datetime.date.today()
-            path = '~/siue/classes/IME_106/' + today.strftime('%Y')#4 digit year
+            path = '~/siue/classes/IE_106/' + today.strftime('%Y')#4 digit year
             path += '/lectures/'
         #self.path = rwkos.FindFullPath(path)
         tuesday_thursday_course.__init__(self, path)
@@ -457,8 +489,8 @@ class course_IME_106(tuesday_thursday_course):
 
     def build_pat(self):
         date_pat = self.next_lecture.strftime('%m_%d_%y')
-        self.pat = 'IME106_' + date_pat + '_%0.4i.xcf'
-        self.search_pat = 'IME106_' + date_pat
+        self.pat = 'IE106_' + date_pat + '_%0.4i.xcf'
+        self.search_pat = 'IE106_' + date_pat
     
 
 class course_492(course_458):#tuesday_thursday_course):
@@ -515,7 +547,8 @@ class nonlinear_controls(tuesday_thursday_course):
         self.search_pat = 'ME592_' + date_pat
 
 
-class course_484(course_458):#<-- I am using 458 as a base class for MW classes
+#class course_484(course_458):#<-- I am using 458 as a base class for MW classes
+class course_484(tuesday_thursday_course):
     def __init__(self, path=None, forward=False):
         if path is None:
             #today = datetime.date.today()
@@ -523,11 +556,36 @@ class course_484(course_458):#<-- I am using 458 as a base class for MW classes
             path = '~/siue/classes/484/' + today.strftime('%Y')#4 digit year
             path += '/lectures/'
         #self.path = rwkos.FindFullPath(path)
-        course_458.__init__(self, path)
+        tuesday_thursday_course.__init__(self, path)
         self.course_num = '484'
         self.forward = forward
 
 
+    def build_pat(self):
+        date_pat = self.next_lecture.strftime('%m_%d_%y')
+        self.pat = 'ME484_' + date_pat + '_%0.4i.xcf'
+        self.search_pat = 'ME484_' + date_pat
+
+
+class course_592(thursday_only_course):
+    def __init__(self, path=None, forward=False):
+        if path is None:
+            #today = datetime.date.today()
+            today = get_valid_date()
+            path = '~/siue/classes/592/' + today.strftime('%Y')#4 digit year
+            path += '/lectures/'
+        #self.path = rwkos.FindFullPath(path)
+        thursday_only_course.__init__(self, path)
+        self.course_num = '592'
+        self.forward = forward
+
+
+    def build_pat(self):
+        date_pat = self.next_lecture.strftime('%m_%d_%y')
+        self.pat = 'ME592_' + date_pat + '_%0.4i.xcf'
+        self.search_pat = 'ME592_' + date_pat
+
+    
 class course_450(course_458):
     """This is a MWF class."""
     def __init__(self, path=None, forward=False):

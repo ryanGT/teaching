@@ -67,7 +67,7 @@ class section(txt_mixin.txt_list):
                     cur_grade = float(q.group(1))
                 except ValueError:
                     if verbosity > 0:
-                        print('warning, found empty grade')
+                        print('warning, found empty grade:')
                     cur_grade = 0.0
                 if grades is None:
                     grades = [cur_grade]
@@ -276,7 +276,7 @@ class quick_read(section_level_1):
 
     def __init__(self, *args, **kwargs):
         section_level_1.__init__(self, *args, **kwargs)
-        self.weight = 0.1
+        self.weight = 0.08
         self.subweights = {'Abstract':1.0, \
                            'Introduction':1.0, \
                            'Conclusion':1.0, \
@@ -306,7 +306,7 @@ class slow_read(quick_read):
 
     def __init__(self, *args, **kwargs):
         section_level_1.__init__(self, *args, **kwargs)
-        self.weight = 0.15
+        self.weight = 0.12
         self.subweights = {'Organization and Flow': 1.0, \
                            'Clarity and Tone': 1.0, \
                            'Format/Style': 1.0, \
@@ -349,6 +349,16 @@ class intro_and_problem_statement_final_report(quick_read):
                            'Design Goals': 1.0, \
                            'Constraints': 1.0, \
                            }
+
+
+class engineering_standards(quick_read):
+    def __init__(self, *args, **kwargs):
+        section_level_1.__init__(self, *args, **kwargs)
+        self.weight = 0.05
+        self.subweights = {'Standards Cited':1.0, \
+                           'Discussion': 1.0, \
+                           }
+
 
 class intro_and_bg_reading_mini_project(quick_read):
     def __init__(self, *args, **kwargs):
@@ -1356,6 +1366,29 @@ class final_report_grade_map_2012(design_report_grade_map_2011):
 
 
 
+class final_report_grade_map_2014(final_report_grade_map_2012):
+    def __init__(self):
+        self.major_sections = []#you must do this before calling the _append* methods
+
+        self._append_quick_read()
+        self._append_introduction_and_prob_statement()
+        self._append_codes_and_standards()
+        self._append_design()
+        self._append_analysis()
+        self._append_prototype_construction()
+        self._append_testing()
+        self._append_misc()
+        self._append_slow_read()
+
+
+    def _append_codes_and_standards(self):
+        title2b = 'Codes and Standards'
+        list2b = ['Standards Cited', \
+                  'Discussion']
+
+        self.append_required([title2b], [list2b])
+
+
 class mini_project_report_map(proposal_grade_map_2011):
     def __init__(self):
         self.major_sections = []#you must do this before calling the _append* methods
@@ -2033,6 +2066,21 @@ weight_dict_final_report_2012 = {'Writing: Quick Read':0.1, \
                                   #'Penalty':group_rst_parser.penalty, \
                                  }
 
+
+weight_dict_final_report_2014 = {'Writing: Quick Read':0.08, \
+                                 'Introduction and Problem Statement':0.1, \
+                                 'Codes and Standards':0.05, \
+                                 'Design': 0.2, \
+                                 'Analysis': 0.2, \
+                                 'Prototype Construction': 0.1, \
+                                 'Testing': 0.1, \
+                                 'Miscellaneous': 0.05, \
+                                 'Writing: Slow Read':0.12, \
+                                  #'Extra Credit':group_rst_parser.extra_credit, \
+                                  #'Penalty':group_rst_parser.penalty, \
+                                 }
+
+
 final_report_ordered_keys = ['Writing: Quick Read', \
                              'Introduction and Problem Statement', \
                              'Design', \
@@ -2046,7 +2094,7 @@ final_report_ordered_keys = ['Writing: Quick Read', \
 
 
 class final_report(design_report):
-    def __init__(self, pathin, weight_dict=weight_dict_final_report_2012, \
+    def __init__(self, pathin, weight_dict=weight_dict_final_report_2014, \
                  ordered_keys=final_report_ordered_keys, \
                  **kwargs):
         design_report.__init__(self, pathin, weight_dict=weight_dict, \
@@ -2122,8 +2170,8 @@ class presentation_with_appearance(group_with_rst):
 #    Slides
 #    Listening to and Answering Questions
 
-    def __init__(self, pathin, max_time=15.0, \
-                 min_time=5.0, grace=0.25, \
+    def __init__(self, pathin, max_time=9.0, \
+                 min_time=7.0, grace=0.25, \
                  **kwargs):
         group_with_rst.__init__(self, pathin, **kwargs)
         self.max_time = max_time
@@ -2141,6 +2189,7 @@ class presentation_with_appearance(group_with_rst):
 
     def calc_overall_score(self):
         self.overall_grade = 0.0
+        #Pdb().set_trace()
         for key, weight in self.weight_dict.iteritems():
             cursec = self.find_section(key)
             self.overall_grade += weight*cursec.grade
@@ -2156,6 +2205,8 @@ class presentation_with_appearance(group_with_rst):
             self.overall_grade *= multiplier
             print('after penalty, overall_grade='+str(self.overall_grade))
 
+        self.overall_grade += self.time_penalty
+        
         return self.overall_grade
 
 
@@ -2292,12 +2343,14 @@ class proposal_presentation_no_appearance(update_presentation):
         time_str = self.find_time_string(time_lines)
         time = self.parse_time_string(time_str)
         penalty = 0.0
-        if time > 11.251:
-            num_steps = int((time-11.0)/0.25)
-            penalty = -0.075*num_steps
-        elif time < 8.849:
-            num_steps = int((9.0-time)/0.25)
-            penalty = -0.075*num_steps
+        #pen_per = -0.075#normal penalty
+        pen_per = -0.03#penalty per unit time step
+        if time > 12.251:
+            num_steps = int((time-12.0)/0.25)
+            penalty = pen_per*num_steps
+        elif time < 7.849:
+            num_steps = int((8.0-time)/0.25)
+            penalty = pen_per*num_steps
         self.time_penalty = penalty
 
 

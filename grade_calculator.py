@@ -100,4 +100,12 @@ class ME484(grade_calculator):
         self.grades_out = grades_out
         
 
+class ME458(grade_calculator):
+    def calc_grades(self):
+        grades_out = 0.05*10*self.HW_Average + \
+                     0.2*10*self.Lab_Ave + \
+                     0.25*10*self.Quiz_Average + \
+                     0.25*self.Midterm + \
+                     0.25*self.Final_Exam
+        self.grades_out = grades_out
 

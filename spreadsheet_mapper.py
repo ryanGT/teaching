@@ -1,5 +1,6 @@
 import txt_mixin, os, txt_database
-from numpy import where, zeros, array, append, column_stack, row_stack
+from numpy import where, zeros, array, append, column_stack, row_stack, \
+     delete
 from delimited_file_utils import open_delimited_with_sniffer_and_check
 
 import copy
@@ -85,7 +86,27 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
         search_list = ['First Name','Firstname','FName']
         return self._search_for_first_match(search_list)
 
+    def _find_nick_name_col(self):
+        search_list = ['Nick Name','Please Call Me']
+        return self._search_for_first_match(search_list)
     
+
+    def replace_firstnames_with_nicknames(self):
+        nick_name_col = self._find_nick_name_col()
+        self.nick_name_col = nick_name_col
+        if nick_name_col is None:
+            #do nothing
+            return
+        self.nicknames = self.data[:,self.nick_name_col]
+
+        for i, nickname in enumerate(self.nicknames):
+            if nickname:
+                self.firstnames[i] = nickname
+                #I think this is redundant and unnecessary
+                self.data[i,self.firstnamecol] = nickname
+                #this is not redundant, and I believe it is necessary
+                self.new_data[i,self.firstnamecol] = nickname
+                
         
     def _set_name_cols(self):
         test_bool = self.labels[0:2] == ['Last Name','First Name']
@@ -103,6 +124,20 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
             assert firstcol is not None, "Could not find a firstname column label."
             self.firstnamecol = firstcol
 
+
+    def delete_column(self, index):
+        """Delete column index from self.data and from self.labels"""
+        temp_data = delete(self.data, index, 1)
+        temp_labels = delete(self.labels, index)
+        self.data = temp_data
+        self.labels = temp_labels
+
+
+    def delete_new_column(self, index):
+        """Delete column index from self.data and from self.labels"""
+        delete(self.new_data, index, 1)
+        delete(self.new_labels, index)
+        
     
     def _get_labels_and_data(self):
         self.labels = self.array[0]
@@ -156,16 +191,29 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
         mylist = [None]*N
 
         for key, ind in self.rowdict.iteritems():
+            value = None
             if source_sheet.valuesdict.has_key(key):
                 value = source_sheet.valuesdict[key]
             else:
-                #try only first initial
+                #try only first initial or nick name
                 last, first = key.split(',',1)
                 alt_key = last + ',' + first[0:1] + '.'
+                nick_name_col = self._find_nick_name_col()
+                if nick_name_col is not None:
+                    nickname = self.data[ind,nick_name_col]
+                    nick_key = last + ',' + nickname
+                else:
+                    nick_key = None
+                    
                 if source_sheet.valuesdict.has_key(alt_key):
                     value = source_sheet.valuesdict[alt_key]
-                else:
-                    raise KeyError, 'cannot find %s or %s in source_sheet.valuesdict' % (key, alt_key)
+                elif (nick_key is not None and source_sheet.valuesdict.has_key(nick_key)):
+                    value = source_sheet.valuesdict[nick_key]
+
+                if value is None:
+                    raise KeyError, 'cannot find %s or %s or %s in source_sheet.valuesdict' % \
+                          (key, alt_key, nick_key)
+                
             if func is not None:
                 value = func(value)
             mylist[ind] = value
@@ -174,7 +222,8 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
         
         if attr is None:
             attr = label
-            setattr(self, attr, myarray)
+
+        setattr(self, attr, myarray)
 
         new_labels = append(self.labels, label)
         new_data = column_stack([self.data, myarray])
@@ -183,7 +232,7 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
         self.new_data = new_data
 
 
-    def map_from_path(self, pathin, sourcecollabel, destlabel, \
+    def map_from_path(self, pathin, sourcecollabel, destlabel=None, \
                       attr=None, \
                       source_class=None):
         """This is a convienence function for using map_from_source.
@@ -192,6 +241,8 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
         common task.  The method combines those 4 things into one."""
         if source_class is None:
             source_class = source_spreadsheet_first_and_lastnames
+        if destlabel is None:
+            destlabel = sourcecollabel
         source_sheet = source_class(pathin,sourcecollabel=sourcecollabel)
         self.map_from_source(source_sheet,destlabel, attr=attr)
         self.replace_with_new()
@@ -202,8 +253,9 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
         self.labels = self.new_labels
 
 
-    def save(self, output_path, delim=None):
-        self.replace_with_new()
+    def save(self, output_path, delim=None, replace=True):
+        if replace:
+            self.replace_with_new()
         out_mat = row_stack([self.labels, self.data])
         txt_mixin.delimited_txt_file.save(self, pathout=output_path, \
                                           array=out_mat, \
@@ -267,8 +319,8 @@ class group_delimited_grade_spreadsheet(delimited_grade_spreadsheet):
     """This is the group version of delimited_grade_spreadsheet where
     only the group name is needed and firstnames are irrelevant."""
     def _set_name_cols(self):
-        test_bool = self.labels[0:1] == ['Group Name']
-        assert test_bool.all(), \
+        test_bool = self.labels[0] in ['Group Name','Team Name']
+        assert test_bool, \
                "source_spreadsheet_first_and_lastnames file violates the name expectations of column 0 for a group sheet"
         self.lastnamecol = 0
         self.firstnamecol = None
@@ -303,11 +355,14 @@ class group_delimited_grade_spreadsheet(delimited_grade_spreadsheet):
         self.rowdict = dict(zip(self.keys, self.inds))
 
 
-    def map_from_path(self, pathin, sourcecollabel, destlabel, \
+    def map_from_path(self, pathin, sourcecollabel, destlabel=None, \
                       attr=None, \
                       source_class=None):
         if source_class is None:
             source_class = group_source_spreadsheet
+
+        if destlabel is None:
+            destlabel = sourcecollabel
         
         return delimited_grade_spreadsheet.map_from_path(self, pathin, sourcecollabel, destlabel, \
                                                          attr=attr, source_class=source_class)

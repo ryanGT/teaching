@@ -11,13 +11,13 @@ reload(group_rst_parser)
 
 import copy
 
-import spring_2013_484
-course_module = spring_2013_484
+import fall_2014_484
+course_module = fall_2014_484
 #reload(spring_2013_484)
 
 #import fall_2009_482
 
-project_names = spring_2013_484.group_list.Project_Name
+project_names = course_module.group_list.Project_Name
 #project_names = fall_2009_482.group_list.Project_Name
 ## project_names = ['Motorized Hand Truck', \
 ##                  'Cougar Baja',
@@ -316,24 +316,24 @@ if __name__ == '__main__':
     if case == 1:
         areas = ['Attendance', \
                  'Participation']
-        course_path = rwkos.FindFullPath('siue/classes/482/2012/')
+        course_path = rwkos.FindFullPath('siue/classes/482/Spring_2014/')
         bb_in_name = 'bb_my_factors_white_papers.csv'
         outname = 'assessment_from_482_team_member_ratings.csv'
 
-        folder = rwkos.FindFullPath('siue/classes/482/2012/team_ratings/final_482_ratings/ind_csv')
+        folder = rwkos.FindFullPath('siue/classes/482/Spring_2014/team_ratings/final_482_ratings/ind_csv')
 
     else:
         areas = ['Teamwork', \
                  'Technical Contribution', \
                  'Project Management', \
                  'Contribution of Ideas']
-        course_path = rwkos.FindFullPath('siue/classes/484/2013/')
+        course_path = rwkos.FindFullPath('siue/classes/484/Fall_2014')
         bb_in_name = 'bb_my_factors.csv'
         outname = 'assessment_from_484_team_member_ratings.csv'
 
-        folder = rwkos.FindFullPath('siue/classes/484/2013/team_member_ratings/ind_csv')
+        folder = rwkos.FindFullPath('siue/classes/484/Fall_2014/team_member_ratings/ind_csv')
 
-    outfolder = rwkos.FindFullPath('siue/classes/484/2013/')
+    outfolder = rwkos.FindFullPath('siue/classes/484/Fall_2014/')
 
         ## 'Accuracy',
         ## 'Dependability',
