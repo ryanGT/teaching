@@ -21,7 +21,11 @@ def bode_plot(freq, dB_mag, phase, fig=None, fignum=1, clear=True, xlim=None, \
     if clear:
         fig.clf()
 
-    ax = fig.add_subplot(211)
+    if len(fig.axes) > 1:
+        ax = fig.axes[0]
+    else:
+        ax = fig.add_subplot(211)
+        
     ax.semilogx(freq, dB_mag, fmt, label=label, **kwargs)
     ax.set_ylabel('dB Mag.')
 
@@ -31,7 +35,12 @@ def bode_plot(freq, dB_mag, phase, fig=None, fignum=1, clear=True, xlim=None, \
     if xlim:
         ax.set_xlim(xlim)
 
-    ax2 = fig.add_subplot(212)
+
+    if len(fig.axes) > 1:
+        ax2 = fig.axes[1]
+    else:
+        ax2 = fig.add_subplot(212)
+
     ax2.semilogx(freq, phase, fmt, label=label, **kwargs)
     ax2.set_ylabel('Phase (deg.)')
     ax2.set_xlabel('Freq. (Hz)')

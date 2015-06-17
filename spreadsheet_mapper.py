@@ -1,9 +1,11 @@
 import txt_mixin, os, txt_database
 from numpy import where, zeros, array, append, column_stack, row_stack, \
      delete
+import numpy
 from delimited_file_utils import open_delimited_with_sniffer_and_check
 
 import copy
+
 
 #########################################################################
 #
@@ -42,6 +44,42 @@ def clean_quotes(stringin):
 def strip(stringin):
     stringout = stringin.strip()
     return stringout
+
+
+def fix_student_names(csvin):
+    """CATME csv files use 'Student Name' as the label and 'Last,
+    First' as the name column.  This function breaks that into seperate last and
+    first columns and rewrites the csv file."""
+    #Last Name	First Name
+    mydb = txt_database.db_from_file(csvin)
+    lower_labels = [item.lower() for item in mydb.labels]
+    mylist = ['last name', 'lastname', 'lname']
+    for label in mylist:
+        if label in lower_labels:
+            #exit now
+            return
+        
+    #keep going only if we didn't find a last name column
+    if "Student Name" not in mydb.labels:
+        #problem, bail
+        raise KeyError, "did not find 'Student Name' in column labels"
+
+    student_names = mydb.Student_Name
+    last_names = []
+    first_names = []
+
+    for name in student_names:
+        last, first = name.split(',',1)
+        last = last.strip()
+        first = first.strip()
+        last_names.append(last)
+        first_names.append(first)
+        
+    new_data = column_stack([last_names, first_names, mydb.data])
+    new_labels = numpy.append(["Last Name", "First Name"], mydb.labels)
+    mydb.data = new_data
+    mydb.labels = new_labels
+    mydb.save(csvin, delim=',')
 
 
 class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
@@ -211,8 +249,11 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
                     value = source_sheet.valuesdict[nick_key]
 
                 if value is None:
-                    raise KeyError, 'cannot find %s or %s or %s in source_sheet.valuesdict' % \
-                          (key, alt_key, nick_key)
+                    if last == 'AAStudent':
+                        value = -1
+                    else:
+                        raise KeyError, 'cannot find %s or %s or %s in source_sheet.valuesdict' % \
+                              (key, alt_key, nick_key)
                 
             if func is not None:
                 value = func(value)

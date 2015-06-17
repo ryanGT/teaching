@@ -343,7 +343,7 @@ class classlist_parser(txt_mixin.txt_file_with_list):
         big_list.sort(key=lambda item: item[name_col])
         self.array = array(big_list)
         self.assign_cols_to_attrs()
-        self.parse_names()
+        self.parse_names(force=True)
         self.parse_emails()
         
         
