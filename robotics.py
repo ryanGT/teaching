@@ -3,6 +3,15 @@ from scipy import *
 deg_to_rad = pi/180.0
 rad_to_deg = 180.0/pi
 
+
+def clean_small_floats(matin, tol=1e-6):
+    """Replace all entries whose absolute value is smaller than tol
+    with 0.0"""
+    rows, cols = where(abs(matin) < 1e-6)
+    matin[rows,cols] = 0.0
+    return matin
+
+
 def cosd(theta):
     theta_r = theta*deg_to_rad
     return cos(theta_r)
