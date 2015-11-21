@@ -1,5 +1,5 @@
 import datetime, os, rwkos, sys, copy, rwkmisc, time, rst_creator, \
-       rst_utils, shutil, pdb
+       rst_utils, shutil, pdb, glob
 
 reload(rst_utils)
 
@@ -9,7 +9,7 @@ reload(rst_utils)
 #firstday = datetime.date(2012, 1, 9)
 #firstday = datetime.date(2013, 1, 7)
 #firstday = datetime.date(2013, 5, 20)
-firstday = datetime.date(2015, 6, 8)
+firstday = datetime.date(2015, 8, 24)
 
 import pdb
 import txt_mixin
@@ -30,6 +30,68 @@ lecture_outline_css_path = rwkos.FindFullPath('git/report_generation/lecture_out
 rst_list = txt_mixin.txt_list([])
 #replaceall(self, findpat, rep, forcestart=0):
 
+
+def list_pdfs_find_handout(pdf_files):
+    """Given a list of pdfs from a glob search of a directory, find
+    the _handout.pdf file and remove it corresponding non-handout file
+    if found.  Return the handout file name and the rest of the pdf
+    files."""
+    pdflist = txt_mixin.txt_list(pdf_files)
+    handout_pat = '_handout.pdf'
+    handoutinds = pdflist.findall(handout_pat)
+
+    if len(handoutinds) == 1:
+        handoutfile = pdflist[handoutinds[0]]
+        non_handout_name = handoutfile.replace('_handout','')
+        non_handout_inds = pdflist.findall(non_handout_name)
+        if len(non_handout_inds) == 1:
+            pdflist.pop(non_handout_inds[0])
+
+        handout_name = handoutfile
+        listout = []
+        # pop the handoutfile from the original list
+        handoutind = pdflist.find(handoutfile)
+        pdflist.pop(handoutind)
+        listout.extend(pdflist)
+    else:
+        handout_name = None
+        listout = pdflist
+        
+    return handout_name, listout
+
+
+
+def list_lecture_files(root_dir, other_exts=['*.py','*.m','*.csv','*.txt']):
+    """Make list of relevant files to copy from a lecture prep source
+    dir to the actual lecture date dir for the website."""
+    def myglob(ext):
+        """glob in root dir"""
+        if '.' not in ext:
+            ext = '.' + ext
+        if '*' not in ext:
+            ext = '*' + ext
+        pat  = os.path.join(root_dir, ext)
+        filelist = glob.glob(pat)
+        return filelist
+    
+    pdflist = myglob('*.pdf')
+    handout_name, other_pdfs = list_pdfs_find_handout(pdflist)
+    if handout_name is not None:
+        all_pdfs = [handout_name] + other_pdfs
+    else:
+        all_pdfs = other_pdfs
+
+    all_items = all_pdfs
+
+    for ext in other_exts:
+        curfiles = myglob(ext)
+        if curfiles:
+            all_items.extend(curfiles)
+
+    return all_items
+
+
+    
 def date_string_to_datetime(string):
     """Convert a date of the format mm/dd/yy to a datetime object.
     Using spaces or underscores in place of /'s is tolerated."""
@@ -90,7 +152,7 @@ class course(object):
 
 
     def build_lecture_path_string(self, date=None):
-        if not hasattr(self, 'date_str'):
+        if (date is not None) or (not hasattr(self, 'date_str')):
             self.format_date(date=date)
         self.lecture_path = os.path.join(self.path, self.date_str)
         return self.lecture_path
@@ -118,7 +180,6 @@ class course(object):
         self.exclude_path = os.path.join(self.lecture_path, 'exclude')
         if not os.path.exists(self.exclude_path):
             os.mkdir(self.exclude_path)
-
 
     def create_one_rst(self, title='Outline'):
         #make this create only if it doens't exist!!!
@@ -314,7 +375,7 @@ class course_458(course):
     def __init__(self, path=None, forward=False):
         if path is None:
             today = datetime.date.today()
-            path = '~/siue/classes/458/' + today.strftime('%Y')#4 digit year
+            path = '~/siue/classes/Fall_2015/458_Fall_2015'
             path += '/lectures/'
         course.__init__(self, path)
         ## self.path = rwkos.FindFullPath(path)
@@ -585,8 +646,29 @@ class course_592(thursday_only_course):
         self.pat = 'ME592_' + date_pat + '_%0.4i.xcf'
         self.search_pat = 'ME592_' + date_pat
 
+
+class course_450_tr(tuesday_thursday_course):
+    """450 offered on Tuesdays and Thursdays"""
+    def __init__(self, path=None, forward=True):
+        if path is None:
+            today = datetime.date.today()
+            #path = '~/siue/classes/450/' + today.strftime('%Y')#4 digit year
+            path = '~/siue/classes/Fall_2015/450_Fall_2015'
+            path += '/lectures/'
+        #self.path = rwkos.FindFullPath(path)
+        tuesday_thursday_course.__init__(self, path)
+        self.forward = forward
+        self.course_num = '450'
+
+
+    def build_pat(self):
+        date_pat = self.next_lecture.strftime('%m_%d_%y')
+        self.pat = 'ME450_' + date_pat + '_%0.4i.xcf'
+        self.search_pat = 'ME450_' + date_pat
+
+
     
-class course_450(course_458):
+class course_450_mwf(course_458):
     """This is a MWF class."""
     def __init__(self, path=None, forward=False):
         if path is None:

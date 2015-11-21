@@ -113,6 +113,8 @@ class classlist_puller(object):
 
 
     def pull(self):
+        if not hasattr(self, 'pathout'):
+            self.build_filename()
         self._build_cmd()
         os.system(self.cmd)
 

@@ -1,7 +1,18 @@
 from matplotlib.pyplot import *
 from numpy import *
 
+import control
+
 font_size = 20.0
+
+def my_rlocus(G, k):
+    rmat, kout = control.root_locus(G, k, Plot=False)
+    plot(real(rmat), imag(rmat))
+    poles = G.pole()
+    plot(real(poles), imag(poles), 'x')
+    zeros = G.zero()
+    if zeros:
+        plot(real(zeros), imag(zeros), 'o')
 
 def TF_mag(G, s1):
     """Find the magnitude of transfer function G at point s1.  G is

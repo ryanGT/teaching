@@ -44,10 +44,16 @@ def save_case(filename, A, B):
 if __name__ == '__main__':
     #folder = rwkos.FindFullPath('mechatronics_2009/homework/encoders')
     #folder = rwkos.FindFullPath('/Users/rkrauss/siue/classes/458/Fall_2014/homework/encoders/')
-    folder = rwkos.FindFullPath('/Users/rkrauss/siue/classes/458/Fall_2014/quizzes/quiz_4/')
+    #folder = rwkos.FindFullPath('/Users/rkrauss/458_Fall_2015/prep/lecture_15_Encoders/')
+    folder = rwkos.FindFullPath('/Users/rkrauss/458_Fall_2015/quizzes/quiz_04/')
     #folder = rwkos.FindFullPath('~/458_2012/final_exam/figs')
     outpat = 'encoders_case_%0.2d.txt'
 
+    # case 1 lecture example
+    A_list = [0.1, 0.3, 0.7, 0.9]
+    B_list = [0.2, 0.4, 0.6, 0.8]
+    case = 1
+    
 ##     # case 11
 ##     case = 11
 ##     A_list = [0.1, 0.3, 0.7, 0.9]
@@ -59,9 +65,9 @@ if __name__ == '__main__':
 ##     save_case(outpath, A, B)
 
 ##     # case 12
-    case = 93
-    A_list = [0.4, 0.6, 0.8, 0.9]
-    B_list = [0.2, 0.3, 0.5, 0.7]
+## case = 93
+## A_list = [0.4, 0.6, 0.8, 0.9]
+## B_list = [0.2, 0.3, 0.5, 0.7]
 ##     A, B = create_case(A_list, B_list, 1, 0)
 ##     plot_case(A, B, case)
 ##     curname = outpat % case
@@ -81,20 +87,20 @@ if __name__ == '__main__':
 ##     #save_case(outpath, A, B)
 
     ## # case 14
-    ## case = 14
-    ## A_list = [0.1, 0.3, 0.5, 0.7, 0.8]
-    ## B_list = [0.2, 0.4, 0.6, 0.9]
-    ## A, B = create_case(A_list, B_list, 1, 0)
-    ## plot_case(A, B, fignum=case, bsty='--', linewidth=2.0)
-    ## ylim([-0.1,1.3])
-    ## legend(['A','B'])
-    ## curname = outpat % case
-    ## fno, ext = os.path.splitext(curname)
-    ## pdfname = fno + '.pdf'
-    ## pdfpath = os.path.join(folder, pdfname)
-    ## outpath = os.path.join(folder, curname)
-    ## save_case(outpath, A, B)
-    ## pylab_util.mysave(pdfpath)
+    case = 14
+    A_list = [0.1, 0.3, 0.5, 0.7, 0.8]
+    B_list = [0.2, 0.4, 0.6, 0.9]
+    A, B = create_case(A_list, B_list, 1, 0)
+    plot_case(A, B, fignum=case, bsty='--', linewidth=2.0)
+    ylim([-0.1,1.3])
+    legend(['A','B'])
+    curname = outpat % case
+    fno, ext = os.path.splitext(curname)
+    pdfname = fno + '.pdf'
+    pdfpath = os.path.join(folder, pdfname)
+    outpath = os.path.join(folder, curname)
+    save_case(outpath, A, B)
+    pylab_util.mysave(pdfpath)
 
 
     # case 15
@@ -106,22 +112,22 @@ if __name__ == '__main__':
     ## B_list = [0.1, 0.3, 0.5, 0.8]
     ## A_list = [0.2, 0.4, 0.6, 0.7]
 
-    A, B = create_case(A_list, B_list, 1, 0)
-    A_shift = A + 0.0075
-    plot_case(A_shift, B, fignum=case, bsty='--', linewidth=2.0)
-    grid(1)
-    ylim([-0.1,1.3])
-    legend(['A','B'])
-    curname = outpat % case
+    ## A, B = create_case(A_list, B_list, 0, 0)
+    ## A_shift = A + 0.0075
+    ## plot_case(A_shift, B, fignum=case, bsty='--', linewidth=2.0)
+    ## grid(1)
+    ## ylim([-0.1,1.3])
+    ## legend(['A','B'])
+    ## curname = outpat % case
 
-    resave = 1
+    ## resave = 1
 
-    if resave:
-        fno, ext = os.path.splitext(curname)
-        pdfname = fno + '.pdf'
-        pdfpath = os.path.join(folder, pdfname)
-        outpath = os.path.join(folder, curname)
-        save_case(outpath, A, B)
-        pylab_util.mysave(pdfpath)
+    ## if resave:
+    ##     fno, ext = os.path.splitext(curname)
+    ##     pdfname = fno + '.pdf'
+    ##     pdfpath = os.path.join(folder, pdfname)
+    ##     outpath = os.path.join(folder, curname)
+    ##     save_case(outpath, A, B)
+    ##     pylab_util.mysave(pdfpath)
 
     show()
