@@ -116,12 +116,12 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
 
 
     def _find_last_name_col(self):
-        search_list = ['Last Name','Lastname','LName']
+        search_list = ['Last Name','Lastname','LName','lastname','last name']
         return self._search_for_first_match(search_list)
 
 
     def _find_first_name_col(self):
-        search_list = ['First Name','Firstname','FName']
+        search_list = ['First Name','Firstname','FName','firstname','first name']
         return self._search_for_first_match(search_list)
 
     def _find_nick_name_col(self):
