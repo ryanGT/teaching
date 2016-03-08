@@ -2354,6 +2354,21 @@ class proposal_presentation_no_appearance(update_presentation):
         self.time_penalty = penalty
 
 
+class proposal_presentation_no_appearance_no_time_penalty(proposal_presentation_no_appearance):
+    def get_timing_grade(self):
+        time_lines = self.get_time_lines()
+        time_str = self.find_time_string(time_lines)
+        time = self.parse_time_string(time_str)
+        penalty = 0.0
+        ## if time > 7.45:
+        ##     num_steps = int((time-7.0)/0.5)
+        ##     penalty = -0.15*num_steps
+        ## elif time < 4.55:
+        ##     num_steps = int((5.0-time)/0.5)
+        ##     penalty = -0.15*num_steps
+        self.time_penalty = penalty
+                                                          
+
 class mini_project_presentation(update_presentation):
     def get_timing_grade(self):
         time_lines = self.get_time_lines()
