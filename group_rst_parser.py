@@ -1861,7 +1861,7 @@ class proposal(group_with_rst):
         for key, weight in self.weight_dict.iteritems():
             cursec = self.find_section(key)
             if cursec is not None:
-                self.overall_grade += weight*cursec.grade*10.0
+                self.overall_grade += weight*cursec.grade*20.0
         ec = self.find_section('Extra Credit')
         if ec is not None:
             print('before ec, overall_grade='+str(self.overall_grade))
@@ -1888,7 +1888,7 @@ class proposal(group_with_rst):
         self.team_rst.append('')
         overall_title = mysecdec('Overall Grade')
         self.team_rst.extend(overall_title)
-        formula_line = '10*(0.5*(Contemporary Issues) + ' + \
+        formula_line = '20*(0.5*(Contemporary Issues) + ' + \
                        '0.2*(Quick Read Weighted Average) + ' + \
                        '0.25*(Slow Read Weighted Average) + ' + \
                        '0.5*(Content Weighted Average))'
@@ -1976,7 +1976,7 @@ class proposal(group_with_rst):
             weight = self.weight_dict[key]
             if first:
                 first = 0
-                eq_out(r'\textrm{grade} = 10 & \left( \myrule \right. %s (\textrm{%s}) \\' % (weight, key))
+                eq_out(r'\textrm{grade} = 20 & \left( \myrule \right. %s (\textrm{%s}) \\' % (weight, key))
             else:
                 last = False
                 if i == N-1:
