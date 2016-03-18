@@ -1636,6 +1636,7 @@ class group_with_rst(group, section):
             labels.extend(section.get_labels())
         self.labels = labels
         self.labels.append('Overall Score')
+        self.labels.append('Percentage')
         return self.labels
 
 
@@ -2223,6 +2224,9 @@ class presentation_with_appearance(group_with_rst):
         ##     row_out.append(0.0)
         overall = self.calc_overall_score()
         row_out.append(overall)
+        if overall <= 5.0:
+            row_out.append(overall*20)#percentage assuming 0-5 point
+                                      #scale, Spring 2016
         row_out.insert(self.time_ind+1, self.time_penalty)
         self.row_out = row_out
         return self.row_out
