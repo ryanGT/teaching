@@ -2171,7 +2171,7 @@ class presentation_with_appearance(group_with_rst):
 #    Slides
 #    Listening to and Answering Questions
 
-    def __init__(self, pathin, max_time=9.0, \
+    def __init__(self, pathin, max_time=11.0, \
                  min_time=7.0, grace=0.25, \
                  **kwargs):
         group_with_rst.__init__(self, pathin, **kwargs)
