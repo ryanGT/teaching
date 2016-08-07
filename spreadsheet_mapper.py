@@ -5,7 +5,7 @@ import numpy
 from delimited_file_utils import open_delimited_with_sniffer_and_check
 
 import copy
-
+import csv
 
 #########################################################################
 #
@@ -62,7 +62,7 @@ def fix_student_names(csvin):
     #keep going only if we didn't find a last name column
     if "Student Name" not in mydb.labels:
         #problem, bail
-        raise KeyError, "did not find 'Student Name' in column labels"
+        raise(KeyError, "did not find 'Student Name' in column labels")
 
     student_names = mydb.Student_Name
     last_names = []
@@ -183,7 +183,7 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
 
 
     def clean_quotes(self,vect):
-        vectout = map(clean_quotes, vect)
+        vectout = list(map(clean_quotes, vect))
         return vectout
 
 
@@ -228,9 +228,9 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
         N = len(self.inds)
         mylist = [None]*N
 
-        for key, ind in self.rowdict.iteritems():
+        for key, ind in self.rowdict.items():
             value = None
-            if source_sheet.valuesdict.has_key(key):
+            if key in source_sheet.valuesdict:
                 value = source_sheet.valuesdict[key]
             else:
                 #try only first initial or nick name
@@ -252,8 +252,9 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
                     if last == 'AAStudent':
                         value = -1
                     else:
-                        raise KeyError, 'cannot find %s or %s or %s in source_sheet.valuesdict' % \
-                              (key, alt_key, nick_key)
+                        raise(KeyError, \
+                              'cannot find %s or %s or %s in source_sheet.valuesdict' % \
+                              (key, alt_key, nick_key))
                 
             if func is not None:
                 value = func(value)
@@ -294,13 +295,17 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
         self.labels = self.new_labels
 
 
-    def save(self, output_path, delim=None, replace=True):
+    def save(self, output_path, delim=',', replace=True):
         if replace:
             self.replace_with_new()
         out_mat = row_stack([self.labels, self.data])
-        txt_mixin.delimited_txt_file.save(self, pathout=output_path, \
-                                          array=out_mat, \
-                                          delim=delim)
+        with open(output_path, 'w') as f:
+            writer = csv.writer(f)
+            writer.writerows(out_mat)
+
+        ## txt_mixin.delimited_txt_file.save(self, pathout=output_path, \
+        ##                                   array=out_mat, \
+        ##                                   delim=delim)
 
 
     def __init__(self, pathin=None, lastnamecol=0, firstnamecol=1, \
