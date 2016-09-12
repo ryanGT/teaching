@@ -18,9 +18,11 @@ from IPython.core.debugger import Pdb
 mod_debug = 1#debug print statements for the module
 
 import copy
+import pathlib
 
 banner_id_pat = re.compile('(800[0-9]+)')
 
+gnum_pat = re.compile('G[0-9]+')
 
 def semester_str_to_pretty_str(semester_in):
     """Convert strings like '201435' to something pretty and easy to
@@ -435,6 +437,11 @@ class classlist_parser(txt_mixin.txt_file_with_list):
 
 def process_one_table_row(row_list, delim='|'):
     rowstr = ''
+
+    def rowstr_append(rowstr, text):
+        rowstr += text + delim
+        return rowstr
+    
     for td in row_list:
         text = None
         if td.find(text=True):
@@ -442,13 +449,23 @@ def process_one_table_row(row_list, delim='|'):
             text = text.replace('&nbsp',' ')
             text = text.replace(u'\xa0', u' ')
             text = text.strip()
-            rowstr += text + delim
+            rowstr = rowstr_append(rowstr, text)
+
+
+        test = td.select('a[href^=mailto]')
+        if test:
+            link = test[0].attrs['href'].strip()
+            assert link.find('mailto:') == 0, "Problem with href str: %s" % link
+            junk, email_str = link.split(':',1)
+            rowstr = rowstr_append(rowstr, email_str)
 
     return rowstr
 
 
 def transcript_html_to_txt_list(filename, delim='|'):
-    soup = BeautifulSoup(open(filename))
+    #soup = BeautifulSoup(open(filename))
+    soup = BeautifulSoup(open(filename), "html.parser")
+    #markup_type=markup_type))
 
     body = soup.body
     rows = body.findAll('tr')
@@ -492,7 +509,9 @@ class transcript_html_parser(object):
         self.txt_filename = fno + '.txt'
 
         self.txt_list = transcript_html_to_txt_list(self.html_path)
-
+        if type(self.txt_list[0]) == bytes:
+            str_list = [item.decode('utf-8') for item in self.txt_list]
+            self.txt_list = str_list
 
 
 class class_schedule_parser(txt_mixin.txt_file_with_list):
@@ -819,8 +838,8 @@ class transcript_txt_parser(txt_mixin.txt_file_with_list):
             if len(course_list) == 8:
                 linesout.append(course_row)
             elif len(course_list) != 6:
-                raise ValueError, "problem with this course_list: " + \
-                      str(course_list)
+                raise(ValueError, "problem with this course_list: " + \
+                      str(course_list))
 
         return linesout
 
@@ -1363,7 +1382,7 @@ class transcript_txt_parser(txt_mixin.txt_file_with_list):
         debug = 1
         if debug:
             for line in ME_299_plus_lines:
-                print line
+                print(line)
                 
         if len(ME_299_plus_lines) > 0:
             self.ME_299_plus_gpa = self.gpa_from_list_of_lines(self.ME_299_plus_lines)
@@ -1499,7 +1518,7 @@ class batch_processor_for_transcripts(object):
         elif len(curfiles) == 1:
             return True
         else:
-            raise ValueError, "found more than one match for " + glob_pat
+            raise(ValueError, "found more than one match for " + glob_pat)
 
 
     def check_for_txt_trans(self, id_str):
@@ -1618,3 +1637,153 @@ def pop_former_probation_names_from_new_list(newlist, oldlist):
 
     return outlist
 
+
+class detailed_classlist_parser(txt_mixin.txt_file_with_list):
+    """Class to parse a txt list that contains a detailed class list
+    from Banner - GVSU.  If a detailed class list is saved as html, it
+    can be reasonably parsed using transcript_html_parser above.  In
+    the resulting txt output, each new student recordt begins with a
+    line that starts with Record| and the following line starts with
+    digits followed by |.  The digits correspond to the students
+    alphabetical position in the class roster:
+
+    Record|Student Name|ID|Registration Status|Registration Number|
+    1|Lastname, Firstname|G-number|**Web Registered**|27
+
+    before the next record line should be a lines containing their
+    major and proram:
+
+    Program:|blah-blah-blah
+    Major:|Product Dsgn & Mfg Engineering"""
+    def break_into_student_lists(self):
+        if not hasattr(self, "record_rows"):
+            self.find_record_start_rows()
+            
+        raw_student_list = []
+        N = len(self.record_rows)
+        
+        for i in range(N):
+            start_ind = self.record_rows[i] + 1
+            if i < N-1:
+                end_ind = self.record_rows[i+1]
+            else:
+                end_ind = -1
+            curlist = self.list[start_ind:end_ind]
+            raw_student_list.append(curlist)
+
+        self.raw_student_list = raw_student_list
+        return raw_student_list
+
+
+    def clean_student_list(self):
+        clean_list = []
+        for curlist in self.raw_student_list:
+            curfilter = filter(None, curlist)
+            outlist = list(curfilter)
+            clean_list.append(outlist)
+
+        self.clean_student_list = clean_list
+        
+
+    def process_one_student_list(self, listin):
+        outdict = {}
+        line1 = listin[0]
+        line1_list = line1.split('|')
+        student_num = int(line1_list[0])
+        outdict['student_num'] = student_num
+        fullname = line1_list[1]
+        outdict['fullname'] = fullname
+        gnum = line1_list[2]
+        q = gnum_pat.match(gnum)
+        assert q is not None, "Problem with G number: %s" % gnum
+        outdict['G Number'] = gnum
+        email = line1_list[-1]
+        assert email.find('@mail.gvsu.edu') > -1, "email problem: %s" % email
+        outdict['email'] = email
+        match_list = ['Program', 'Major']
+        for item in match_list:
+            search_str = item + ':|'
+            for i, line in enumerate(listin):
+                if line.find(search_str) == 0:
+                    junk, curstr = curlist = line.split('|',1)
+                    outdict[item] = curstr.strip()
+                    break
+        return outdict
+    
+
+    def student_list_to_dicts(self):
+        dict_list = []
+
+        for curlist in self.clean_student_list:
+            curdict = self.process_one_student_list(curlist)
+            dict_list.append(curdict)
+
+        self.students = dict_list
+        return self.students
+    
+        
+    def convert_dict_list_to_spreadsheet_list(self):
+        ss_list = []
+        keys = ['student_num','fullname','G Number','Program','Major','email']
+        self.keys = keys
+
+        for student in self.students:
+            curlist = [student[key] for key in keys]
+            ss_list.append(curlist)
+
+        self.spreadsheet_list = ss_list
+        
+        
+
+    def find_record_start_rows(self):
+        record_rows = self.findallre('^Record\|')
+        for i, ind in enumerate(record_rows):
+            # vefify that after each line that starts with Record| is a
+            # line that starts with ##|
+            next_row = self.list[ind+1]
+            j = i+1
+            test_str = '%i|' % j
+            search_ind = next_row.find(test_str)
+            assert search_ind == 0, "bad next row test: %s" % next_row
+
+        self.record_rows = record_rows
+        return record_rows
+
+
+    def get_label_rows(self):
+        label_dict = {'student_num':'Student #', \
+              'fullname':'Student Name'
+              }
+        labels = []
+        for item in self.keys:
+            if item in label_dict.keys():
+                curlabel = label_dict[item]
+            else:
+                curlabel = item
+            labels.append(curlabel)
+
+        self.labels = labels
+        return self.labels
+    
+
+    def save(self):
+        import csv
+        labels = self.get_label_rows()
+        fulllist = [labels] + self.spreadsheet_list
+
+        mypath = pathlib.Path(self.pathin)
+        fno = mypath.stem
+        csvname = fno + '.csv'
+
+        with open(csvname, 'w') as f:
+            writer = csv.writer(f, dialect='excel')
+            writer.writerows(fulllist)
+            
+    
+    def go(self):
+        self.find_record_start_rows()
+        self.break_into_student_lists()
+        self.clean_student_list()
+        self.student_list_to_dicts()
+        self.convert_dict_list_to_spreadsheet_list()
+        self.save()
