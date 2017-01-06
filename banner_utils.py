@@ -2,7 +2,7 @@ import re
 
 import os, subprocess, re
 
-from mybanner import MYSID, MYPIN
+#from mybanner import MYSID, MYPIN
 USERAGENT="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0"
 ACCEPTSTR="text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
 cookiepath = 'cookies.txt'
@@ -164,7 +164,7 @@ class banner_course(object):
 
 summary_pat = re.compile('<table .*>Summary Class List<')
 name_pat = re.compile(".*\'Student Information\'.*>(.*?)</a>")
-id_pat = re.compile(">(\d{9})<")
+id_pat = re.compile(">(G\d{8})<")
 generic_data_pat = re.compile('<td CLASS=".*"><SPAN class=".*">(.*?)</SPAN></td>')
 email_pat = re.compile('href="mailto:(.*?)"')
 
@@ -380,7 +380,7 @@ class html_class_list_parser(object):
         csv_list = self.to_csv_list()
         #add a newline to each row
         csv_w_newlines = [item + '\n' for item in csv_list]
-        f = open(filepath, 'wb')
+        f = open(filepath, 'w')
         f.writelines(csv_w_newlines)
         f.close()
 
