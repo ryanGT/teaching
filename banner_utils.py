@@ -1,6 +1,9 @@
 import re
 
-import os, subprocess, re
+import os, subprocess, re, copy
+#import txt_mixin
+
+#from IPython.core.debugger import Pdb
 
 #from mybanner import MYSID, MYPIN
 USERAGENT="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0"
@@ -163,16 +166,25 @@ class banner_course(object):
 ## </tr>
 
 summary_pat = re.compile('<table .*>Summary Class List<')
+detail_pat = re.compile('<table .*>Detail Class List<')
 name_pat = re.compile(".*\'Student Information\'.*>(.*?)</a>")
 id_pat = re.compile(">(G\d{8})<")
 generic_data_pat = re.compile('<td CLASS=".*"><SPAN class=".*">(.*?)</SPAN></td>')
 email_pat = re.compile('href="mailto:(.*?)"')
+record_number_pat = re.compile('<th .*?>Record<br />Number</th>')
+email_class_pat = re.compile('<a.*?>Email class</a>')
+th_pat = re.compile('<th .*?>(.*?)</th>')
+td_pat = re.compile('<td .*?>(.*?)</td>')
+
+
 
 class student(object):
     def __init__(self, linesin):
         self.linesin = linesin
         self.next_ind = 0
         self.N = len(self.linesin)
+        self.csv_attrs = attrs = ['lastname', 'firstname','id','reg_method','level', \
+                                  'credits','email']
         self.parse_lines()
         
 
@@ -240,6 +252,14 @@ class student(object):
         self.firstname = first
 
 
+    def email_csv(self):
+        raw_str = '"%s"' % self.raw_name
+        email  = getattr(self, 'email')
+        mylist = [raw_str, email]
+        csv_str = ','.join(mylist)
+        return csv_str
+
+        
     def to_csv(self):
         """spit out raw_name, lastname, firstname,
         'id','reg_method','level','credits','email'"""
@@ -248,16 +268,134 @@ class student(object):
         raw_str = '"%s"' % self.raw_name
         mylist = [raw_str]
 
-        attrs = ['lastname', 'firstname','id','reg_method','level','credits','email']
 
-        for attr in attrs:
+        for attr in self.csv_attrs:
             val  = getattr(self, attr)
             mylist.append(val)
 
         csv_str = ','.join(mylist)
 
         return csv_str
+
+
+
+class detail_student(student):
+    def __init__(self, *args, **kwargs):
+        student.__init__(self, *args, **kwargs)
+        self.csv_attrs = ['lastname', 'firstname','id','reg_method','level', \
+                          'email', \
+                          'admit_term', \
+                          'admit_type', \
+                          'catalog_term', \
+                          'college', \
+                          'level', \
+                          'major', \
+                          'program', \
+                          ]
+        
+    def detail_dict_to_attrs(self):
+        for key, val in self.detail_dict.items():
+            clean_key = key.replace(' ','_')
+            clean_key = clean_key.lower()
+            setattr(self, clean_key, val)
+
             
+    def parse_lines(self):
+        pat_attr_list = [(name_pat, 'raw_name'), \
+                 (id_pat, 'id'), \
+                 (td_pat, 'reg_method'), \
+                 (email_pat, 'email')]
+
+        for pat, attr in pat_attr_list:
+            reg_res = self.find_next_re(pat)
+            self.assign_regexp_group_to_attr(reg_res, attr)
+
+
+        # ? do I just pop th and td pairs or am I extracting specific information?
+        th_list = ['Level','Program','Admit Term',\
+                   'Admit Type','Catalog Term','College','Major']
+
+        detail_dict = {}
+        th_gen_pat = '<th .*?>%s</th>'
+
+        detail_ind = copy.copy(self.next_ind)
+        
+        for key in th_list:
+            search_key = key + ':'
+            th_str = th_gen_pat % search_key
+            cur_pat = re.compile(th_str)
+
+            # I don't want to assume the key are in the right order, so
+            # I am not using self.find_next_re
+            for i in range(detail_ind,self.N):
+                curline = self.linesin[i]
+                res = cur_pat.search(curline)
+                if res:
+                    # the next list should contain the table data info we want
+                    next_line = self.linesin[i+1]
+                    td_res = td_pat.search(next_line)
+                    if td_res:
+                        data = td_res.group(1)
+                        detail_dict[key] = data
+                    ## else:
+                    ##     print('problem with next line for key %s' % key)
+                    ##     print(next_line)
+                    ##     Pdb().set_trace()
+
+                    break
+
+
+        self.detail_dict = detail_dict
+        self.detail_dict_to_attrs()
+        
+        # <th > and <td > within the same row clearly go together
+        # <td >&nbsp;</td> can be thrown out
+        #  - will <th > it its own row always match up with <td > in next row?
+        #  - do I just match <th > and <td > pairs without caring about the row?
+        #this should take us to the end of email and we are ready to deal with these things:
+        #
+        #</tr>
+        #<tr>
+        #<td colspan="4" CLASS="dddead">&nbsp;</td>
+        #</tr>
+        #<tr>
+        #<th colspan="4" CLASS="ddlabel" scope="row" >Current Program</th>
+        #</tr>
+        #<tr>
+        #<td colspan="4" CLASS="dddefault">Bachelor of Sci in Engineering</td>
+        #</tr>
+        #<tr>
+        #<th colspan="2" CLASS="ddlabel" scope="row" >Level:</th>
+        #<td colspan="2" CLASS="dddefault">Undergraduate</td>
+        #</tr>
+        #<tr>
+        #<th colspan="2" CLASS="ddlabel" scope="row" >Program:</th>
+        #<td colspan="2" CLASS="dddefault">Mechanical Engineering-BSE</td>
+        #</tr>
+        #<tr>
+        #<th colspan="2" CLASS="ddlabel" scope="row" >Admit Term:</th>
+        #<td colspan="2" CLASS="dddefault">Fall 2015</td>
+        #</tr>
+        #<tr>
+        #<th colspan="2" CLASS="ddlabel" scope="row" >Admit Type:</th>
+        #<td colspan="2" CLASS="dddefault">High School Applicant</td>
+        #</tr>
+        #<tr>
+        #<th colspan="2" CLASS="ddlabel" scope="row" >Catalog Term:</th>
+        #<td colspan="2" CLASS="dddefault">Fall 2015</td>
+        #</tr>
+        #<tr>
+        #<th colspan="2" CLASS="ddlabel" scope="row" >College:</th>
+        #<td colspan="2" CLASS="dddefault">Padnos Col of Egr & Computing</td>
+        #</tr>
+        #<tr>
+        #<th colspan="2" CLASS="ddlabel" scope="row" >Major:</th>
+        #<td colspan="2" CLASS="dddefault">Mechanical Engineering</td>
+        #</tr>
+        #<tr>
+        #<td CLASS="ddseparator">&nbsp;</td>
+        #</tr>
+
 
 
 def verify_row(rows):
@@ -274,17 +412,20 @@ class html_class_list_parser(object):
     def __init__(self, htmlstr):
         self.htmlstr = htmlstr
         self.htmllist = htmlstr.split('\n')
+        self.table_start_pat = summary_pat
         self.next_ind = -1
         self.N = len(self.htmllist)
         self.students = []
         self.student_lines = []
+        self.csv_labels = ['raw_name','lastname','firstname','id',\
+                           'reg_method','level','credits','email']
         #self.parse()
         
 
     def find_class_list_table(self):
         found = False
         for i, line in enumerate(self.htmllist):
-            if summary_pat.search(line):
+            if self.table_start_pat.search(line):
                 self.next_ind = i+1
                 found = True
                 break
@@ -300,6 +441,22 @@ class html_class_list_parser(object):
         
         for i in range(start_ind, self.N):
             if self.htmllist[i].find(search_str) > -1:
+                found_ind = i
+                break
+
+        return found_ind
+
+
+    def find_next_re(self, re_pat, start_ind=None):
+        if start_ind is None:
+            start_ind = self.next_ind
+
+        found_ind = -1
+
+        for i in range(start_ind, self.N):
+            res = re_pat.search(self.htmllist[i])
+            if res:
+                self.next_ind = i+1
                 found_ind = i
                 break
 
@@ -362,11 +519,10 @@ class html_class_list_parser(object):
         for curlist in self.student_lines:
             curstudent = student(curlist)
             self.students.append(curstudent)
-
+        
 
     def to_csv_list(self):
-        labels = ['raw_name','lastname', 'firstname','id','reg_method','level','credits','email']
-        label_str = ','.join(labels)
+        label_str = ','.join(self.csv_labels)
         csv_list = [label_str]
 
         for student in self.students:
@@ -376,15 +532,74 @@ class html_class_list_parser(object):
         return csv_list
 
 
-    def save(self, filepath):
-        csv_list = self.to_csv_list()
+    def to_email_list(self):
+        labels = ['name','email']
+        label_str = ','.join(labels)
+        csv_list = [label_str]
+
+        for student in self.students:
+            csv_str = student.email_csv()
+            csv_list.append(csv_str)
+
+        return csv_list
+            
+
+    def csv_list_to_path(self, csv_list, filepath):
         #add a newline to each row
         csv_w_newlines = [item + '\n' for item in csv_list]
         f = open(filepath, 'w')
         f.writelines(csv_w_newlines)
         f.close()
 
+        
+    def save(self, filepath):
+        csv_list = self.to_csv_list()
+        self.csv_list_to_path(csv_list, filepath)
+        
+
+    def save_email_csv(self, filepath):
+        csv_list = self.to_email_list()
+        self.csv_list_to_path(csv_list, filepath)
                           
+
+
+class detail_class_list_parser(html_class_list_parser):
+    def __init__(self, *args, **kwargs):
+        html_class_list_parser.__init__(self, *args, **kwargs)
+        self.table_start_pat = detail_pat
+        
+
+    def find_next_row(self):
+        """A summary class list has one student per row; a detail
+        class list is more complicated.  The current student end where the next student
+        begins and each student spans mulitple rows.  Find the start of the next
+        student and then back up to the previous </tr>"""
+        start_ind = self.find_next_re(name_pat)
+        if start_ind == -1:
+            # we are out of students
+            return None
+
+        # each student starts with this label
+        # <th CLASS="ddheader" scope="col" >Record<br />Number</th>
+        
+        end_ind = self.find_next_re(record_number_pat, start_ind) -1
+        
+        if end_ind > -1:
+            # we found a row, increment next_ind
+            self.next_ind = end_ind
+        else:
+            # we are at the last student, end at Email Class    
+            end_ind = self.find_next_re(email_class_pat, start_ind) -1
+        return self.htmllist[start_ind:self.next_ind]
+
+
+
+    def make_students(self):
+        for curlist in self.student_lines:
+            curstudent = detail_student(curlist)
+            self.students.append(curstudent)
+            
+        self.csv_labels = ['raw_name'] + curstudent.csv_attrs
 
 
 if __name__ == '__main__':

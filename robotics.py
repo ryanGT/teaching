@@ -1,4 +1,5 @@
-from scipy import *
+from numpy import *
+import copy
 
 deg_to_rad = pi/180.0
 rad_to_deg = 180.0/pi
@@ -10,6 +11,13 @@ def clean_small_floats(matin, tol=1e-6):
     rows, cols = where(abs(matin) < 1e-6)
     matin[rows,cols] = 0.0
     return matin
+
+def prettymat(matin):
+    tol = 1e-6
+    inds = np.where(abs(matin)<tol)
+    matout = copy.copy(matin)
+    matout[inds] = 0
+    return matout
 
 
 def cosd(theta):

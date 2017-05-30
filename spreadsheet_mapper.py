@@ -243,19 +243,18 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
                 else:
                     nick_key = None
                     
-                if source_sheet.valuesdict.has_key(alt_key):
+                if alt_key in source_sheet.valuesdict:
                     value = source_sheet.valuesdict[alt_key]
-                elif (nick_key is not None and source_sheet.valuesdict.has_key(nick_key)):
+                elif (nick_key is not None and nick_key in source_sheet.valuesdict):
                     value = source_sheet.valuesdict[nick_key]
 
                 if value is None:
                     if last == 'AAStudent':
                         value = -1
                     else:
-                        raise(KeyError, \
-                              'cannot find %s or %s or %s in source_sheet.valuesdict' % \
-                              (key, alt_key, nick_key))
-                
+                        raise KeyError('cannot find %s or %s or %s in source_sheet.valuesdict' % \
+                                       (key, alt_key, nick_key))
+                    
             if func is not None:
                 value = func(value)
             mylist[ind] = value
