@@ -1,23 +1,52 @@
 from numpy import *
 import copy
+import numpy as np
 
 deg_to_rad = pi/180.0
 rad_to_deg = 180.0/pi
+
+def print_mat(matin, fmt="%0.4g", do_print=True):
+    outstr = ''
+
+    for row in matin:
+        rowstr = ''
+        for item in row:
+            if rowstr:
+                rowstr += ', '
+            rowstr += fmt % item
+        rowstr = '[%s]\n' % rowstr
+        outstr += rowstr
+
+    outstr = '[%s]' % outstr
+
+    if do_print:
+        print(outstr)
+
+    return outstr
 
 
 def clean_small_floats(matin, tol=1e-6):
     """Replace all entries whose absolute value is smaller than tol
     with 0.0"""
-    rows, cols = where(abs(matin) < 1e-6)
+    rows, cols = where(abs(matin) < tol)
     matin[rows,cols] = 0.0
     return matin
 
+
 def prettymat(matin):
     tol = 1e-6
-    inds = np.where(abs(matin)<tol)
+    inds = where(abs(matin)<tol)
     matout = copy.copy(matin)
     matout[inds] = 0
     return matout
+
+
+def dot_list(mat_list):
+    mat_out = mat_list.pop(0)
+    for mat in mat_list:
+        mat_out = np.dot(mat_out,mat)
+
+    return mat_out
 
 
 def cosd(theta):
