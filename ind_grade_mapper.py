@@ -178,7 +178,7 @@ class ind_grade_mapper_v2(delimited_grade_spreadsheet):
                 score = '-1'
             else:
                 team = self.team_mapper.dict[key]
-                if not team_grade.dict.has_key(team) and len(team) < 3:
+                if team not in team_grade.dict and len(team) < 3:
                     try_team = 'Team ' + team.strip()
                     score = team_grade.dict[try_team]
                 else:
