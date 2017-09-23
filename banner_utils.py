@@ -270,7 +270,10 @@ class student(object):
 
 
         for attr in self.csv_attrs:
-            val  = getattr(self, attr)
+            if hasattr(self, attr):
+                val  = getattr(self, attr)
+            else:
+                val = ''
             mylist.append(val)
 
         csv_str = ','.join(mylist)
@@ -290,6 +293,7 @@ class detail_student(student):
                           'college', \
                           'level', \
                           'major', \
+                          'major_concentration', \
                           'program', \
                           ]
         
@@ -312,8 +316,9 @@ class detail_student(student):
 
 
         # ? do I just pop th and td pairs or am I extracting specific information?
-        th_list = ['Level','Program','Admit Term',\
-                   'Admit Type','Catalog Term','College','Major']
+        th_list = ['Level','Program','Admit Term', \
+                   'Admit Type','Catalog Term','College','Major', \
+                   'Major Concentration']
 
         detail_dict = {}
         th_gen_pat = '<th .*?>%s</th>'
