@@ -123,25 +123,69 @@ def verify_coeff_list(expr, coeffs):
     test2 = (test.expand()).simplify()
     return test2
 
-        
+
+def coeffs_of_s_explicit(expr):
+    """Find the coefficients of s in expr explicitly by setting s to 0
+    to find the next part and then subtracting that part off and
+    dividing by s"""
+    expr_rest = copy.copy(expr)
+    mydict = {}
+    
+    for i in range(20):
+        next_part = expr_rest.subs({s:0})
+        mydict[s**i] = next_part.simplify()
+        expr_rest -= next_part
+        if expr_rest.simplify() == 0:
+            break
+        expr_rest = (expr_rest/s).expand()
+
+    return mydict
+
+    
+    
 class partial_fraction_solver(object):
+    """Class to solve parital fraction expansion problems for dynamic
+    systems and control"""
     def __init__(self, Xs, Xpf, unknowns):
+        """Xs refers to X(s), the thing whose x(t) we are trying to
+        find via partial fraction expansion.  Xpf is the partial
+        fraction expansion form with unknown coefficients in the
+        numerator.  unknowns is the list of unknown coefficients."""
         self.Xs = Xs
         self.Xpf = Xpf
         self.unknowns = unknowns
 
 
-    def find_explicit_common_denom_form(self):
+    def find_common_denominator(self):
         self.den_list = find_den_list(self.Xpf)
         self.comden = find_common_denominator(self.den_list)
+        return self.comden
+
+    def find_explicit_common_denom_form(self):
+        self.find_common_denominator()
         self.Xcd = explicit_common_denominator(self.Xpf, self.comden)
+        return self.Xcd
+
+
+    def find_numerator_equation(self):
+        self.lhs_num = find_num(self.Xs, self.comden)
+        self.rhs_num = find_num(self.Xcd, self.comden)
+        return sympy.Eq(self.lhs_num, self.rhs_num)
+
+
+    def find_s_eqns(self):
+        # call find_numerator_equation before calling this method
+        mydict = {}
+        rest_rhs = copy.copy(self.rhs_num)
+        rest_lhs = copy.copy(self.lhs_num)
         
+        for i in range(20):# assume s**20 is plenty
+            pass
 
     def find_coeffs(self):
         # call find_explicit_common_denom_form before calling this
         # method
-        self.lhs_num = find_num(self.Xs, self.comden)
-        self.rhs_num = find_num(self.Xcd, self.comden)
+        self.find_numerator_equation()
         self.lhs_coeffs = find_coeffs_of_s(self.lhs_num)
         self.rhs_coeffs = find_coeffs_of_s(self.rhs_num)
         
