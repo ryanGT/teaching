@@ -1,4 +1,8 @@
 from scipy import log10, angle, squeeze, r_, where
+import matplotlib
+import numpy as np
+import matplotlib.ticker
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 
 def find_dB_mag_and_phase(Gjw):
     dB_mag = 20.0*log10(abs(Gjw))
@@ -11,6 +15,65 @@ def _get_fig(fig=None, fignum=1, figsize=None):
         import matplotlib.pyplot as plt
         fig = plt.figure(fignum, figsize=figsize)
     return fig
+
+def mygrid(ax):
+    ax.grid(1, which="both",ls=":", color='0.75')
+
+    
+def set_log_ticks(ax,nullx=False):
+    locmaj = matplotlib.ticker.LogLocator(base=10,numticks=12) 
+    ax.xaxis.set_major_locator(locmaj)
+    if nullx:
+        ax.xaxis.set_major_formatter(matplotlib.ticker.NullFormatter())
+
+    mysubs = np.arange(0.1,0.99,0.1)
+    locmin = matplotlib.ticker.LogLocator(base=10.0,subs=mysubs,numticks=12)
+    ax.xaxis.set_minor_locator(locmin)
+    ax.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+
+
+def set_db_ticks(ax, db):
+    dbmin = db.min()
+    dbmax = db.max()
+    # aim for less than 6 ticks in muliples of 10, 20, 40 , ...
+    myspan = dbmax-dbmin
+    maxticks = 6
+
+    ticklist = [10,20,40,60,80]
+
+    N = None
+
+    for tick in ticklist:
+        if myspan/tick < maxticks:
+            N = tick
+            break
+
+    if N is None:
+        N = 100
+
+    majorLocator = MultipleLocator(N)
+    majorFormatter = FormatStrFormatter('%d')
+
+    ax.yaxis.set_major_locator(majorLocator)
+    ax.yaxis.set_major_formatter(majorFormatter)
+
+    
+def set_phase_ticks(ax, phase):
+    phmin = phase.min()
+    phmax = phase.max()
+    # if 4 or 5 multiples of 45 is enough, use 45 as the base
+    mul45 = (phmax-phmin)/45
+    if mul45 < 6:
+        N = 45
+    elif mul45 < 12:
+        N = 90
+    else:
+        N = 180
+    majorLocator = MultipleLocator(N)
+    majorFormatter = FormatStrFormatter('%d')
+
+    ax.yaxis.set_major_locator(majorLocator)
+    ax.yaxis.set_major_formatter(majorFormatter)
 
     
 def bode_plot(freq, dB_mag, phase, fig=None, fignum=1, clear=True, xlim=None, \
@@ -29,8 +92,12 @@ def bode_plot(freq, dB_mag, phase, fig=None, fignum=1, clear=True, xlim=None, \
     ax.semilogx(freq, dB_mag, fmt, label=label, **kwargs)
     ax.set_ylabel('dB Mag.')
 
+    set_log_ticks(ax,nullx=True)
+    set_db_ticks(ax, dB_mag)
+
     if grid:
-        ax.grid(1)
+        mygrid(ax)
+        #ax.grid(1)
 
     if xlim:
         ax.set_xlim(xlim)
@@ -45,8 +112,12 @@ def bode_plot(freq, dB_mag, phase, fig=None, fignum=1, clear=True, xlim=None, \
     ax2.set_ylabel('Phase (deg.)')
     ax2.set_xlabel('Freq. (Hz)')
 
+    set_log_ticks(ax2)
+    set_phase_ticks(ax2, phase)
+
     if grid:
-        ax2.grid(1)
+        #ax2.grid(1)
+        mygrid(ax2)
 
     if xlim:
         ax2.set_xlim(xlim)

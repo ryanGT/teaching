@@ -1,11 +1,25 @@
 import sympy
 import copy
+import numpy as np
 
 s = sympy.symbols('s')
 
 def tolatex(var):
     outstr = sympy.printing.latex(var)
     print(outstr)
+
+
+def sympy_time_vect(xtsym,t_sym,tvect):
+    """Find a vector of floating point numbers for xtsym(t).  
+    xtsym is a symbolic expression that needs to be evaluated at each 
+    t_i in tvect"""
+    N = len(tvect)
+    xvect = np.zeros(N)
+
+    for i, t_i in enumerate(tvect):
+        xvect[i] = xtsym.subs(t_sym,t_i)
+
+    return xvect
 
 
 def part_frac_solver(Xs, part_frac, denom, coeff_list):
@@ -173,14 +187,32 @@ class partial_fraction_solver(object):
         return sympy.Eq(self.lhs_num, self.rhs_num)
 
 
+    def expand_numerator_equation(self):
+        lhs = self.lhs_num.expand()
+        lhs = lhs.simplify()
+        rhs = self.rhs_num.expand()
+        rhs = rhs.simplify()
+        return sympy.Eq(lhs, rhs)
+
+
     def find_s_eqns(self):
         # call find_numerator_equation before calling this method
         mydict = {}
-        rest_rhs = copy.copy(self.rhs_num)
-        rest_lhs = copy.copy(self.lhs_num)
+        rhs_dict = coeffs_of_s_explicit(self.rhs_num)
+        lhs_dict = coeffs_of_s_explicit(self.lhs_num)
+
+        eq_dict = {}
+
+        for key, rval in rhs_dict.items():
+            if key in lhs_dict:
+                lval = lhs_dict[key]
+            else:
+                lval = 0
+
+            eq_dict[key] = sympy.Eq(lval,rval)
         
-        for i in range(20):# assume s**20 is plenty
-            pass
+        return eq_dict
+
 
     def find_coeffs(self):
         # call find_explicit_common_denom_form before calling this

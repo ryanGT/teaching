@@ -1,7 +1,7 @@
 import datetime, os, rwkos, sys, copy, rwkmisc, time, rst_creator, \
        rst_utils, shutil, pdb, glob
 
-reload(rst_utils)
+#reload(rst_utils)
 
 #firstday = datetime.date(2010, 8, 23)
 #firstday = datetime.date(2011, 1, 10)
