@@ -1,0 +1,23 @@
+\documentclass{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+
+%%%<
+\usepackage{verbatim}
+\usepackage[active,tightpage]{preview}
+\PreviewEnvironment{tikzpicture}
+\setlength\PreviewBorder{5pt}%
+%%%>
+\begin{document}
+\def \myd {20}
+\def \myleft {0.0}
+\def \myR {20.0}
+\begin{tikzpicture}
+\draw[step=1cm,dashed,very thin] (\myleft,0) grid (\myR,\myd);
+%\draw[<->, thick] (\myleftA,0) -- (\myRA,0)  node[right] {$t$};
+%\draw[<->, thick] (0,-\myL) -- (0,\myL) node[above] {Disp.};
+\end{tikzpicture}
+
+\end{document}

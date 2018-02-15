@@ -1,8 +1,17 @@
 from scipy import log10, angle, squeeze, r_, where
 import matplotlib
 import numpy as np
+from numpy import pi
 import matplotlib.ticker
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
+
+
+def unwrap_deg(phase):
+    phaser = phase*pi/180
+    phaseru = np.unwrap(phaser)
+    phase_uw = phaseru*180/pi
+    return phase_uw
+
 
 def find_dB_mag_and_phase(Gjw):
     dB_mag = 20.0*log10(abs(Gjw))
