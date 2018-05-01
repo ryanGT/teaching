@@ -229,3 +229,41 @@ class transformed_coords_sketch(object):
                  ax.set_xlim(self.xlims)
                  ax.set_ylim(self.ylims)
                  self.set_arrow_lengths()
+
+
+
+class sketch_with_point_on_B(transformed_coords_sketch):
+    def main(self, P_b, label='$P$', r=0.1, label_shift=(-0.3,0.3), \
+             grid=False):
+        self.draw_axis_A()
+        self.draw_axis_B()
+        self.axis_off()
+        self.draw_B_xticks()
+        self.draw_B_yticks()
+        if grid:
+            self.draw_B_vertical_gridlines()
+            self.draw_B_horizontal_gridlines()
+            
+        self.draw_circle_B(P_b[0], P_b[1], r=r)
+        labelx = P_b[0]+label_shift[0]
+        labely = P_b[1]+label_shift[1]
+        self.place_text_B(labelx, labely, label)
+
+
+
+class sketch_with_point_on_A(transformed_coords_sketch):
+    def main(self, P_a, label='$P$', r=0.1, label_shift=(-0.3,0.3), \
+             grid=False):
+        self.draw_axis_A()
+        self.draw_axis_B()
+        self.axis_off()
+        self.draw_A_xticks()
+        self.draw_A_yticks()
+        if grid:
+            self.draw_A_vertical_gridlines()
+            self.draw_A_horizontal_gridlines()
+
+        self.draw_circle_A(P_a[0], P_a[1], r=r)
+        labelx = P_a[0]+label_shift[0]
+        labely = P_a[1]+label_shift[1]
+        self.place_text_A(labelx, labely, label)
