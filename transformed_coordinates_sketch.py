@@ -1,10 +1,10 @@
 from matplotlib.transforms import BlendedGenericTransform
 from matplotlib import patches
-from matplotlib.patches import Circle
+from matplotlib.patches import Circle, Arc
 import matplotlib.pyplot as plt
 plt.rcParams['mathtext.fontset'] = 'cm'
 import numpy as np
-
+dtr = np.pi/180
 
 def transform_coords(coords, HT):
     if len(coords) == 2:
@@ -51,17 +51,19 @@ class transformed_coords_sketch(object):
         self.place_rotated_text(x, y, text, self.HT)
 
             
-    def draw_rotated_arrow(self, start_coords, end_coords, HT):
+    def draw_rotated_arrow(self, start_coords, end_coords, HT, \
+                           fc='k', ec='k', **plot_args):
         start_A = transform_coords(start_coords, HT)
         stop_A = transform_coords(end_coords, HT)
         dx_A = stop_A[0]-start_A[0]
         dy_A = stop_A[1]-start_A[1]
 
         self.ax.arrow(start_A[0], start_A[1], dx_A, dy_A, \
-                      fc='k', ec='k', lw = self.lw, \
+                      lw = self.lw, fc=fc, ec=ec, \
                       head_width=self.hw, head_length=self.hl, \
                       overhang = self.ohg, \
-                      length_includes_head= True, clip_on = False)
+                      length_includes_head=True, clip_on = False, \
+                      **plot_args)
 
 
     def draw_axis(self, HT, substr='A'):
@@ -250,6 +252,38 @@ class sketch_with_point_on_B(transformed_coords_sketch):
         self.place_text_B(labelx, labely, label)
 
 
+    def draw_circular_arc_A_coords(self, r, start_angle, stop_angle, \
+                                   arrow_angle=85, delta_sign=-1, \
+                                   head_length=0.4, head_width=0.2, \
+                                   cw=False):
+        """If the arc is drawn clockwise, cw=True.  This requires an arc with
+        start_angle and stop_angle switched."""
+        angle_rad = arrow_angle*dtr
+        end_x = r*np.cos(stop_angle*dtr)
+        end_y = r*np.sin(stop_angle*dtr)
+
+        dx = (head_length) * np.cos(angle_rad)*delta_sign
+        dy = (head_length) * np.sin(angle_rad)*delta_sign
+
+        start_x = end_x - dx
+        start_y = end_y - dy
+
+        if cw:
+            arc_start = stop_angle
+            arc_end = start_angle
+        else:
+            arc_start = start_angle
+            arc_end = stop_angle
+            
+        arc = Arc((0, 0),
+                  r*2, r*2,  # ellipse width and height
+                  theta1=arc_start, theta2=arc_end, linestyle='-', lw=2)
+        self.ax.add_patch(arc)
+        self.ax.arrow(start_x, start_y, dx, dy, \
+                      head_width=head_width, head_length=head_length, \
+                      fc='k', ec='k', length_includes_head=True)
+
+        
 
 class sketch_with_point_on_A(transformed_coords_sketch):
     def main(self, P_a, label='$P$', r=0.1, label_shift=(-0.3,0.3), \
