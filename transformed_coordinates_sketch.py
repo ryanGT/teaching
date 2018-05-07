@@ -67,8 +67,8 @@ class transformed_coords_sketch(object):
 
 
     def draw_axis(self, HT, substr='A'):
-        xlabel = '$X_{%s}$' % substr
-        ylabel = '$Y_{%s}$' % substr
+        xlabel = self.x_label_pat % substr
+        ylabel = self.y_label_pat % substr
         self.draw_rotated_arrow((self.xmin,0), (self.xmax,0), HT)
         self.place_rotated_text(self.xmax+0.5, 0, xlabel, HT)
         self.draw_rotated_arrow((0,self.ymin), (0,self.ymax), HT)
@@ -208,50 +208,7 @@ class transformed_coords_sketch(object):
         #yhw = hw/(ymax-ymin)*(xmax-xmin)* height/width
         #yhl = hl/(xmax-xmin)*(ymax-ymin)* width/height
 
-
-    def axis_off(self):
-        self.ax.set_axis_off()
         
-        
-    def __init__(self, HT, ax, \
-                 xmax=5, xmin=-0.5, ymax=5, ymin=-0.5, \
-                 xlims=[-3,7], ylims=[-3,7], \
-                 fontdict = {'size': 18, 'family':'serif'}, \
-                 ):
-                 self.HT = HT
-                 self.eye = np.eye(4)
-                 self.ax = ax
-                 self.xmax = xmax
-                 self.xmin = xmin
-                 self.ymax = ymax
-                 self.ymin = ymin
-                 self.xlims = xlims
-                 self.ylims = ylims
-                 self.fontdict = fontdict
-                 ax.set_xlim(self.xlims)
-                 ax.set_ylim(self.ylims)
-                 self.set_arrow_lengths()
-
-
-
-class sketch_with_point_on_B(transformed_coords_sketch):
-    def main(self, P_b, label='$P$', r=0.1, label_shift=(-0.3,0.3), \
-             grid=False):
-        self.draw_axis_A()
-        self.draw_axis_B()
-        self.axis_off()
-        self.draw_B_xticks()
-        self.draw_B_yticks()
-        if grid:
-            self.draw_B_vertical_gridlines()
-            self.draw_B_horizontal_gridlines()
-            
-        self.draw_circle_B(P_b[0], P_b[1], r=r)
-        labelx = P_b[0]+label_shift[0]
-        labely = P_b[1]+label_shift[1]
-        self.place_text_B(labelx, labely, label)
-
-
     def draw_circular_arc_A_coords(self, r, start_angle, stop_angle, \
                                    arrow_angle=85, delta_sign=-1, \
                                    head_length=0.4, head_width=0.2, \
@@ -285,6 +242,54 @@ class sketch_with_point_on_B(transformed_coords_sketch):
 
         
 
+    def axis_off(self):
+        self.ax.set_axis_off()
+        
+        
+    def __init__(self, HT, ax, \
+                 xmax=5, xmin=-0.5, ymax=5, ymin=-0.5, \
+                 xlims=[-3,7], ylims=[-3,7], \
+                 fontdict = {'size': 18, 'family':'serif'}, \
+                 xpat='$X_{%s}$', ypat='$Y_{%s}$', \
+                 ):
+                 self.HT = HT
+                 self.eye = np.eye(4)
+                 self.ax = ax
+                 self.xmax = xmax
+                 self.xmin = xmin
+                 self.ymax = ymax
+                 self.ymin = ymin
+                 self.xlims = xlims
+                 self.ylims = ylims
+                 self.x_label_pat = xpat
+                 self.y_label_pat = ypat
+                 self.fontdict = fontdict
+                 ax.set_xlim(self.xlims)
+                 ax.set_ylim(self.ylims)
+                 self.set_arrow_lengths()
+
+
+
+class sketch_with_point_on_B(transformed_coords_sketch):
+    def main(self, P_b, label='$P$', r=0.1, label_shift=(-0.3,0.3), \
+             grid=False):
+        self.draw_axis_A()
+        self.draw_axis_B()
+        self.axis_off()
+        self.draw_B_xticks()
+        self.draw_B_yticks()
+        if grid:
+            self.draw_B_vertical_gridlines()
+            self.draw_B_horizontal_gridlines()
+            
+        self.draw_circle_B(P_b[0], P_b[1], r=r)
+        labelx = P_b[0]+label_shift[0]
+        labely = P_b[1]+label_shift[1]
+        self.place_text_B(labelx, labely, label)
+
+
+        
+
 class sketch_with_point_on_A(transformed_coords_sketch):
     def main(self, P_a, label='$P$', r=0.1, label_shift=(-0.3,0.3), \
              grid=False):
@@ -301,3 +306,30 @@ class sketch_with_point_on_A(transformed_coords_sketch):
         labelx = P_a[0]+label_shift[0]
         labely = P_a[1]+label_shift[1]
         self.place_text_A(labelx, labely, label)
+
+
+
+
+class sketch_Ry_with_point_on_B(transformed_coords_sketch):
+    def __init__(self, *args, **kwargs):
+        transformed_coords_sketch.__init__(self, *args, **kwargs)
+        #self.x_label_pat = xpat
+        self.y_label_pat = '$Z_%s$'
+        
+
+    def main(self, P_b, label='$P$', r=0.1, label_shift=(-0.3,0.3), \
+             grid=False):
+        self.draw_axis_A()
+        self.draw_axis_B()
+        self.axis_off()
+        self.draw_B_xticks()
+        self.draw_B_yticks()
+        if grid:
+            self.draw_B_vertical_gridlines()
+            self.draw_B_horizontal_gridlines()
+            
+        self.draw_circle_B(P_b[0], P_b[1], r=r)
+        labelx = P_b[0]+label_shift[0]
+        labely = P_b[1]+label_shift[1]
+        self.place_text_B(labelx, labely, label)
+        
