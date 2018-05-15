@@ -52,27 +52,44 @@ class transformed_coords_sketch(object):
 
             
     def draw_rotated_arrow(self, start_coords, end_coords, HT, \
-                           fc='k', ec='k', **plot_args):
+                           fc='k', ec=None, lw=None, **plot_args):
+        if ec is None:
+            ec = fc
         start_A = transform_coords(start_coords, HT)
         stop_A = transform_coords(end_coords, HT)
         dx_A = stop_A[0]-start_A[0]
         dy_A = stop_A[1]-start_A[1]
 
+        if lw is None:
+            lw = self.arrow_lw
+
         self.ax.arrow(start_A[0], start_A[1], dx_A, dy_A, \
-                      lw = self.lw, fc=fc, ec=ec, \
+                      lw=lw, fc=fc, ec=ec, \
                       head_width=self.hw, head_length=self.hl, \
                       overhang = self.ohg, \
                       length_includes_head=True, clip_on = False, \
                       **plot_args)
 
 
+    def draw_B_arrow(self, end_coords, start_coords=(0,0), \
+                     fc='b', ec=None, zorder=1000, **plot_args):
+        self.draw_rotated_arrow(start_coords, end_coords, HT=self.HT, \
+                                ec=ec, fc=fc, zorder=zorder, **plot_args)
+        
+    def draw_A_arrow(self, end_coords, start_coords=(0,0), \
+                     fc='b', ec=None, zorder=1000, **plot_args):
+        self.draw_rotated_arrow(start_coords, end_coords, HT=self.eye, \
+                                ec=ec, fc=fc, zorder=zorder, **plot_args)
+
     def draw_axis(self, HT, substr='A'):
         xlabel = self.x_label_pat % substr
         ylabel = self.y_label_pat % substr
-        self.draw_rotated_arrow((self.xmin,0), (self.xmax,0), HT)
-        self.place_rotated_text(self.xmax+0.5, 0, xlabel, HT)
-        self.draw_rotated_arrow((0,self.ymin), (0,self.ymax), HT)
-        self.place_rotated_text(0, self.ymax+0.5, ylabel, HT)
+        self.draw_rotated_arrow((self.xmin,0), (self.xmax,0), HT, \
+                                fc=self.axis_color, lw=self.axis_lw)
+        self.place_rotated_text(self.xmax+self.axis_label_shift, 0, xlabel, HT)
+        self.draw_rotated_arrow((0,self.ymin), (0,self.ymax), HT, \
+                                fc=self.axis_color, lw=self.axis_lw)
+        self.place_rotated_text(0, self.ymax+self.axis_label_shift, ylabel, HT)
 
 
     def draw_axis_A(self):
@@ -251,10 +268,19 @@ class transformed_coords_sketch(object):
                  xlims=[-3,7], ylims=[-3,7], \
                  fontdict = {'size': 18, 'family':'serif'}, \
                  xpat='$X_{%s}$', ypat='$Y_{%s}$', \
+                 axis_label_shift=0.5, \
+                 axis_color='k', axis_lw=2, \
+                 arrow_lw=None, \
                  ):
                  self.HT = HT
                  self.eye = np.eye(4)
                  self.ax = ax
+                 self.axis_label_shift = axis_label_shift
+                 self.axis_color = axis_color
+                 self.axis_lw = axis_lw
+                 if arrow_lw is None:
+                     arrow_lw=axis_lw
+                 self.arrow_lw = arrow_lw
                  self.xmax = xmax
                  self.xmin = xmin
                  self.ymax = ymax
@@ -333,3 +359,27 @@ class sketch_Ry_with_point_on_B(transformed_coords_sketch):
         labely = P_b[1]+label_shift[1]
         self.place_text_B(labelx, labely, label)
         
+
+
+class rotation_matrix_sketch(transformed_coords_sketch):
+    def __init__(self,  HT, ax, \
+                 xmax=1.5, xmin=0, ymax=1.5, ymin=0, \
+                 xlims=[-1,2], ylims=[-1,2], \
+                 axis_label_shift=0.2, \
+                 **kwargs
+                 ):
+        transformed_coords_sketch.__init__(self, HT, ax, \
+                                           xmax=xmax, xmin=xmin, \
+                                           ymax=ymax, ymin=ymin, \
+                                           xlims=xlims, ylims=ylims, \
+                                           axis_label_shift=axis_label_shift, \
+                                           axis_color='#818480', \
+                                           axis_lw=2, \
+                                           arrow_lw=3, \
+                                           **kwargs)
+
+
+    def main(self):
+        self.draw_axis_A()
+        self.draw_axis_B()
+        self.axis_off()
