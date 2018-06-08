@@ -33,8 +33,7 @@ def clean_small_floats(matin, tol=1e-6):
     return matin
 
 
-def prettymat(matin):
-    tol = 1e-6
+def prettymat(matin, tol=1e-6):
     inds = where(abs(matin)<tol)
     matout = copy.copy(matin)
     matout[inds] = 0
@@ -104,6 +103,28 @@ def HTinv(Tin):
     P_BorgA = Tin[0:3,3]
     P_AorgB = -1.0*dot(Ri,P_BorgA)
     Tout[0:3,3] = P_AorgB
+    return Tout
+
+
+def HTinv3(Tin):
+    Tout = zeros((4,4))
+    R = Tin[0:3,0:3]
+    Ri = R.T
+    Tout[0:3,0:3] = Ri
+    P_BorgA = Tin[0:3,3]
+    P_AorgB = -1.0*dot(Ri,P_BorgA)
+    Tout[0:3,3] = P_AorgB
+    Tout[3,3] = 1
+    return Tout
+
+
+def HTinv2(Tin):
+    R = Tin[0:3,0:3]
+    Ri = R.T
+    P_BorgA = Tin[0:3,3]
+    P_AorgB = -1.0*dot(Ri,P_BorgA)
+    temp = np.column_stack([Ri, P_AorgB])
+    Tout = np.row_stack([temp, [0,0,0,1]])
     return Tout
 
 

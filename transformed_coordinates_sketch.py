@@ -214,7 +214,16 @@ class transformed_coords_sketch(object):
     def draw_circle_B(self, x, y, r, **kwargs):
         self.draw_rotated_circle(x, y, r, self.HT, **kwargs)
 
-        
+
+    def draw_circle_with_label(self, coords, HT, label='$P$', \
+                               label_shift=(0.3,0.3), \
+                               r=0.1, **kwargs):
+        self.draw_rotated_circle(coords[0], coords[1], r, HT, **kwargs)
+        labelx = coords[0]+label_shift[0]
+        labely = coords[1]+label_shift[1]
+        self.place_rotated_text(labelx, labely, label, HT)
+
+
     def set_arrow_lengths(self):
         self.hw = 1./30.*(self.ymax-self.ymin)
         self.hl = 1./20.*(self.xmax-self.xmin)
@@ -314,6 +323,13 @@ class sketch_with_point_on_B(transformed_coords_sketch):
         self.place_text_B(labelx, labely, label)
 
 
+class sketch_without_point(transformed_coords_sketch):
+    def main(self):
+        self.draw_axis_A()
+        self.draw_axis_B()
+        self.axis_off()
+
+
         
 
 class sketch_with_point_on_A(transformed_coords_sketch):
@@ -361,6 +377,18 @@ class sketch_Ry_with_point_on_B(transformed_coords_sketch):
         
 
 
+class sketch_Rx_with_point_on_B(transformed_coords_sketch):
+    def __init__(self, *args, **kwargs):
+        transformed_coords_sketch.__init__(self, *args, **kwargs)
+        self.x_label_pat = '$Y_%s$'
+        self.y_label_pat = '$Z_%s$'
+
+    def main(self):
+        self.draw_axis_A()
+        self.draw_axis_B()
+        self.axis_off()
+
+        
 class rotation_matrix_sketch(transformed_coords_sketch):
     def __init__(self,  HT, ax, \
                  xmax=1.5, xmin=0, ymax=1.5, ymin=0, \
