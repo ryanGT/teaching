@@ -8,3 +8,7 @@ def pdf_link_download_maker(linkin):
     base, linkid = linkin.split("id=",1)
     out_str = html_pdf_links_str.replace("IDSTR",linkid)
     print(out_str)
+
+
+
+
