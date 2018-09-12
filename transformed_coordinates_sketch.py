@@ -81,9 +81,11 @@ class transformed_coords_sketch(object):
         self.draw_rotated_arrow(start_coords, end_coords, HT=self.eye, \
                                 ec=ec, fc=fc, zorder=zorder, **plot_args)
 
-    def draw_axis(self, HT, substr='A'):
-        xlabel = self.x_label_pat % substr
-        ylabel = self.y_label_pat % substr
+    def draw_axis(self, HT, substr='A', xlabel=None, ylabel=None):
+        if xlabel is None:
+            xlabel = self.x_label_pat % substr
+        if ylabel is None:
+            ylabel = self.y_label_pat % substr
         self.draw_rotated_arrow((self.xmin,0), (self.xmax,0), HT, \
                                 fc=self.axis_color, lw=self.axis_lw)
         self.place_rotated_text(self.xmax+self.axis_label_shift, 0, xlabel, HT)
@@ -388,6 +390,34 @@ class sketch_Rx_with_point_on_B(transformed_coords_sketch):
         self.draw_axis_B()
         self.axis_off()
 
+
+class arbitrary_axes_sketch(transformed_coords_sketch):
+    def __init__(self, HT, ax, \
+                 X_A_label, Y_A_label, \
+                 X_B_label, Y_B_label, \
+                 **kwargs):
+        transformed_coords_sketch.__init__(self, HT, ax, **kwargs)
+        self.X_A_label = X_A_label
+        self.Y_A_label = Y_A_label
+        self.X_B_label = X_B_label
+        self.Y_B_label = Y_B_label
+
+
+    def draw_axis_A(self):
+        self.draw_axis(self.eye, \
+                       xlabel=self.X_A_label, ylabel=self.Y_A_label)
+
+
+    def draw_axis_B(self):
+        self.draw_axis(self.HT, \
+                       xlabel=self.X_B_label, ylabel=self.Y_B_label)
+
+
+    def main(self):
+        self.draw_axis_A()
+        self.draw_axis_B()
+        self.axis_off()
+    
         
 class rotation_matrix_sketch(transformed_coords_sketch):
     def __init__(self,  HT, ax, \

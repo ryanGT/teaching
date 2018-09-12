@@ -237,7 +237,11 @@ class partial_fraction_solver(object):
             pad = [0] * n_diff
             new_list = pad + self.lhs_coeffs
             self.lhs_coeffs = new_list
-            
+
+
+    def show_equation(self):
+        return sympy.Eq(self.Xs, self.Xpf)
+    
         
     def main(self):
         self.find_explicit_common_denom_form()
