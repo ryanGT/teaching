@@ -170,10 +170,7 @@ def crossover_freq(db, freq):
     #find where the current db value is greater than 0 and the next one is not
     t1=squeeze(db > 0.0)#vector of True and False elements for db > 0.0
     t2=r_[t1[1:],t1[0]]#vector t1 shifted by 1 index
-    t3=(t1 & -t2)#current value is > 0.0 and the next is not
-    myinds=where(t3)[0]
-    if not myinds.any():
-        return None, []
-    maxind=max(myinds)
-    return freq[maxind], maxind
+    t3=(t1 & ~t2)#current value is > 0.0 and the next is not
+    ind = t3.argmax()
+    return freq[ind], ind
 

@@ -117,6 +117,9 @@ def build_s_poly(expr):
 def find_coeffs_of_s(expr):
     mypoly = build_s_poly(expr)
     coeffs = mypoly.coeffs()
+    if expr.subs({s:0}) == 0:
+        # there is a missing term in coeffs for 0*s**0
+        coeffs += [0]
     return coeffs
 
 

@@ -13,8 +13,8 @@ def create_enc(tlist,start_low=True):
         sig=ones(shape(t))
     curval=sig[0]
     for ct in tlist:
-        ind=where(t>ct)
-        if ind:
+        ind=where(t>ct)[0]
+        if ind.any():
             sig[ind]=1-curval
             curval=sig[ind[0]]
     return sig
@@ -26,11 +26,13 @@ def create_case(A_list, B_list, A_start=0, B_start=0):
     return A, B
 
 
-def plot_case(A, B, fignum=1, asty='-', bsty='-', clear=True, **kwargs):
+def plot_case(A, B, fignum=1, asty='-', bcolor='r', bsty='--', clear=True, **kwargs):
     figure(fignum)
     if clear:
         clf()
-    plot(t, A, asty, t, B, bsty, **kwargs)
+    #plot(t, A, asty, t, B, bsty, **kwargs)
+    step(t, A, **kwargs)#
+    step(t, B, color=bcolor,linestyle=bsty, **kwargs)
     xlabel('Time (sec)')
     ylabel('Encoder Signals')
     ylim([-0.1, 1.1])
