@@ -109,7 +109,9 @@ def tolatex(var):
     #print(outstr)
     return outstr
 
-
+def print_latex(var):
+    outstr = tolatex(var)
+    print(outstr)
 
 def rot_mat_dot_prods_one_row(Aletter='X', frameA='A', frameB='B'):
     Bletters = ['X','Y','Z']

@@ -86,7 +86,8 @@ def set_phase_ticks(ax, phase):
 
     
 def bode_plot(freq, dB_mag, phase, fig=None, fignum=1, clear=True, xlim=None, \
-              label=None, fmt='-', grid=True, figsize=None, **kwargs):
+              label=None, fmt='-', grid=True, figsize=None, unwrap=False, \
+              **kwargs):
     """This function plots a very nice Bode plot.  freq is a vector in
     Hz.  dB_mag and phase are vectors with the same length as freq."""
     fig = _get_fig(fig, fignum, figsize=figsize)
@@ -97,6 +98,9 @@ def bode_plot(freq, dB_mag, phase, fig=None, fignum=1, clear=True, xlim=None, \
         ax = fig.axes[0]
     else:
         ax = fig.add_subplot(211)
+
+    if unwrap:
+        phase = unwrap_deg(phase)
         
     ax.semilogx(freq, dB_mag, fmt, label=label, **kwargs)
     ax.set_ylabel('dB Mag.')
@@ -155,13 +159,17 @@ def bode_plot3(freq, inst, *args, **kwargs):
     return dB_mag, phase
 
 
-def calc_db_mag_and_phase(Gjw):
+def calc_db_mag_and_phase(Gjw, unwrap=False):
     dB = 20.0*log10(abs(Gjw))
     phase = angle(Gjw, 1)
+    if unwrap:
+        phase = unwrap_deg(phase)
     return dB, phase
 
-def bode_plot_from_complex(freq, Gjw, fignum=1, clear=False, **kwargs):
-    dB, phase = calc_db_mag_and_phase(Gjw)
+
+def bode_plot_from_complex(freq, Gjw, fignum=1, clear=False, unwrap=False, \
+                           **kwargs):
+    dB, phase = calc_db_mag_and_phase(Gjw, unwrap=unwrap)
     bode_plot(freq, dB, phase, fignum=fignum, clear=clear, **kwargs)
     
 
