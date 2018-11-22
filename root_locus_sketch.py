@@ -20,7 +20,7 @@ class root_locus_sketch(object):
     def __init__(self, ax, \
                  xmax=2, xmin=-5, ymax=5, ymin=-5, \
                  xlims=[-3,7], ylims=[-3,7], \
-                 fontdict = {'size': 18, 'family':'serif'}, \
+                 fontdict = {'size': 20, 'family':'serif'}, \
                  axis_lw=2, \
                  ):
         self.ax = ax
@@ -29,6 +29,7 @@ class root_locus_sketch(object):
         self.ymin = ymin
         self.ymax = ymax
         self.axis_lw = axis_lw
+        self.fontdict = fontdict
         
         
 
@@ -86,15 +87,31 @@ class root_locus_sketch(object):
 
     def add_text(self, point, text, xoffset=0, yoffset=0, \
                  fontdict=None):
+        if fontdict is None:
+            fontdict = self.fontdict
         self.ax.text(np.real(point)+xoffset, np.imag(point)+yoffset, \
                      text, fontdict=fontdict)
 
 
-    def draw_line(self, start, end, linestyle='k--'):
+    def draw_point_with_label(self, point, text, style='go', size=12, \
+                          xoffset=0, yoffset=0, \
+                          fontdict=None):
+        self.draw_marker(point, style=style, size=size)
+        self.add_text(point, text, xoffset=xoffset, yoffset=yoffset, \
+                      fontdict=fontdict)
+
+
+    def draw_line(self, start, end, linestyle='k--', **plot_kwargs):
         self.ax.plot([np.real(start), np.real(end)], \
                      [np.imag(start), np.imag(end)], \
                      linestyle)
 
+
+    def draw_lines_to_point(self, point, pole_or_zero_list, \
+                            linestyle='k--', **plot_kwargs):
+        for pz in pole_or_zero_list:
+            self.draw_line(pz, point, linestyle=linestyle, **plot_kwargs)
+            
 
     def draw_poles(self, pole_list, style='rX', size=12):
         for i, p in enumerate(pole_list):
@@ -102,6 +119,31 @@ class root_locus_sketch(object):
             self.ax.plot([np.real(p)],[np.imag(p)], \
                          style, markersize=size)
 
+
+    def plot_branches(self, rmat, **plot_kwargs):
+        self.ax.plot(np.real(rmat), np.imag(rmat), **plot_kwargs)
+
+
+    def label_axes(self, real_point=None, imag_point=None, fontdict=None):
+        if real_point is None:
+            real_point = self.xmax-0.7j
+        if imag_point is None:
+            imag_point = 0.3+self.ymax*1j
+        self.add_text(real_point, 'Re', fontdict=fontdict)
+        self.add_text(imag_point, 'Im', fontdict=fontdict)
+        
+
+    def label_points(self, points, labels, offsets=None, fontdict=None):
+        N = len(points)
+        if offsets is None:
+            offsets = [(0,0)]*N
+        elif len(offsets) == 1:
+            offsets = N*offsets
+
+        for p, label, offset in zip(points, labels, offsets):
+            self.add_text(p, label, xoffset=offset[0], yoffset=offset[1], \
+                          fontdict=fontdict)
+            
 
     def draw_vertical_gridlines(self, xlist=None, \
                                 ymin=None, ymax=None, plot_kwargs=None):

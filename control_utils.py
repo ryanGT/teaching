@@ -1,10 +1,48 @@
 from matplotlib.pyplot import *
 from numpy import *
-
+import numpy as np
 import control
+from control import TransferFunction as TF
 
 font_size = 20.0
 
+def _unpack_complex(root_list):
+    """If there are any complex roots, they are specify as tuples
+    using (wn,z).  Find those and put -z*wn+/-j*wd in the output list."""    
+    roots_out = []
+    for root in root_list:
+        curtype = type(root)
+        if np.isscalar(root):
+            roots_out.append(root)
+        elif curtype in [list, tuple]:
+            wn = root[0]
+            z = root[1]
+            assert np.abs(z) < 1, "Overdamped roots are not handled at this time"
+            wd = wn*np.sqrt(1-z**2)
+            r1 = -z*wn+1j*wd
+            r2 = np.conj(r1)
+            roots_out.extend([r1,r2])
+        else:
+            print("I don't know how to deal with this root type: %s" % root)
+    return roots_out
+
+    
+def build_TF(poles=[], zeros=[]):
+    """Build a TF whose poles and zeros are given.  Complex poles or zeros
+    are created by passing (wn,z) as a tuple in the pole or zero list."""
+    if np.isscalar(poles):
+        poles = [poles]
+    if np.isscalar(zeros):
+        zeros = [zeros]
+        
+    all_poles = _unpack_complex(poles)
+    all_zeros = _unpack_complex(zeros)
+    num = np.poly(all_zeros)
+    den = np.poly(all_poles)
+    G = TF(num,den)
+    return G
+    
+    
 def my_rlocus(G, k):
     rmat, kout = control.root_locus(G, k, Plot=False)
     plot(real(rmat), imag(rmat))

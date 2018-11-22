@@ -25,19 +25,29 @@ def get_list(N):
     return mylist
 
     
-def G_to_text(G, N):
+def G_to_text(G, Nstr):
+    if type(Nstr) != str:
+        Nstr = str(Nstr)
     ns = np.squeeze(G.num)
     ds = np.squeeze(G.den)
     numstr = np.array2string(ns,separator=',')
     denstr = np.array2string(ds,separator=',')
-    num2 = 'num%i = %s' % (N, numstr)
-    den2 = 'den%i = %s' % (N, denstr)
-    Gstr = 'G%i = control.TransferFunction(num%i,den%i)' % \
-               (N, N, N)
-    append_line = 'G_list.append(G%i)' % N
+    num2 = 'num%s = %s' % (Nstr, numstr)
+    den2 = 'den%s = %s' % (Nstr, denstr)
+    Gstr = 'G%s = control.TransferFunction(num%s,den%s)' % \
+               (Nstr, Nstr, Nstr)
+    append_line = 'G_list.append(G%s)' % Nstr
     lines_out = [num2,den2,Gstr, append_line]
     return lines_out
 
+
+def print_G_to_text(G, N):
+    lines_out = G_to_text(G,N)
+    if 'append' in lines_out[-1]:
+        lines_out.pop(-1)
+    for line in lines_out:
+        print(line)
+        
 
 def save_G(G,N=None):
     if N is None:
