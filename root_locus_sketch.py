@@ -35,6 +35,8 @@ class root_locus_sketch(object):
 
     def draw_arrow(self, start_coords, end_coords, \
                    fc='k', ec=None, lw=None, **plot_args):
+        if not hasattr(self, 'hw'):
+            self.set_arrow_lengths()
         if ec is None:
             ec = fc
         # if lw is None:
@@ -80,9 +82,9 @@ class root_locus_sketch(object):
         self.ax.set_axis_off()
 
 
-    def draw_marker(self, point, style='go', size=12):
+    def draw_marker(self, point, style='go', size=12, **plot_kwargs):
         self.ax.plot([np.real(point)],[np.imag(point)], \
-                     style, markersize=size)
+                     style, markersize=size, **plot_kwargs)
 
 
     def add_text(self, point, text, xoffset=0, yoffset=0, \
@@ -113,7 +115,117 @@ class root_locus_sketch(object):
             self.draw_line(pz, point, linestyle=linestyle, **plot_kwargs)
             
 
-    def draw_poles(self, pole_list, style='rX', size=12):
+    def draw_poles(self, pole_list, style='rX', size=12, **plot_kwargs):
+        for i, p in enumerate(pole_list):
+            j = i+1
+            self.ax.plot([np.real(p)],[np.imag(p)], \
+                         style, markersize=size, **plot_kwargs)
+
+
+    def draw_zeros(self, zero_list, style='ro', size=12, **plot_kwargs):
+        self.draw_poles(zero_list, style=style, size=size, **plot_kwargs)
+        
+
+    def plot_branches(self, rmat, **plot_kwargs):
+        self.ax.plot(np.real(rmat), np.imag(rmat), **plot_kwargs)
+
+
+    def label_axes(self, real_point=None, imag_point=None, fontdict=None):
+        if real_point is None:
+            real_point = self.xmax-0.7j
+        if imag_point is None:
+            imag_point = 0.3+self.ymax*1j
+        self.add_text(real_point, 'Re', fontdict=fontdict)
+        self.add_text(imag_point, 'Im', fontdict=fontdict)
+        
+
+    def label_points(self, points, labels, offsets=None, fontdict=None):
+        N = len(points)
+        if offsets is None:
+            offsets = [(0,0)]*N
+        elif len(offsets) == 1:
+            offsets = N*offsets
+
+        for p, label, offset in zip(points, labels, offsets):
+            self.add_text(p, label, xoffset=offset[0], yoffset=offset[1], \
+                          fontdict=fontdict)
+            
+
+    def draw_vertical_gridlines(self, xlist=None, \
+                                ymin=None, ymax=None, plot_kwargs=None):
+        if plot_kwargs is None:
+            plot_kwargs = grid_dict
+
+        if ymax is None:
+            ymax = self.ymax
+
+        if ymin is None:
+            ymin = self.ymin
+
+        if xlist is None:
+            xlist = np.arange(0,self.xmax,1)
+
+        for x in xlist:
+            self.ax.plot([x,x], [ymin,ymax], **plot_kwargs)
+
+
+    def draw_horizontal_gridlines(self, ylist=None, \
+                                xmin=None, xmax=None, plot_kwargs=None):
+        if plot_kwargs is None:
+            plot_kwargs = grid_dict
+
+        if xmax is None:
+            xmax = self.xmax
+
+        if xmin is None:
+            xmin = self.xmin
+
+        if ylist is None:
+            ylist = np.arange(self.ymin,self.ymax,1)
+
+        for y in ylist:
+            self.ax.plot([int(xmin),int(xmax)], [y,y], **plot_kwargs)
+            
+
+
+    def draw_xticks(self, ticks=None, dy=0.1, **plot_kwargs):
+        kwargs = {'color':'k',\
+                  'linewidth':2}
+        kwargs.update(plot_kwargs)
+
+        if ticks is None:
+            ticks = np.arange(int(self.xmin), int(self.xmax), 1)
+
+        
+        for tick in ticks:
+            start_tick = [tick, dy]
+            end_tick = [tick, -dy]
+            self.ax.plot([tick,tick], [dy,-dy], **kwargs)
+
+
+    def draw_yticks(self, ticks=None, dx=0.1, **plot_kwargs):
+        kwargs = {'color':'k',\
+                  'linewidth':2}
+        kwargs.update(plot_kwargs)
+
+        if ticks is None:
+            ticks = np.arange(int(self.ymin), int(self.ymax)+1, 1)
+
+        
+        for tick in ticks:
+            self.ax.plot([-dx,dx], [tick,tick], **kwargs)
+            
+            
+
+
+class root_locus_sketch_with_TF(root_locus_sketch):
+    def __init__(self, ax, G, *args, **kwargs):
+        root_locus_sketch.__init__(self, ax, *args, **kwargs)
+        self.G = G
+
+
+    
+
         for i, p in enumerate(pole_list):
             j = i+1
             self.ax.plot([np.real(p)],[np.imag(p)], \
@@ -210,3 +322,33 @@ class root_locus_sketch(object):
             self.ax.plot([-dx,dx], [tick,tick], **kwargs)
             
             
+
+
+class root_locus_sketch_with_TF(root_locus_sketch):
+    def __init__(self, ax, G, *args, **kwargs):
+        root_locus_sketch.__init__(self, ax, *args, **kwargs)
+        self.G = G
+
+    
+    def draw_poles(self, style='rX', size=12, zorder=10, **kwargs):
+        root_locus_sketch.draw_poles(self, self.G.pole(), style=style, \
+                                     size=size, zorder=zorder, **kwargs)
+
+        
+    def draw_zeros(self, style='ro', size=12, zorder=10, **kwargs):
+        root_locus_sketch.draw_poles(self, self.G.zero(), style=style, \
+                                     size=size, zorder=zorder, \
+                                     **kwargs)
+        
+
+
+    def add_test_point(self, point, style='go', size=12, **plot_kwargs):
+        self.s0 = point
+        self.draw_marker(point, style=style, size=size, **plot_kwargs)
+
+
+    def draw_lines_to_test_point(self, linestyle='k--', **plot_kwargs):
+        self.draw_lines_to_point(self.s0, self.G.pole(), \
+                                 linestyle=linestyle, **plot_kwargs)
+        self.draw_lines_to_point(self.s0, self.G.zero(), \
+                                 linestyle=linestyle, **plot_kwargs)
