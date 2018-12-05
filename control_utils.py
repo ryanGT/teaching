@@ -3,6 +3,7 @@ from numpy import *
 import numpy as np
 import control
 from control import TransferFunction as TF
+import copy
 
 font_size = 20.0
 
@@ -26,6 +27,89 @@ def _unpack_complex(root_list):
             print("I don't know how to deal with this root type: %s" % root)
     return roots_out
 
+
+def second_order_roots_to_tuple(root_list):
+    """If there are any second order roots in root_list, pop them as
+    complex conjugate pairs and replace with (wn,z).  This is a
+    stepping stone toward print factored latex for a TF and it is the
+    opposite of the function _unpack_complex"""
+    list_out = []
+    mylist = copy.copy(root_list.tolist())
+    N = len(root_list)
+
+    for i in range(N):
+        if len(mylist) == 0:
+            break
+        cur_root = mylist.pop()
+        if np.abs(np.imag(cur_root)) > 1e-6:
+            # this root is complex
+            myconj = np.conj(cur_root)
+            ci = mylist.index(myconj)
+            mylist.pop(ci)
+            wn = np.abs(cur_root)
+            z = -np.real(cur_root)/wn
+            list_out.append((wn,z))
+        else:
+            list_out.append(cur_root)
+
+    return list_out
+
+
+def one_root_to_latex(root_in):
+    if np.isscalar(root_in):
+        assert np.abs(np.imag(root_in)) < 1e-6, "not sure if this is real: %s" % root_in
+        if np.abs(root_in) < 1e-6:
+            str_out = 's'
+        else:
+            str_out = 's %+0.4g' % -np.real(root_in)
+    else:
+        wn = root_in[0]
+        z = root_in[1]
+        b = 2*z*wn
+        c = wn**2
+        str_out = 's^2 %+0.4g s %+0.4g' % (b,c)
+    return str_out
+
+    
+
+def root_list_to_latex(pole_list):
+    """pole_list is assumed to be a list of first poles or zeros along
+    with (wn,z) tuples.  If an entry is scalar, it is a first order
+    root."""
+    str_out = ""
+    for p in pole_list:
+        cur_str = one_root_to_latex(p)
+        if len(pole_list) == 1:
+            return cur_str
+        else:
+            str_out += '(%s)' % cur_str
+    return str_out
+
+
+
+def TF_to_factored_latex(G,lhs=None,substr=None):
+    """Convert a TF instance to latex where the numerator and
+    denominator are factored into first and second order terms."""
+    p_list = second_order_roots_to_tuple(G.pole())
+    z_list = second_order_roots_to_tuple(G.zero())
+    if not z_list:
+        z_str = '1'
+    else:
+        z_str = root_list_to_latex(z_list)
+    p_str = root_list_to_latex(p_list)
+    rhs = '\\frac{%s}{%s}' % (z_str,p_str)
+    if substr is not None:
+        if lhs is None:
+            lhs = 'G_{%s}(s)' % substr
+        else:
+            lhs = '%s_{%s}(s)' % (lhs,substr)
+            
+    if lhs is not None:
+        out_str = '%s = %s' % (lhs, rhs)
+        return out_str
+    else:
+        return rhs
+    
     
 def build_TF(poles=[], zeros=[]):
     """Build a TF whose poles and zeros are given.  Complex poles or zeros

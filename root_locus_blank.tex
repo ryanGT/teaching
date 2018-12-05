@@ -11,19 +11,21 @@
 \setlength\PreviewBorder{5pt}%
 %%%>
 \begin{document}
-\def \myd {4.0}
-\def \myleft {-7.0}
-\def \myleftA {-7.3}
+\def \myd {6.0}
+\def \myleft {-9.0}
+\def \myleftA {-9.3}
 \def \myA {0.3}
 \pgfmathparse{\myd+\myA}
 \let\myL\pgfmathresult
-\def \myR {2.0}
+\def \myR {3.0}
 \pgfmathparse{\myR+\myA}
 \let\myRA\pgfmathresult
 \begin{tikzpicture}
 \draw[step=1.0cm,dashed,very thin] (\myleft,-\myd) grid (\myR,\myd);
-\draw[<->, very thick] (\myleftA,0) -- (\myRA,0)  node[right] {\Large{Real}};
-\draw[<->, very thick] (0,-\myL) -- (0,\myL) node[above] {\Large{Imag.}};
+\draw[<->, very thick, color=gray] (\myleftA,0) -- (\myRA,0)
+         node[right, color=black] {\Large{Real}};
+\draw[<->, very thick, color=gray] (0,-\myL) -- (0,\myL)
+         node[above, color=black] {\Large{Imag.}};
 
 %add specific poles and stuff
 % \tikzstyle{pole}=[draw,thick,minimum width=7pt,minimum height=7pt,fill=white]

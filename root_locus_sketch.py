@@ -17,17 +17,22 @@ grid_dict = {'linestyle':'dashed',\
 }
 
 class root_locus_sketch(object):
-    def __init__(self, ax, \
-                 xmax=2, xmin=-5, ymax=5, ymin=-5, \
-                 xlims=[-3,7], ylims=[-3,7], \
+    def __init__(self, ax=None, \
+                 xmax=2, xmin=-5.5, ymax=5.5, ymin=-5.5, \
+                 xlims=[-8,4], ylims=[-6,6], \
                  fontdict = {'size': 20, 'family':'serif'}, \
                  axis_lw=2, \
                  ):
+        if ax is None:
+            fig = plt.figure(figsize=(9,9))
+            ax = fig.add_subplot(111)
         self.ax = ax
         self.xmin = xmin
         self.xmax = xmax
         self.ymin = ymin
         self.ymax = ymax
+        self.xlims = xlims
+        self.ylims = ylims
         self.axis_lw = axis_lw
         self.fontdict = fontdict
         
@@ -95,6 +100,12 @@ class root_locus_sketch(object):
                      text, fontdict=fontdict)
 
 
+    def add_math_text(self, point, text, *args, **kwargs):
+        if text[0] != '$':
+            text = '$%s$' % text
+        self.add_text(point, text, *args, **kwargs)
+            
+
     def draw_point_with_label(self, point, text, style='go', size=12, \
                           xoffset=0, yoffset=0, \
                           fontdict=None):
@@ -106,7 +117,7 @@ class root_locus_sketch(object):
     def draw_line(self, start, end, linestyle='k--', **plot_kwargs):
         self.ax.plot([np.real(start), np.real(end)], \
                      [np.imag(start), np.imag(end)], \
-                     linestyle)
+                     linestyle, **plot_kwargs)
 
 
     def draw_lines_to_point(self, point, pole_or_zero_list, \
@@ -215,6 +226,17 @@ class root_locus_sketch(object):
         for tick in ticks:
             self.ax.plot([-dx,dx], [tick,tick], **kwargs)
             
+
+    def main_axis(self):
+        self.set_arrow_lengths()
+        self.axis_off()
+        self.draw_axis()
+        self.draw_xticks()
+        self.draw_yticks()
+        self.label_axes()
+        self.ax.set_xlim(self.xlims)
+        self.ax.set_ylim(self.ylims)
+        plt.tight_layout()
             
 
 
@@ -222,7 +244,7 @@ class root_locus_sketch_with_TF(root_locus_sketch):
     def __init__(self, ax, G, *args, **kwargs):
         root_locus_sketch.__init__(self, ax, *args, **kwargs)
         self.G = G
-
+        
 
     
 
@@ -321,7 +343,6 @@ class root_locus_sketch_with_TF(root_locus_sketch):
         for tick in ticks:
             self.ax.plot([-dx,dx], [tick,tick], **kwargs)
             
-            
 
 
 class root_locus_sketch_with_TF(root_locus_sketch):
@@ -342,13 +363,89 @@ class root_locus_sketch_with_TF(root_locus_sketch):
         
 
 
-    def add_test_point(self, point, style='go', size=12, **plot_kwargs):
+    def add_test_point(self, point, style='go', size=12, \
+                       label=None, label_offset=0+0j, \
+                       **plot_kwargs):
         self.s0 = point
         self.draw_marker(point, style=style, size=size, **plot_kwargs)
-
+        if label is not None:
+            self.add_math_text(self.s0+label_offset, label)
+            
 
     def draw_lines_to_test_point(self, linestyle='k--', **plot_kwargs):
         self.draw_lines_to_point(self.s0, self.G.pole(), \
                                  linestyle=linestyle, **plot_kwargs)
         self.draw_lines_to_point(self.s0, self.G.zero(), \
                                  linestyle=linestyle, **plot_kwargs)
+
+
+    def build_label_list(self, N, pat):
+        labels = []
+        for i in range(N):
+            j = i+1
+            cur_str = pat % j
+            labels.append(cur_str)
+        return labels
+
+        
+    def make_phi_labels(self):
+        N = len(self.G.pole())
+        phi_labels = self.build_label_list(N, '\\phi_{%i}')
+        return phi_labels
+
+
+    def make_psi_labels(self):
+        N = len(self.G.zero())
+        psi_labels = self.build_label_list(N, '\\psi_{%i}')
+        return psi_labels
+
+
+    def label_angles_to_point(self, phi_labels, psi_labels, \
+                              phi_offsets=None, psi_offsets=None, \
+                              **kwargs):
+        if phi_offsets is None:
+            np = len(self.G.pole())
+            phi_offsets = [0]*np
+        if psi_offsets is None:
+            nz = len(self.G.zero())
+            psi_offsets = [0]*nz
+        
+        for p, label, po in zip(self.G.pole(), phi_labels, phi_offsets):
+            self.add_math_text(p+po, label, **kwargs)
+        for z, label, zo in zip(self.G.zero(), psi_labels, psi_offsets):
+            self.add_math_text(z+zo, label, **kwargs)
+            
+
+
+class root_locus_sketch_two_pole_locations(root_locus_sketch):
+    """A class for generating pole locations plots for comparing two
+    TFs and their step responses."""
+    def __init__(self, G1, G2, label_offsets=[0.2+0.2j, 0.2+0.2j], \
+                 markers=['bo','g^'], inds=[1,2], \
+                 **kwargs):
+        root_locus_sketch.__init__(self, **kwargs)
+        self.G1 = G1
+        self.G2 = G2
+        self.label_offsets = label_offsets
+        self.markers = markers
+        self.inds = inds
+
+
+    def draw_and_label_poles(self):
+        # get poles and force the imaginary part to be positive
+        p1 = self.G1.pole()[0]
+        p2 = self.G2.pole()[0]
+
+        for p, m, lo, ind in zip([p1,p2], self.markers, \
+                                  self.label_offsets, self.inds):
+            p = np.real(p) + 1j*np.abs(np.imag(p))
+            self.draw_marker(p, style=m)
+            self.draw_marker(np.conj(p), style=m)
+            mytext = '$G_{%i}$' % ind
+            self.add_text(p, mytext, xoffset=np.real(lo), yoffset=np.imag(lo))
+        
+
+    def main(self):
+        self.main_axis()
+        self.draw_and_label_poles()
+        
