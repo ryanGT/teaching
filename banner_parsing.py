@@ -37,15 +37,17 @@ def semester_str_to_pretty_str(semester_in):
 
     
 def parse_one_name(string_in):
-    last, rest = string_in.split(',',1)
-    last = last.strip()
-    rest = rest.strip()
-    if rest.find(' ') > -1:
-        first, rest2 = rest.split(' ',1)
-        first = first.strip()
-    else:
-        first = rest
-    return last, first
+    #last, rest = string_in.split(' ',1)
+    name_list = string_in.split(' ')
+    last = name_list.pop(-1).strip()
+    first = name_list.pop(0).strip()
+    middle = ''
+    if name_list:
+        middle = ' '.join(name_list)
+        if middle:
+            middle = middle.strip()
+    return last, first, middle
+    
 
 email_pat = re.compile('<(.*)>')
 
@@ -53,6 +55,27 @@ def parse_one_email_string(string_in):
     q = email_pat.search(string_in)
     return q.group(1)
 
+
+letter_to_gpa_dict = {'A':4.0, \
+                      'A-':3.6666667, \
+                      'B+':3.3333333, \
+                      'B':3.0, \
+                      'B-':2.6666667, \
+                      'C+':2.3333333, \
+                      'C':2.0, \
+                      'C-':1.6666667, \
+                      'D+':1.3333333, \
+                      'D':1.0, \
+                      'D-':0.6666667, \
+                      'F':0}
+
+def letter_grade_to_gpa(letter):
+    return letter_to_gpa_dict[letter]
+
+
+def letter_grade_list_to_gpa_list(listin):
+    listout = [letter_grade_to_gpa(item) for item in listin]
+    return listout
 
 
 class classlist_puller(object):
@@ -512,7 +535,25 @@ class transcript_html_parser(object):
         if type(self.txt_list[0]) == bytes:
             str_list = [item.decode('utf-8') for item in self.txt_list]
             self.txt_list = str_list
+        self.txt_list = txt_mixin.txt_list(self.txt_list)
 
+
+    def find_student_name(self):
+        inds = self.txt_list.findall("Name :")
+        assert len(inds) == 1, "Problem with search for Name :, inds = " + str(inds)
+        name_row = self.txt_list[inds[0]]
+        junk, name = name_row.split('|',1)
+        name = name.strip()
+        self.student_name = name
+
+
+    def get_filename_from_student_name(self):
+        if not hasattr(self, 'student_name'):
+            self.find_student_name()
+        filename = rwkos.clean_filename(self.student_name + '.txt')
+        return filename
+
+        
 
 class class_schedule_parser(txt_mixin.txt_file_with_list):
     """The first step in my undergraduate committee work of finding
@@ -651,6 +692,13 @@ class transcript_txt_parser(txt_mixin.txt_file_with_list):
         inds = self.list.findallre(pat, match=match)
         return self.list[inds[0]]
 
+
+    def _get_last_line(self, pat, match=False):
+        """Get last match, which should hopefully be the most current
+        major (for example)."""
+        inds = self.list.findallre(pat, match=match)
+        return self.list[inds[-1]]
+
     
     def get_regexp_matches(self, pat, match=False):
         listout = []
@@ -672,6 +720,14 @@ class transcript_txt_parser(txt_mixin.txt_file_with_list):
         return self.major, self.dept
 
 
+    def get_major(self):
+        pat = append_delim_to_pat('^Major:', self.delim)
+        line = self._get_last_line(pat)
+        junk, major = line.split(self.delim, 1)
+        self.major = major.strip()
+        return self.major
+        
+        
     def get_college(self):
         pat = append_delim_to_pat('^College:', self.delim)
         line = self._get_first_line(pat)
@@ -716,8 +772,8 @@ class transcript_txt_parser(txt_mixin.txt_file_with_list):
         """split a line into a list and grab the -3 element"""
         line_list = self.split_row_to_list(line)
         grade = line_list[-3]
-        all_grades = ['A','B','C','D','F','S','NS','W','WP','WF','UW','WR','I']
-        assert grade in all_grades, "Invalid grade: %s" % grade
+        #all_grades = ['A','B','C','D','F','S','NS','W','WP','WF','UW','WR','I']
+        #assert grade in all_grades, "Invalid grade: %s" % grade
         return grade
         
 
@@ -835,11 +891,11 @@ class transcript_txt_parser(txt_mixin.txt_file_with_list):
 
         for course_row in lines:
             course_list = self.split_row_to_list(course_row)
-            if len(course_list) == 8:
+            if len(course_list) > 6:
                 linesout.append(course_row)
-            elif len(course_list) != 6:
-                raise(ValueError, "problem with this course_list: " + \
-                      str(course_list))
+            #elif len(course_list) != 6:
+            #    raise(ValueError, "problem with this course_list: " + \
+            #          str(course_list))
 
         return linesout
 
@@ -1218,6 +1274,101 @@ class transcript_txt_parser(txt_mixin.txt_file_with_list):
         return currow
 
 
+    def get_grades_for_course(self, subject_lines, course, subject='EGR'):
+        """Given a list of lines that presumably match a subject, find
+        all lines matching ^subject\|course\| and make a string
+        containing all the grades for that course"""
+        pat = append_delim_to_pat('^'+subject, self.delim)
+        pat += str(course)
+        inds = txt_mixin.txt_list(subject_lines).findallre(pat)
+        grades = ''
+
+        for ind in inds:
+            curline = subject_lines[ind]
+            curgrade = self.get_grade_form_line(curline)
+            #print('curgrade = %s' % curgrade)
+            if grades:
+                grades += ';'
+            grades += curgrade
+
+        return grades
+
+
+    def grade_str_from_lines(self, lines):
+        """Given a list of lines, build a single string that contains
+        Subject Course: Grade;"""
+        outstr = ""
+        for curline in lines:
+            line_list = self.split_row_to_list(curline)
+            subj = line_list[0]
+            course = line_list[1]
+            grade = line_list[-3]
+            curstr = '%s %s: %s' % (subj, course, grade)
+            if outstr:
+                outstr += '; '
+            outstr += curstr
+        return outstr
+
+
+    def build_course_pat(self, course, subject='EGR'):
+        pat = append_delim_to_pat('^'+subject, self.delim)
+        pat += str(course)
+        return pat
+    
+
+    def pop_course_from_list(self, subject_lines, course, subject='EGR'):
+        """Given a list of subject lines, pop the ones that match course"""
+        pat = self.build_course_pat(course, subject)
+        subject_lines = txt_mixin.txt_list(subject_lines)
+        for i in range(1000):
+            ind = subject_lines.findnextre(pat)
+            if ind:
+                subject_lines.pop(ind)
+            else:
+                break
+        return subject_lines
+            
+        
+
+    def EGR_107_team_building_row(self):
+        # name, major, gpa, EGR 100 grade, EGR 106 grade, other EGR grades
+        # MTH 201 and 202 grades, other MTH grades
+        gpa = self.find_overall_gpa()
+        raw_name = self.get_name()
+        name_list = parse_one_name(raw_name)
+        self.get_major()
+        currow = list(name_list) + [self.major, gpa]
+        out = currow.append
+        fin_egr_lines = self._get_completed_subject_lines('EGR')
+        egr100_grades = self.get_grades_for_course(fin_egr_lines, 100)
+        out(egr100_grades)
+        egr106_grades = self.get_grades_for_course(fin_egr_lines, 106)
+        out(egr106_grades)
+        gpa_106  = letter_grade_to_gpa(egr106_grades)
+        out(gpa_106)
+        egr107_grades = self.get_grades_for_course(fin_egr_lines, 107)
+        out(egr107_grades)
+        fin_mth_lines = self._get_completed_subject_lines('MTH')
+        mth201_grades = self.get_grades_for_course(fin_mth_lines, 201, subject='MTH')
+        out(mth201_grades)
+        other_mth_lines = self.pop_course_from_list(fin_mth_lines, 201, subject='MTH')
+        other_mth_str = self.grade_str_from_lines(other_mth_lines)
+        out(other_mth_str)
+        return currow
+
+
+    def EGR_107_labels(self):
+        mylabels = ["Lastname","Firstname","MI", \
+                    "Major", "Cum. GPA", \
+                    "EGR 100 Grade(s)", \
+                    "EGR 106 Grade(s)", \
+                    "106 GPA", \
+                    "EGR 107 Grade(s)", \
+                    "MTH 201 Grade(s)", \
+                    "Other MTH Grades"]
+        return mylabels
+
+
     def get_IME_spreadsheet_labels(self):
         mylabels = ['Last Name','First Name','Middle Initial', \
                     'Major','SIUE GPA']
@@ -1445,14 +1596,14 @@ class transcript_txt_parser(txt_mixin.txt_file_with_list):
     def __init__(self, filename, delim='|', *args, **kwargs):
         txt_mixin.txt_file_with_list.__init__(self, filename, *args, **kwargs)
         self.delim = delim
-        if os.path.exists(filename):
-            self.get_banner_id_from_filename()
+        #if os.path.exists(filename):
+        #    self.get_banner_id_from_filename()
 
 
 
 class batch_processor_for_transcripts(object):
     """This class exists to make it easy to batch pull the transcripts
-    for all students enrolles in a course and then output a csv file
+    for all students enrolled in a course and then output a csv file
     with specific columns.  This class should be most likely used as a
     base class with classes being derived for specific courses."""
     def __init__(self, subject='ME', course='458', section='001', \

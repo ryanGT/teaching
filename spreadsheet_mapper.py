@@ -294,6 +294,19 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
         self.labels = self.new_labels
 
 
+    def add_new_column(self, col_data, label, replace=True):
+        """replace_with_new seems to mess with the add_new_column method
+           inherited from txt_database.  I am solving this problem by copying 
+           the new data and labels before appending and then making new_data and
+           new_labels the same as data and labels after appending"""
+        if replace:
+            self.replace_with_new()
+        txt_database.txt_database.add_new_column(self, col_data, label)
+        if replace:
+            self.new_data = self.data
+            self.new_labels = self.labels
+        
+
     def save(self, output_path, delim=',', replace=True):
         if replace:
             self.replace_with_new()
