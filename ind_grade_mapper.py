@@ -247,3 +247,38 @@ class ind_grade_mapper_v2(delimited_grade_spreadsheet):
         txt_mixin.delimited_txt_file.save(self, pathout=self.output_path, \
                                           array=out_mat, \
                                           delim=delim)
+
+
+
+class ind_grade_mapper_v3_only_new(ind_grade_mapper_v2):
+    """One annoyance I have when mapping team grades to individual for
+       upload to BB is making sure not to upload the team # column or
+       other lingering columns to blackboard.  So, this class strips
+       off all incoming columns other than the standard BB columns.
+       This means cutting off everything in labels and data after the
+       standard intro columns.
+
+    """
+    def truncate_data(self):
+        assumed_labels = ['Last Name','First Name','Username','Student ID']
+        stop_col = -1
+        stop_N = len(assumed_labels)
+        print("stop_N = %i" % stop_N)
+        stop_col = stop_N
+        
+        for i in range(stop_N):
+            label = self.labels[i]
+            print("i = %i, label = %s" % (i, label))
+            if label != assumed_labels[i]:
+                stop_col = i
+                break
+        
+        print('stop_col = ' + str(stop_col))
+        assert stop_col >= 3, "did not find 3 matching columns; I doubt this will work"
+        self.labels = self.labels[0:stop_col]
+        self.data = self.data[:,0:stop_col]
+        
+        
+    def __init__(self, *args, **kwargs):
+        ind_grade_mapper_v2.__init__(self, *args, **kwargs)
+        self.truncate_data()

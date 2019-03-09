@@ -127,7 +127,22 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
     def _find_nick_name_col(self):
         search_list = ['Nick Name','Please Call Me']
         return self._search_for_first_match(search_list)
-    
+
+
+    def _find_id_col(self):
+        search_list = ["Student ID", "student id", "ID", "id"]
+        return self._search_for_first_match(search_list)
+
+
+    def _find_email_col(self):
+        search_list = ["Email", "email"]
+        return self._search_for_first_match(search_list)
+
+
+    def _find_team_col(self):
+        search_list = ["Team", "team"]
+        return self._search_for_first_match(search_list)
+
 
     def replace_firstnames_with_nicknames(self):
         nick_name_col = self._find_nick_name_col()
@@ -305,6 +320,23 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
         if replace:
             self.new_data = self.data
             self.new_labels = self.labels
+
+
+    def catme_labels(self):
+        """Replace labels with their catme approved versions:
+        first,last,email,id,team"""
+        mydict = {'last':self._find_last_name_col, \
+                  'first':self._find_first_name_col, \
+                  'id':self._find_id_col, \
+                  'email':self._find_email_col, \
+                  'team':self._find_team_col}
+        for key, func in mydict.items():
+            try:
+                ind = func()
+                self.labels[ind] = key
+            except:
+                print("could not find %s column" % key)
+        print("labels: %s" % self.labels)
         
 
     def save(self, output_path, delim=',', replace=True):
