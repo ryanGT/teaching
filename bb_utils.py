@@ -71,6 +71,14 @@ def get_file_id(linkin):
     return linkid
 
 
+def jupyter_notebook_gdrive_img_link(linkin, width=300):
+    # goal: <img src="https://drive.google.com/uc?id=1sRRu8WPs9yBBOEC7OkComZfUd5P5h7CY" width=300px>
+    pat = '<img src="https://drive.google.com/uc?id=%s" width=%ipx>'
+    my_id = get_file_id(linkin)
+    out_str = pat % (my_id, width)
+    return out_str
+
+
 def pdf_link_download_maker(linkin):
     linkid = get_file_id(linkin)
     out_str = html_pdf_links_str.replace("IDSTR",linkid)
