@@ -51,11 +51,20 @@ def add_background(pathin, pad=10):
     return pad_path
 
 
-def expr_to_png(expr, basename, add_bg=True, pad=10):
-    if expr[0] != '$':
-        expr = '$' + expr
-    if expr[-1] != '$':
-        expr += '$'
+def text_to_png(expr, basename, add_bg=True, pad=10):
+    """Make a png of something assumed to be a sentence with inline
+    math.  So, do not pad the entire expression with $...$"""
+    expr_to_png(expr, basename, add_bg=True, pad=10, onlymath=False)
+    
+
+def expr_to_png(expr, basename, add_bg=True, pad=10, onlymath=True):
+    """Adding the only math option so that I can also pass in
+    sentences with math inline."""
+    if onlymath:
+        if expr[0] != '$':
+            expr = '$' + expr
+        if expr[-1] != '$':
+            expr += '$'
     curdir = os.getcwd()
     os.chdir(folder)
     fno, ext = os.path.splitext(basename)

@@ -27,11 +27,20 @@ def HT(R, Px=0, Py=0, Pz=0):
 
 def HTx(alpha, Px=0, Py=0, Pz=0):
     """Create an HT matrix based on an Rx rotation and optional Px,
-    Py, and Pz translations."""
+    Py, and Pz translations.  Alpha should be in
+    radians if it is numeric."""
     R = Rx(alpha)
     T = HT(R, Px, Py, Pz)
     return T
 
+    
+def Ry(th):
+    """Create a symbolic Ry rotation matrix.  Theta should be in
+    radians if it is numeric."""
+    R = Matrix([[cos(th),0, sin(th)],\
+                [0,1,0],\
+                [-sin(th),0,cos(th)]])
+    return R
     
 def Rz(th):
     """Create a symbolic Rz rotation matrix.  Theta should be in

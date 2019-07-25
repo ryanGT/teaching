@@ -6,6 +6,14 @@ plt.rcParams['mathtext.fontset'] = 'cm'
 import numpy as np
 dtr = np.pi/180
 
+## Note to self:
+## Previously I have used np.eye(4) for the HT matrix of axis A
+## and this was assigned to self.eye; I then use self.HT for
+## axis B.  I am not seeking to generalize for things like an X/Z axis with
+## Z_A pointing down.  So, from now on, I am replacing self.eye with self.HT_0A
+## and self.HT with self.HT_0B.
+## - is it weird that I am using HT_0B instead of HT_AB?
+
 def transform_coords(coords, HT):
     if len(coords) == 2:
         coords = np.append(coords,[0,1])
@@ -44,11 +52,11 @@ class transformed_coords_sketch(object):
 
 
     def place_text_A(self, x, y, text):
-        self.place_rotated_text(x, y, text, self.eye)
+        self.place_rotated_text(x, y, text, self.HT_0A)
 
 
     def place_text_B(self, x, y, text):
-        self.place_rotated_text(x, y, text, self.HT)
+        self.place_rotated_text(x, y, text, self.HT_0B)
 
             
     def draw_rotated_arrow(self, start_coords, end_coords, HT, \
@@ -73,12 +81,12 @@ class transformed_coords_sketch(object):
 
     def draw_B_arrow(self, end_coords, start_coords=(0,0), \
                      fc='b', ec=None, zorder=1000, **plot_args):
-        self.draw_rotated_arrow(start_coords, end_coords, HT=self.HT, \
+        self.draw_rotated_arrow(start_coords, end_coords, HT=self.HT_0B, \
                                 ec=ec, fc=fc, zorder=zorder, **plot_args)
         
     def draw_A_arrow(self, end_coords, start_coords=(0,0), \
                      fc='b', ec=None, zorder=1000, **plot_args):
-        self.draw_rotated_arrow(start_coords, end_coords, HT=self.eye, \
+        self.draw_rotated_arrow(start_coords, end_coords, HT=self.HT_0A, \
                                 ec=ec, fc=fc, zorder=zorder, **plot_args)
 
     def draw_axis(self, HT, substr='A', xlabel=None, ylabel=None):
@@ -95,11 +103,11 @@ class transformed_coords_sketch(object):
 
 
     def draw_axis_A(self):
-        self.draw_axis(self.eye)
+        self.draw_axis(self.HT_0A)
 
 
     def draw_axis_B(self):
-        self.draw_axis(self.HT, substr='B')
+        self.draw_axis(self.HT_0B, substr='B')
 
 
     def draw_xticks(self, HT, ticks=None, dy=0.1, **plot_kwargs):
@@ -118,11 +126,11 @@ class transformed_coords_sketch(object):
 
 
     def draw_A_xticks(self, ticks=None, dy=0.1, **plot_kwargs):
-        self.draw_xticks(self.eye,ticks=ticks, dy=dy, **plot_kwargs)
+        self.draw_xticks(self.HT_0A,ticks=ticks, dy=dy, **plot_kwargs)
 
 
     def draw_B_xticks(self, ticks=None, dy=0.1, **plot_kwargs):
-        self.draw_xticks(self.HT, ticks=ticks, dy=dy, **plot_kwargs)
+        self.draw_xticks(self.HT_0B, ticks=ticks, dy=dy, **plot_kwargs)
         
 
     def draw_yticks(self, HT, ticks=None, dx=0.1, **plot_kwargs):
@@ -140,11 +148,11 @@ class transformed_coords_sketch(object):
 
 
     def draw_A_yticks(self, ticks=None, dx=0.1, **plot_kwargs):
-        self.draw_yticks(self.eye,ticks=ticks, dx=dx, **plot_kwargs)
+        self.draw_yticks(self.HT_0A,ticks=ticks, dx=dx, **plot_kwargs)
 
 
     def draw_B_yticks(self, ticks=None, dx=0.1, **plot_kwargs):
-        self.draw_yticks(self.HT, ticks=ticks, dx=dx, **plot_kwargs)
+        self.draw_yticks(self.HT_0B, ticks=ticks, dx=dx, **plot_kwargs)
 
 
 
@@ -164,12 +172,12 @@ class transformed_coords_sketch(object):
 
 
     def draw_A_vertical_gridlines(self, xlist=None, **kwargs):
-        self.draw_rotated_vertical_gridlines(self.eye, xlist=xlist,
+        self.draw_rotated_vertical_gridlines(self.HT_0A, xlist=xlist,
                                              **kwargs)
 
 
     def draw_B_vertical_gridlines(self, xlist=None, **kwargs):
-            self.draw_rotated_vertical_gridlines(self.HT, xlist=xlist,
+            self.draw_rotated_vertical_gridlines(self.HT_0B, xlist=xlist,
                                                  **kwargs)
 
 
@@ -190,12 +198,12 @@ class transformed_coords_sketch(object):
 
 
     def draw_A_horizontal_gridlines(self, ylist=None, **kwargs):
-        self.draw_rotated_horizontal_gridlines(self.eye, ylist=ylist,
+        self.draw_rotated_horizontal_gridlines(self.HT_0A, ylist=ylist,
                                                **kwargs)
 
 
     def draw_B_horizontal_gridlines(self, ylist=None, **kwargs):
-        self.draw_rotated_horizontal_gridlines(self.HT, ylist=ylist,
+        self.draw_rotated_horizontal_gridlines(self.HT_0B, ylist=ylist,
                                                **kwargs)
 
 
@@ -210,11 +218,11 @@ class transformed_coords_sketch(object):
 
 
     def draw_circle_A(self, x, y, r, **kwargs):
-        self.draw_rotated_circle(x, y, r, self.eye, **kwargs)
+        self.draw_rotated_circle(x, y, r, self.HT_0A, **kwargs)
         
 
     def draw_circle_B(self, x, y, r, **kwargs):
-        self.draw_rotated_circle(x, y, r, self.HT, **kwargs)
+        self.draw_rotated_circle(x, y, r, self.HT_0B, **kwargs)
 
 
     def draw_circle_with_label(self, coords, HT, label='$P$', \
@@ -274,7 +282,7 @@ class transformed_coords_sketch(object):
         self.ax.set_axis_off()
         
         
-    def __init__(self, HT, ax, \
+    def __init__(self, HT_0B, ax, \
                  xmax=5, xmin=-0.5, ymax=5, ymin=-0.5, \
                  xlims=[-3,7], ylims=[-3,7], \
                  fontdict = {'size': 18, 'family':'serif'}, \
@@ -282,9 +290,11 @@ class transformed_coords_sketch(object):
                  axis_label_shift=0.5, \
                  axis_color='k', axis_lw=2, \
                  arrow_lw=None, \
+                 HT_0A = np.eye(4), \
                  ):
-                 self.HT = HT
-                 self.eye = np.eye(4)
+                 self.HT_0B = HT_0B
+                 #self.eye = np.eye(4)
+                 self.HT_0A = HT_0A
                  self.ax = ax
                  self.axis_label_shift = axis_label_shift
                  self.axis_color = axis_color
@@ -392,11 +402,11 @@ class sketch_Rx_with_point_on_B(transformed_coords_sketch):
 
 
 class arbitrary_axes_sketch(transformed_coords_sketch):
-    def __init__(self, HT, ax, \
+    def __init__(self, HT_0B, ax, \
                  X_A_label, Y_A_label, \
                  X_B_label, Y_B_label, \
                  **kwargs):
-        transformed_coords_sketch.__init__(self, HT, ax, **kwargs)
+        transformed_coords_sketch.__init__(self, HT_0B, ax, **kwargs)
         self.X_A_label = X_A_label
         self.Y_A_label = Y_A_label
         self.X_B_label = X_B_label
@@ -404,12 +414,12 @@ class arbitrary_axes_sketch(transformed_coords_sketch):
 
 
     def draw_axis_A(self):
-        self.draw_axis(self.eye, \
+        self.draw_axis(self.HT_0A, \
                        xlabel=self.X_A_label, ylabel=self.Y_A_label)
 
 
     def draw_axis_B(self):
-        self.draw_axis(self.HT, \
+        self.draw_axis(self.HT_0B, \
                        xlabel=self.X_B_label, ylabel=self.Y_B_label)
 
 
@@ -420,18 +430,19 @@ class arbitrary_axes_sketch(transformed_coords_sketch):
     
         
 class rotation_matrix_sketch(transformed_coords_sketch):
-    def __init__(self,  HT, ax, \
+    def __init__(self,  HT_0B, ax, \
                  xmax=1.5, xmin=0, ymax=1.5, ymin=0, \
                  xlims=[-1,2], ylims=[-1,2], \
                  axis_label_shift=0.2, \
+                 axis_color='#818480', \
                  **kwargs
                  ):
-        transformed_coords_sketch.__init__(self, HT, ax, \
+        transformed_coords_sketch.__init__(self, HT_0B, ax, \
                                            xmax=xmax, xmin=xmin, \
                                            ymax=ymax, ymin=ymin, \
                                            xlims=xlims, ylims=ylims, \
                                            axis_label_shift=axis_label_shift, \
-                                           axis_color='#818480', \
+                                           axis_color=axis_color, \
                                            axis_lw=2, \
                                            arrow_lw=3, \
                                            **kwargs)
@@ -441,3 +452,13 @@ class rotation_matrix_sketch(transformed_coords_sketch):
         self.draw_axis_A()
         self.draw_axis_B()
         self.axis_off()
+
+
+
+
+class rotation_matrix_sketch_XZ_labels(rotation_matrix_sketch):
+    def __init__(self,  HT_0B, ax, ypat='$Z_{%s}$', **kwargs):
+        rotation_matrix_sketch.__init__(self, HT_0B, ax, ypat=ypat, **kwargs)
+        
+    
+                 

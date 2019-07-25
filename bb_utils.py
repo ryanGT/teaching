@@ -1,11 +1,10 @@
 import re
 #import pdb
 
-html_pdf_links_str = r"""<p>Open: <a href="https://drive.google.com/open?id=IDSTR" target="_blank">https://drive.google.com/open?id=IDSTR</a></p>
-<p>Download: <a href="https://drive.google.com/uc?export=download&id=IDSTR" target="_blank">https://drive.google.com/uc?export=download&id=IDSTR</a></p>"""
+html_pdf_links_str = r"""<p>Open: <a href="https://drive.google.com/open?id=IDSTR" target="_blank">https://drive.google.com/open?id=IDSTR</a></p>
+<p>Download: <a href="https://drive.google.com/uc?export=download&id=IDSTR" target="_blank">https://drive.google.com/uc?export=download&id=IDSTR</a></p>"""
 
-download_only_str = r"""<p>Download: <a href="https://drive.google.com/uc?export=download&id=IDSTR" target="_blank">https://drive.google.com/uc?export=download&id=IDSTR</a></p>"""
-
+download_only_str = r"""<p>Download: <a href="https://drive.google.com/uc?export=download&id=IDSTR" target="_blank">https://drive.google.com/uc?export=download&id=IDSTR</a></p>"""
 
 open_only_str = r"""<p>Open: <a href="https://drive.google.com/open?id=IDSTR" target="_blank">https://drive.google.com/open?id=IDSTR</a></p>"""
 
@@ -19,6 +18,7 @@ pure_link_str = r'<p><a href="MYPATH" target="_blank">MYPATH</a></p>'
 #https://docs.google.com/presentation/d/1y4s2w0wuN_MBtho-84gKhbRnza-_04FqS6bNQI30mJg/edit?usp=sharing
 #https://docs.google.com/presentation/d/1y4s2w0wuN_MBtho-84gKhbRnza-_04FqS6bNQI30mJg/edit?usp=sharing
 #https://drive.google.com/drive/folders/1K1QvjItpjSvSh1Y9MlZY1fczrC94oO4C?usp=sharing
+#https://docs.google.com/document/d/1HjKxcGE2ITonkNe9SFfcBUX6FhLYQBR4euhTESZe9Q4/edit?usp=sharing
 
 chop_list = ["/view","/edit"]
 
@@ -31,7 +31,7 @@ def chop_from_end(linkin):
     return linkout
 
 
-d_file_types = ['file','presentation']
+d_file_types = ['file','presentation','document']
 
 def break_file_d_link(linkin, filetype='file'):
     splitstr = filetype + '/d/'
@@ -76,6 +76,20 @@ def jupyter_notebook_gdrive_img_link(linkin, width=300):
     pat = '<img src="https://drive.google.com/uc?id=%s" width=%ipx>'
     my_id = get_file_id(linkin)
     out_str = pat % (my_id, width)
+    return out_str
+
+
+def markdown_jupyter_download_link(linkin):
+    my_id = get_file_id(linkin)
+    download_str = "https://drive.google.com/uc?export=download&id=%s" % my_id  
+    out_str = "[%s](%s)" % (download_str, download_str)
+    return out_str
+
+
+def markdown_pdf_open_link(linkin):
+    my_id = get_file_id(linkin)
+    open_str = "https://drive.google.com/open?id=%s" % my_id
+    out_str = '[%s](%s){target="_blank"}' % (open_str, open_str)
     return out_str
 
 

@@ -6,7 +6,7 @@ from delimited_file_utils import open_delimited_with_sniffer_and_check
 
 import copy
 import csv
-
+#import pdb
 #########################################################################
 #
 # I know I have several mostly working versions of this, but it is
@@ -299,6 +299,7 @@ class delimited_grade_spreadsheet(txt_mixin.delimited_txt_file, \
             source_class = source_spreadsheet_first_and_lastnames
         if destlabel is None:
             destlabel = sourcecollabel
+        #pdb.set_trace()
         source_sheet = source_class(pathin,sourcecollabel=sourcecollabel)
         self.map_from_source(source_sheet,destlabel, attr=attr)
         self.replace_with_new()

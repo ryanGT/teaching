@@ -1,6 +1,7 @@
 import txt_mixin
 import copy
 #import pdb
+import bb_utils
 
 class notes_csv_row(object):
     def process_row(self):
@@ -23,11 +24,19 @@ class notes_csv_row(object):
             self.slide_int = None
         #print('temp_list = %s' % temp_list)
         last_ent = temp_list[-1]
-        if last_ent.find('https://drive.google.com/open') == 0:
-            self.link = last_ent
+        try:
+            myid  = bb_utils.get_file_id(last_ent)
+            self.link = "https://drive.google.com/open?id=" + myid
             temp_list.pop(-1)
-        else:
+        except ValueError:
             self.link = None
+            print("temp_list = %s" % temp_list)
+        
+        ## if last_ent.find('https://drive.google.com/open') == 0:
+        ##     self.link = last_ent
+        ##     temp_list.pop(-1)
+        ## else:
+        ##     self.link = None
         # what is left in temp list should now be just the title
         # - .join works even if there is just one entry
         self.title = ','.join(temp_list)
