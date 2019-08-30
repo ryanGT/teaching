@@ -6,6 +6,8 @@ printing.init_printing(use_latex=True)
 from IPython import display
 from IPython.display import Math
 
+#\renewcommand{\labelitemii}{$\star$}
+
 myheader = r"""\documentclass[12pt]{article}
 \newcommand{\be}{\begin{equation}}
 \newcommand{\ee}{\end{equation}}
@@ -23,6 +25,7 @@ myheader = r"""\documentclass[12pt]{article}
 \renewcommand{\v}{\vector{v}}
 \renewcommand{\a}{\vector{a}}
 \pagenumbering{gobble}
+\renewcommand{\labelitemii}{$\circ$}
 \begin{document}
 """
 
