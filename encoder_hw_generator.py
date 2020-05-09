@@ -52,10 +52,33 @@ if __name__ == '__main__':
     outpat = 'encoders_case_%0.2d.txt'
 
     # case 1 lecture example
-    A_list = [0.1, 0.3, 0.7, 0.9]
+    A_list = [0.1, 0.3, 0.5, 0.7]
     B_list = [0.2, 0.4, 0.6, 0.8]
     case = 1
-    
+
+
+    # case 2 lecture example
+    ## A_list = [0.3, 0.5, 0.7, 0.9]
+    ## B_list = [0.2, 0.4, 0.6, 0.8]
+    ## case = 2
+
+    A, B = create_case(A_list, B_list, 0, 0)
+    plot_case(A, B, fignum=case, bsty='--', linewidth=2.0)
+    ylim([-0.1,1.45])
+    legend(['A','B'],loc=1)
+    curname = outpat % case
+    fno, ext = os.path.splitext(curname)
+    pdfname = fno + '.pdf'
+    pdfpath = os.path.join(folder, pdfname)
+    pngname = fno + '.png'
+    pngpath = os.path.join(folder, pngname)
+    outpath = os.path.join(folder, curname)
+    yticks([0,1])
+    tight_layout()
+    save_case(outpath, A, B)
+    pylab_util.mysave(pdfpath)
+    savefig(pngpath)
+
 ##     # case 11
 ##     case = 11
 ##     A_list = [0.1, 0.3, 0.7, 0.9]
@@ -88,21 +111,22 @@ if __name__ == '__main__':
 ##     outpath = os.path.join(folder, curname)
 ##     #save_case(outpath, A, B)
 
-    ## # case 14
-    case = 14
-    A_list = [0.1, 0.3, 0.5, 0.7, 0.8]
-    B_list = [0.2, 0.4, 0.6, 0.9]
-    A, B = create_case(A_list, B_list, 1, 0)
-    plot_case(A, B, fignum=case, bsty='--', linewidth=2.0)
-    ylim([-0.1,1.3])
-    legend(['A','B'])
-    curname = outpat % case
-    fno, ext = os.path.splitext(curname)
-    pdfname = fno + '.pdf'
-    pdfpath = os.path.join(folder, pdfname)
-    outpath = os.path.join(folder, curname)
-    save_case(outpath, A, B)
-    pylab_util.mysave(pdfpath)
+    ## ## # case 14
+    ## case = 14
+    ## A_list = [0.1, 0.3, 0.5, 0.7, 0.8]
+    ## B_list = [0.2, 0.4, 0.6, 0.9]
+    ## A, B = create_case(A_list, B_list, 1, 0)
+
+    ## plot_case(A, B, fignum=case, bsty='--', linewidth=2.0)
+    ## ylim([-0.1,1.3])
+    ## legend(['A','B'])
+    ## curname = outpat % case
+    ## fno, ext = os.path.splitext(curname)
+    ## pdfname = fno + '.pdf'
+    ## pdfpath = os.path.join(folder, pdfname)
+    ## outpath = os.path.join(folder, curname)
+    ## save_case(outpath, A, B)
+    ## pylab_util.mysave(pdfpath)
 
 
     # case 15

@@ -6,6 +6,15 @@ import matplotlib.ticker
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 
 
+def find_freq_vect(t):
+    dt = t[2] - t[1]
+    T = t.max()+dt
+    df = 1/T
+    N = len(t)
+    nvect = np.arange(N)
+    freq = df*nvect
+    return freq
+
 def unwrap_deg(phase):
     phaser = phase*pi/180
     phaseru = np.unwrap(phaser)

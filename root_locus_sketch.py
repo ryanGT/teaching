@@ -345,7 +345,7 @@ class root_locus_sketch_with_TF(root_locus_sketch):
             
 
 
-class root_locus_sketch_with_TF(root_locus_sketch):
+class root_locus_sketch_with_TF_2(root_locus_sketch):
     def __init__(self, ax, G, *args, **kwargs):
         root_locus_sketch.__init__(self, ax, *args, **kwargs)
         self.G = G

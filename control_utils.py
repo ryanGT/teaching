@@ -7,6 +7,45 @@ import copy
 
 font_size = 20.0
 
+def _digit_coeffs_to_C_array_str(coeff_list, N, fmt='%0.8g'):
+    out_str = '{'
+    m = len(coeff_list)
+    n_pad = N-m
+
+    if n_pad > 0:
+        pad_str = '0,'*n_pad
+        out_str += pad_str
+
+    for i, coeff in enumerate(coeff_list):
+        cur_str = fmt % coeff
+        out_str += cur_str
+        if i < m-1:
+            out_str += ','
+
+    out_str+= '};'
+    return out_str
+            
+
+def digital_TF_to_arduino_arrays(TFz, sub_str=''):
+    den = np.squeeze(TFz.den)
+    num = np.squeeze(TFz.num)
+    n = len(den)
+    m = len(num)
+
+    a_str = _digit_coeffs_to_C_array_str(den, n)
+    if sub_str:
+        a_lhs = 'a_' + sub_str
+        b_lhs = 'b_' + sub_str
+    else:
+        a_lhs = 'a'
+        b_lhs = 'b'
+    a_str = '%s = %s' % (a_lhs, a_str)
+    b_str = _digit_coeffs_to_C_array_str(num, n)
+    b_str = '%s = %s' % (b_lhs, b_str)
+    print(b_str)
+    print(a_str)
+    
+
 def _unpack_complex(root_list):
     """If there are any complex roots, they are specify as tuples
     using (wn,z).  Find those and put -z*wn+/-j*wd in the output list."""    
