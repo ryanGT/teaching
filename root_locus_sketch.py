@@ -92,6 +92,11 @@ class root_locus_sketch(object):
                      style, markersize=size, **plot_kwargs)
 
 
+    def draw_markers(self, point_list, style='go', size=12, **plot_kwargs):
+        for point in point_list:
+            self.draw_marker(point, style=style, size=size, **plot_kwargs)
+
+
     def add_text(self, point, text, xoffset=0, yoffset=0, \
                  fontdict=None):
         if fontdict is None:
@@ -134,8 +139,8 @@ class root_locus_sketch(object):
 
 
     def draw_zeros(self, zero_list, style='ro', size=12, **plot_kwargs):
-        self.draw_poles(zero_list, style=style, size=size, **plot_kwargs)
-        
+        self.draw_markers(zero_list, style=style, size=size, **plot_kwargs)
+
 
     def plot_branches(self, rmat, **plot_kwargs):
         self.ax.plot(np.real(rmat), np.imag(rmat), **plot_kwargs)
@@ -241,20 +246,30 @@ class root_locus_sketch(object):
 
 
 class root_locus_sketch_with_TF(root_locus_sketch):
-    def __init__(self, ax, G, *args, **kwargs):
+    def __init__(self, G, ax=None, *args, **kwargs):
         root_locus_sketch.__init__(self, ax, *args, **kwargs)
         self.G = G
+
+
+    def main(self, kvect=None, markerstyle='bX', linecolor='b'):
+        root_locus_sketch.main_axis(self)
+        self.draw_poles(style=markerstyle)
+        self.plot_branches(kvect=kvect,color=linecolor)
+        self.draw_zeros()
         
 
-    
-
-        for i, p in enumerate(pole_list):
-            j = i+1
-            self.ax.plot([np.real(p)],[np.imag(p)], \
-                         style, markersize=size)
+    def draw_poles(self, style='rX', size=12, **plot_kwargs):
+        root_locus_sketch.draw_poles(self, self.G.pole(), style=style, size=size, **plot_kwargs)
 
 
-    def plot_branches(self, rmat, **plot_kwargs):
+    def draw_zeros(self, style='ro', size=12, **plot_kwargs):
+        zlist = self.G.zero()
+        if len(zlist) > 0:
+            root_locus_sketch.draw_zeros(self, zlist, style=style, size=size, **plot_kwargs)
+        
+
+    def plot_branches(self, kvect=None, **plot_kwargs):
+        rmat, kout = control.root_locus(self.G, kvect=kvect, Plot=False)
         self.ax.plot(np.real(rmat), np.imag(rmat), **plot_kwargs)
 
 
