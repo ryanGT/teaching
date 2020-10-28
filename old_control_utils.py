@@ -172,7 +172,7 @@ def my_rlocus(G, k):
     poles = G.pole()
     plot(real(poles), imag(poles), 'x')
     zeros = G.zero()
-    if zeros:
+    if len(zeros) > 0:
         plot(real(zeros), imag(zeros), 'o')
 
 def TF_mag(G, s1):
