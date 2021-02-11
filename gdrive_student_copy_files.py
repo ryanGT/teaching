@@ -74,3 +74,58 @@ class student_file_finder_185(student_file_finder):
     def __init__(self, topdir, preferred_root, bad_root=None, ext_list=ext_list_185):
         student_file_finder.__init__(self, topdir, preferred_root, \
                                      bad_root=bad_root, ext_list=ext_list) 
+
+
+
+class student_file_finder_filter_older(student_file_finder):
+    """This class checks to see if a file is newer than another file
+    with a different extension but the same filename (fno), and
+    filters out files that are older than the other extension.  One
+    example usecase is gdoc-down: downloading a pdf from google drive
+    is somewhat time consuming, so only do it if the gdoc or gslides
+    file is newer than the pdf.
+
+    return True if the test fails and filename should not be copied
+    (because it is older than the pdf or whatever)."""
+    def __init__(self, topdir, preferred_root, bad_root=None, ext_list=default_ext_list, \
+                 check_ext='.pdf'):
+        student_file_finder.__init__(self, topdir, preferred_root, \
+                                     bad_root=bad_root, ext_list=ext_list) 
+        self.check_ext = check_ext
+
+        
+    def filter_older(self, filename):
+        fno, ext = os.path.splitext(filename)
+        checkname = fno + self.check_ext
+        if os.path.exists(checkname):
+            chkmtime = os.path.getmtime(checkname)
+            docmtime = os.path.getmtime(filename)
+            if docmtime > chkmtime:
+                return False
+            else:
+                return True
+        else:
+            return False
+    
+
+
+    def main(self, filter_older=True):
+        allpaths = student_file_finder.main(self)
+        if filter_older:
+            filt_paths = []
+            for curpath in allpaths:
+                if not self.filter_older(curpath):
+                    filt_paths.append(curpath)
+            self.allpaths = filt_paths
+        return self.allpaths
+
+
+gdoc_down_ext_list = ['.gdoc','.gslides']
+
+class student_file_finder_gdoc_down(student_file_finder_filter_older):
+    def __init__(self, topdir, preferred_root, bad_root=None, ext_list=gdoc_down_ext_list, \
+                 check_ext='.pdf'):
+        student_file_finder_filter_older.__init__(self, topdir, preferred_root, \
+                                                  bad_root=bad_root, ext_list=ext_list, \
+                                                  check_ext=check_ext)
+    
