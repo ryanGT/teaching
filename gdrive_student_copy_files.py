@@ -19,7 +19,7 @@ class student_file_finder(object):
         self.ext_list = ext_list
 
 
-    def skipfolder(folderpath):
+    def skipfolder(self, folderpath):
         """Determing if folder should be autoskipped"""
         skipfolders = ['.ipynb_checkpoints','figs','prep','solutions','eqns','tikz_slides', \
                        'instructor_resources']
@@ -37,7 +37,7 @@ class student_file_finder(object):
             self.topdir = self.topdir.replace(self.bad_root, self.preferred_root)
 
         for root, dirs, files in os.walk(self.topdir):
-            print("root = %s" % root)
+            #print("root = %s" % root)
             curpaths = self.process_one_folder(root)
             allpaths.extend(curpaths)
 
@@ -50,7 +50,7 @@ class student_file_finder(object):
         
         if not self.skipfolder(folderpath):
             rp = relpath.relpath(folderpath, self.preferred_root)
-            print("rp = %s" % rp)
+            #print("rp = %s" % rp)
 
             rwkos.clean_files_in_folder(folderpath)
 
@@ -62,7 +62,7 @@ class student_file_finder(object):
                     ext = '*' + ext
                 pat = os.path.join(folderpath, ext)
                 files = glob.glob(pat)
-                rplist = [relpath.relpath(item, srcfolder) for item in files]
+                rplist = [relpath.relpath(item, self.topdir) for item in files]
                 mypaths.extend(rplist)
 
         return mypaths
