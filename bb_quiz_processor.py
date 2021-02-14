@@ -1,6 +1,7 @@
 import txt_database
 import numpy as np
 import matplotlib.pyplot as plt
+plt.rcParams['font.size'] = 14
 import copy
 from collections import Counter
 import os, rwkos, glob, txt_mixin
@@ -32,7 +33,7 @@ class quiz_question(object):
     
 
 
-    def find_correction_answer(self, tol=1e-4):
+    def find_correct_answer(self, tol=1e-4):
         """Search through auto_scores until the difference between an
         auto_score and self.possible_points is less than tol."""
         for i, auto in enumerate(self.auto_scores):
@@ -86,9 +87,9 @@ class quiz_question(object):
     def gen_markdown(self):
         listout = []
         out = listout.append
-        out("## Question %i" % self.qnum)
-        out('')
-        out("**Question:** %s" % self.question)
+        out("## Question %i: %s" % (self.qnum, self.question))
+        #out('')
+        #out("**Question:** %s" % self.question)
         out('')
         out('\\columnsbegin')
         out('\\column{0.4\\textwidth}')
@@ -96,7 +97,10 @@ class quiz_question(object):
         out('')
         for i, ans in enumerate(self.ans_list):
             j = i+1
-            line = '- ans %i: %s' % (j, ans)
+            if ans == self.correct_ans:
+                line = '- **ans %i: %s**' % (j, ans)
+            else:
+                line = '- ans %i: %s' % (j, ans)
             out(line)
         out('')
         out('\\column{0.6\\textwidth}')
@@ -125,7 +129,7 @@ class quiz_question(object):
         auto_score_attr = 'Auto_Score_%i' % self.qnum
         auto_score_list = self.getpattr(auto_score_attr)
         self.auto_scores = auto_score_list.astype(float)
-        self.find_correction_answer()
+        self.find_correct_answer()
         self.build_hist_dict()
         self.gen_hist(save=save)
         
@@ -152,11 +156,17 @@ class quiz_processor(txt_database.txt_database_from_file):
         self.markdown = big_list
 
 
-    def save_pres(self, title="Quiz Results"):
+    def save_pres(self, title='"Quiz Results"'):
         cmd1 = "new_md_beamer_pres.py %s" % title
         os.system(cmd1)
         slides_files = glob.glob("*_slides.md")
         assert len(slides_files) == 1, "did not find exactly one match, found %i" % len(slides_files)
         md_fn = slides_files[0]
         txt_mixin.dump(md_fn, self.markdown)
+        self.md_fn = md_fn
+        
+
+    def run_pandoc(self):
+        cmd = "md_to_beamer_pres.py %s" % self.md_fn
+        os.system(cmd)
         
