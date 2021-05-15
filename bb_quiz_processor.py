@@ -6,7 +6,7 @@ import copy
 from collections import Counter
 import os, rwkos, glob, txt_mixin
 import pylab_util as PU
-
+import pdb
 
 def string_cleaner(str_in):
     mytuples = [('&nbsp;','')]
@@ -128,6 +128,7 @@ class quiz_question(object):
         self.possible_points = float(possible_list[0])
         auto_score_attr = 'Auto_Score_%i' % self.qnum
         auto_score_list = self.getpattr(auto_score_attr)
+        pdb.set_trace()
         self.auto_scores = auto_score_list.astype(float)
         self.find_correct_answer()
         self.build_hist_dict()
