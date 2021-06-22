@@ -477,3 +477,71 @@ class group_source_spreadsheet(group_delimited_grade_spreadsheet,\
         self.make_values_dict()
 
 
+
+
+class delimited_grade_spreadsheet_userids_as_keys(delimited_grade_spreadsheet):
+    """For nbgrader, I need to work with csv files that have usernames
+    from Blackboard, but no first or last names.  So, the keys will be
+    userids, which should be unique and cleaner in some sense."""
+    ##def __init__(self, *args, **kwargs):
+    ##    delimited_grade_spreadsheet.__init__(self, *args, **kwargs)
+    ##    self.find_usernames()
+        
+
+    def _find_username_col(self):
+        search_list = ["Username", "username", "uid", "UID"]
+        return self._search_for_first_match(search_list)
+
+
+
+    def find_usernames(self):
+        uid_col = self._find_username_col()
+        assert uid_col is not None, "Could not find a username column label."
+        self.uid_col = uid_col
+        self.usernames = self.clean_quotes(self.data[:,self.uid_col])
+
+
+    def make_keys_and_dict(self):
+        self.find_usernames()
+        N = len(self.usernames)
+        keys = [None]*N
+        i_vect = range(N)
+        for i, uid in zip(i_vect, self.usernames):
+            key = uid
+            keys[i] = key
+
+        self.keys = keys
+        self.inds = i_vect
+        self.rowdict = dict(zip(self.keys, self.inds))
+    
+
+
+
+
+class source_spreadsheet_userids_as_keys(source_spreadsheet_first_and_lastnames, \
+                                         delimited_grade_spreadsheet_userids_as_keys):
+    def make_keys_and_dict(self):
+        delimited_grade_spreadsheet_userids_as_keys.make_keys_and_dict(self)
+
+
+    def __init__(self, pathin=None, sourcecollabel=None, \
+                 delim='\t', **kwargs):
+        txt_mixin.delimited_txt_file.__init__(self, pathin, delim=delim, \
+                                              **kwargs)
+        myarray = open_delimited_with_sniffer_and_check(pathin)
+        self.array = myarray
+        ## self.lastnamecol = lastnamecol
+        ## self.firstnamecol = firstnamecol
+        self._get_labels_and_data()
+        self.make_keys_and_dict()
+        
+        #from txt_database.__init__
+        self.N_cols = len(self.labels)
+        inds = range(self.N_cols)
+        self.col_inds = dict(zip(self.labels, inds))
+        self._col_labels_to_attr_names()
+        self.map_cols_to_attr()
+
+        self.sourcecollabel = sourcecollabel
+        self.find_source_col()
+        self.make_values_dict()
