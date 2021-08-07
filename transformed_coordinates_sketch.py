@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 plt.rcParams['mathtext.fontset'] = 'cm'
 import numpy as np
 dtr = np.pi/180
+from IPython.core.debugger import Pdb
 
 ## Note to self:
 ## Previously I have used np.eye(4) for the HT matrix of axis A
@@ -40,6 +41,7 @@ class transformed_coords_sketch(object):
         stop_A = transform_coords(end_coords, HT)
         x_vect = [start_A[0],stop_A[0]]
         y_vect = [start_A[1],stop_A[1]]
+        #print("x_vect = %s" % x_vect)
         self.ax.plot(x_vect, y_vect, **plot_kwargs)
 
 
@@ -106,8 +108,8 @@ class transformed_coords_sketch(object):
         self.draw_axis(self.HT_0A)
 
 
-    def draw_axis_B(self):
-        self.draw_axis(self.HT_0B, substr='B')
+    def draw_axis_B(self, xlabel=None, ylabel=None):
+        self.draw_axis(self.HT_0B, substr='B', xlabel=xlabel, ylabel= ylabel)
 
 
     def draw_xticks(self, HT, ticks=None, dy=0.1, **plot_kwargs):
@@ -158,6 +160,7 @@ class transformed_coords_sketch(object):
 
     def draw_rotated_vertical_gridlines(self, HT, xlist=None, \
                                         ymin=0, ymax=None, plot_kwargs=None):
+        #Pdb().set_trace()
         if plot_kwargs is None:
             plot_kwargs = grid_dict
 
@@ -168,6 +171,7 @@ class transformed_coords_sketch(object):
             xlist = np.arange(0,self.xmax,1)
 
         for x in xlist:
+            #print("x = %s" % x)
             self.draw_rotated_line([x,ymin], [x,ymax], HT, **plot_kwargs)
 
 

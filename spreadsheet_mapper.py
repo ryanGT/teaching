@@ -489,7 +489,7 @@ class delimited_grade_spreadsheet_userids_as_keys(delimited_grade_spreadsheet):
         
 
     def _find_username_col(self):
-        search_list = ["Username", "username", "uid", "UID"]
+        search_list = ["Username", "username", "uid", "UID","user id","user_id"]
         return self._search_for_first_match(search_list)
 
 
@@ -515,6 +515,39 @@ class delimited_grade_spreadsheet_userids_as_keys(delimited_grade_spreadsheet):
         self.rowdict = dict(zip(self.keys, self.inds))
     
 
+    def map_from_source(self, source_sheet, label, attr=None, func=None):
+        self.old_data = copy.copy(self.data)
+        self.old_labels = copy.copy(self.labels)
+
+        N = len(self.inds)
+        mylist = [None]*N
+
+        for key, ind in self.rowdict.items():
+            value = None
+            if key in source_sheet.valuesdict:
+                value = source_sheet.valuesdict[key]
+            else:
+                # for other versions of mapping, I would do many things to find out why I
+                # couldn't find the data.  But if we are using BB user ids, missing
+                # data probably means it wasn't turned in.  So, just setting value to 0.
+                value = 0
+
+            if func is not None:
+                value = func(value)
+            mylist[ind] = value
+
+        myarray = array(mylist)
+
+        if attr is None:
+            attr = label
+
+        setattr(self, attr, myarray)
+
+        new_labels = append(self.labels, label)
+        new_data = column_stack([self.data, myarray])
+
+        self.new_labels = new_labels
+        self.new_data = new_data
 
 
 
@@ -545,3 +578,14 @@ class source_spreadsheet_userids_as_keys(source_spreadsheet_first_and_lastnames,
         self.sourcecollabel = sourcecollabel
         self.find_source_col()
         self.make_values_dict()
+
+
+class wsq_source_username_as_key(source_spreadsheet_userids_as_keys):
+    def __init__(self, pathin=None, sourcecollabel="grade", \
+                 delim='\t', **kwargs):
+        source_spreadsheet_userids_as_keys.__init__(self, pathin, delim=delim, \
+                                                    sourcecollabel=sourcecollabel, \
+                                                    **kwargs)
+        self.sourcecollabel = sourcecollabel
+        
+    
