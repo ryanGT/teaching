@@ -382,7 +382,10 @@ class source_spreadsheet_first_and_lastnames(delimited_grade_spreadsheet):
     lastname,firstname."""
     def find_source_col(self):
         labels = self.labels.tolist()
-        ind = labels.index(self.sourcecollabel)
+        try:
+            ind = labels.index(self.sourcecollabel)
+        except:
+            ind = -1#assume last column - what could go wrong?
         self.source_col_ind = ind
 
 
