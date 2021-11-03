@@ -4,10 +4,11 @@ import bode_utils
 import matplotlib
 
 rcParams['figure.subplot.bottom'] = 0.15
+rcParams['font.size'] = 18
 
-myfreqlims = [10**-2,10**3]
+myfreqlims = [10**-2,10**4]
 
-fig = figure(1)
+fig = figure(1,figsize=(8,6))
 fig.clf()
 ax1 = subplot(211)
 ax1.set_xscale('log')

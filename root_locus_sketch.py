@@ -232,12 +232,13 @@ class root_locus_sketch(object):
             self.ax.plot([-dx,dx], [tick,tick], **kwargs)
             
 
-    def main_axis(self):
+    def main_axis(self, ticks=True):
         self.set_arrow_lengths()
         self.axis_off()
         self.draw_axis()
-        self.draw_xticks()
-        self.draw_yticks()
+        if ticks:
+            self.draw_xticks()
+            self.draw_yticks()
         self.label_axes()
         self.ax.set_xlim(self.xlims)
         self.ax.set_ylim(self.ylims)
@@ -251,10 +252,12 @@ class root_locus_sketch_with_TF(root_locus_sketch):
         self.G = G
 
 
-    def main(self, kvect=None, markerstyle='bX', linecolor='b'):
-        root_locus_sketch.main_axis(self)
+    def main(self, kvect=None, markerstyle='bX', linecolor='b',
+             plot_branches=True, ticks=True):
+        root_locus_sketch.main_axis(self, ticks=ticks)
         self.draw_poles(style=markerstyle)
-        self.plot_branches(kvect=kvect,color=linecolor)
+        if plot_branches:
+            self.plot_branches(kvect=kvect,color=linecolor)
         self.draw_zeros()
         
 
@@ -460,7 +463,7 @@ class root_locus_sketch_two_pole_locations(root_locus_sketch):
             self.add_text(p, mytext, xoffset=np.real(lo), yoffset=np.imag(lo))
         
 
-    def main(self):
-        self.main_axis()
+    def main(self, ticks=True):
+        self.main_axis(ticks=ticks)
         self.draw_and_label_poles()
         
