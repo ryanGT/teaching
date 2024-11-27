@@ -1,4 +1,5 @@
-import txt_mixin, os
+from krauss_misc import txt_mixin
+import os
 from numpy import where, zeros, array, append, column_stack, row_stack
 
 from spreadsheet_mapper import clean_quotes, delimited_grade_spreadsheet, \

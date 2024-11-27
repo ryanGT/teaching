@@ -1,4 +1,4 @@
-from scipy import log10, angle, squeeze, r_, where
+from numpy import log10, angle, squeeze, r_, where
 import matplotlib
 import numpy as np
 from numpy import pi

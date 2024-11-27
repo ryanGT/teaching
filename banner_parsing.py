@@ -6,7 +6,7 @@ Don't forget to use the -a option when generating the classlist:
 classlist.sh -a IME 106 FR3 201415 > sec_FR3_classlist.txt
 """
 
-import txt_mixin, csv_to_latex, rwkos
+import txt_mixin, csv_to_latex, rwkos, basic_file_ops
 import os, re, glob
 import numpy
 from numpy import array, arange
@@ -759,6 +759,24 @@ class transcript_txt_parser(txt_mixin.txt_file_with_list):
         return linesout
 
 
+    def find_specific_course(self, course_num, subject='EGR'):
+        subject_lines = self.get_passed_courses_for_subject(subject)
+        matches = []
+        for course_line in subject_lines:
+            skip = False
+            course_list = self.split_row_to_list(course_line)
+            if course_list[-1] in ['E','I']:
+                skip = True
+
+            if not skip:
+                cur_num = int(course_list[1])
+                if cur_num == course_num:
+                    matches.append(course_line)
+
+        return matches
+
+
+
     def split_row_to_list(self, rowstr):
         """split row using self.delim and pop empty elements from the
         end"""
@@ -882,6 +900,78 @@ class transcript_txt_parser(txt_mixin.txt_file_with_list):
 
         return linesout
         
+    
+    def get_passed_courses_for_subject(self, subject):
+        all_subject_lines = self.get_subject_lines(subject)
+        failed_grades = ['W','F']
+    
+        linesout = []
+
+        for line in all_subject_lines:
+            cur_grade = self.get_grade_form_line(line)
+            if cur_grade not in failed_grades:
+                linesout.append(line)
+
+        return linesout
+        
+
+    def get_credit_hours_from_list_of_lines(self, lines):
+        """Assuming the method is passed in a list of lines that have been
+        filtered to have only passed grades, find the total number of credit
+        hours for the list"""
+        ch_total = 0
+
+        for course_row in lines:
+            skip = False
+            course_list = self.split_row_to_list(course_row)
+            if course_list[-1] in ['E','I']:
+                skip = True
+            #assert len(course_list) == 8, "bad grade row: " + course_row
+            if not skip:
+                qp = float(course_list[-1])
+                ch = float(course_list[-2])
+                ch_total += ch
+
+        return ch_total
+
+
+    def get_design_courses(self, year=2022):
+        common_design_courses = [209,214,226,309,360,314,301,326,257,330,323,485,486]
+        if year < 2018:
+            old_courses = [101,106,107,345]
+            design_courses = old_courses + common_design_courses
+        elif year > 2020:
+            new_courses = [100,111,112,113,185]
+            design_courses = new_courses + common_design_courses
+
+        EGR_lines = self.get_passed_courses_for_subject('EGR')
+
+        design_rows = []
+        for course_row in EGR_lines:
+            skip = False
+            course_list = self.split_row_to_list(course_row)
+            if course_list[-1] in ['E','I']:
+                skip = True
+
+            if not skip:
+                course_num = int(course_list[1])
+                if course_num in design_courses:
+                    design_rows.append(course_row)
+
+        return design_rows
+
+
+
+    def get_passed_math_and_science_courses(self):
+        subjects = ['MTH','STA','PHY','BIO','CHM']
+        mylines = []
+
+        for subject in subjects:
+            curlist = self.get_passed_courses_for_subject(subject)
+            mylines.extend(curlist)
+
+        return mylines
+
 
     def filter_inprogress_courses(self, lines):
         """After scrubbing off empty elements from the end of the
@@ -899,6 +989,109 @@ class transcript_txt_parser(txt_mixin.txt_file_with_list):
 
         return linesout
 
+
+
+    def table_5_1_one_section(self, lines, title):
+        mylist = []
+        out = mylist.append
+
+        out("## %s Courses" % title)
+        out('')
+        out('```')
+        mylist.extend(lines)
+        out('```')
+        out('')
+
+
+        my_credits = self.get_credit_hours_from_list_of_lines(lines)
+
+        out('### Total %s Credit Hours: %i' % (title, my_credits))
+        out('')
+        return mylist
+
+
+    def check_list_of_classes(self, course_num_list, subject="EGR"):
+        mylist = []
+        for course_num in course_num_list:
+            curlist = self.find_specific_course(course_num, subject=subject)
+            mylist.extend(curlist)
+
+        return mylist
+
+
+    def IE_requirements_table_5_1_year_2017(self):
+        # - EGR 314 OR EGR 345
+        # - EGR 360 - Thermodynamics Credits: 4
+        # - EGR 450 or EGR 455
+        mylist = []
+        out = mylist.append
+        extnd = mylist.extend
+
+        out("### EGR 314 or 345")
+        list1 = self.check_list_of_classes([314,345])
+        extnd(list1)
+        out('')
+
+        out("### EGR 360")
+        list2 = self.find_specific_course(360)
+        extnd(list2)
+        out('')
+
+        out("### EGR 450 or 455")
+        list3 = self.check_list_of_classes([450,455])
+        extnd(list3)
+        out('')
+
+        return mylist
+
+
+
+    def generate_IE_requirements_for_table_5_1(self, year=2022):
+        method_name = "IE_requirements_table_5_1_year_%0.4i" % year
+        method = getattr(self, method_name)
+        mylist = method()
+        title = '## IE Requirements for Catalog Yeat %0.4i' % year
+        out_list = [title, ''] + mylist
+        return out_list
+
+
+    def generate_ABET_report(self, year=2022):
+        report_lines = []
+        out = report_lines.append
+        extnd = report_lines.extend
+
+        out("Catalog Year: %i" % year)
+        out('')
+
+        math_sci_lines = self.get_passed_math_and_science_courses()
+        math_sci_report = self.table_5_1_one_section(math_sci_lines, \
+                "Math and Science")
+        
+        extnd(math_sci_report)
+
+        EGR_lines = self.get_passed_courses_for_subject('EGR')
+        all_EGR_report = self.table_5_1_one_section(EGR_lines, \
+                "All Engineering Courses")
+        extnd(all_EGR_report)
+
+       
+        design_lines = self.get_design_courses(year=year)
+        design_report = self.table_5_1_one_section(design_lines, \
+                "Engineering Deisgn")
+        extnd(design_report)
+        
+        IE_report = self.generate_IE_requirements_for_table_5_1(year=year)
+        extnd(IE_report)
+        
+
+
+        # Save to markdown file
+        fno, ext = os.path.splitext(self.filename)
+        self.md_name = fno + '.md'
+        basic_file_ops.writefile(self.md_name, report_lines)
+        #txt_mixin.dump_delimited(
+ 
+        return report_lines
 
 
     def get_filtered_non_passing_lines(self, subject):

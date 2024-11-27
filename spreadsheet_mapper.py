@@ -1,4 +1,5 @@
-import txt_mixin, os, txt_database
+from krauss_misc import txt_mixin
+import os, txt_database
 from numpy import where, zeros, array, append, column_stack, row_stack, \
      delete
 import numpy

@@ -1,4 +1,5 @@
-import os, glob, shutil, relpath, txt_mixin, rwkos, copy
+import os, glob, shutil, copy
+from krauss_misc import relpath, txt_mixin, rwkos
 
 default_ext_list = ['.pdf','.ipynb','.jpg','.png','.jpeg','.txt']
 
