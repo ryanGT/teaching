@@ -257,5 +257,4 @@ class partial_fraction_solver(object):
         self.sol = solve_coeff_lists(self.rhs_coeffs, self.lhs_coeffs, \
                                      self.unknowns)
         return self.sol
-        
-        
+

@@ -85,11 +85,14 @@ def open_files_for_student(all_files):
                  'jpg':'eog', \
                  'png':'eog'})
 
-    jupyter_root = "http://localhost:8888/lab/tree/445_545_SS24/grading"
-    #root_345 = rwkos.get_root("345")
+    #jupyter_root = "http://localhost:8888/lab/tree/445_545_SS24/grading"
+    jupyter_root = "http://localhost:8888/lab/tree/345_F24_local/grading"
+
+    root_345 = rwkos.get_root("345")
     # Note: this probably fails if the path hasn't been cleaned 
     # properly
-    grading_root = "/Users/kraussry/445_545_SS24/grading" 
+    #grading_root = "/Users/kraussry/445_545_SS24/grading" 
+    grading_root = os.path.join(root_345,"grading") 
     curdir = os.getcwd()
     curdir = clean_course_path(curdir)
     reldir = relpath.relpath(curdir, grading_root)
