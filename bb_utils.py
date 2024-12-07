@@ -86,7 +86,11 @@ def open_files_for_student(all_files):
                  'png':'eog'})
 
     #jupyter_root = "http://localhost:8888/lab/tree/445_545_SS24/grading"
-    jupyter_root = "http://localhost:8888/lab/tree/345_F24_local/grading"
+    if rwkos.amiLinux():
+        # no jupyter lab yet in Ubuntu
+        jupyter_root = "http://localhost:8888/tree/345_F24_local/grading"
+    else:
+        jupyter_root = "http://localhost:8888/lab/tree/345_F24_local/grading"
 
     root_345 = rwkos.get_root("345")
     # Note: this probably fails if the path hasn't been cleaned 
