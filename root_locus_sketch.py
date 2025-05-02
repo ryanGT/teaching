@@ -451,8 +451,10 @@ class root_locus_sketch_two_pole_locations(root_locus_sketch):
 
     def draw_and_label_poles(self):
         # get poles and force the imaginary part to be positive
-        p1 = self.G1.pole()[0]
-        p2 = self.G2.pole()[0]
+        #
+        # Note that this code assumes two underdamped, second order systems
+        p1 = self.G1.poles()[0]
+        p2 = self.G2.poles()[0]
 
         for p, m, lo, ind in zip([p1,p2], self.markers, \
                                   self.label_offsets, self.inds):

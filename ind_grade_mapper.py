@@ -33,6 +33,7 @@ class team_grade_dict(txt_mixin.delimited_txt_file):
 
     def _build_dict(self):
         labels = self.array[0]
+        print("labels = %s" % labels)
         id_ind = where(labels==self.team_id_column_label)[0][0]
         score_ind = where(labels==self.score_column)[0][0]
 
