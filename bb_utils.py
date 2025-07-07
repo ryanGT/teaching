@@ -3,6 +3,7 @@ from krauss_misc import rwkos, relpath
 from find_bb_column_label import find_bb_column_label
 #import pdb
 import bb_pandas_utils
+from datetime import datetime, date
 
 html_pdf_links_str = r"""<p>Open: <a href="https://drive.google.com/open?id=IDSTR" target="_blank">https://drive.google.com/open?id=IDSTR</a></p>
 <p>Download: <a href="https://drive.google.com/uc?export=download&id=IDSTR" target="_blank">https://drive.google.com/uc?export=download&id=IDSTR</a></p>"""
@@ -85,18 +86,32 @@ def open_files_for_student(all_files):
                  'jpg':'eog', \
                  'png':'eog'})
 
-    #jupyter_root = "http://localhost:8888/lab/tree/445_545_SS24/grading"
-    if rwkos.amiLinux():
-        # no jupyter lab yet in Ubuntu
-        jupyter_root = "http://localhost:8888/tree/345_F24_local/grading"
-    else:
-        jupyter_root = "http://localhost:8888/lab/tree/345_F24_local/grading"
+    today = date.today()
+    cur_year = today.year
+    ## is it summer:
+    ss_start = date(cur_year, 5, 1)
+    ss_end = date(cur_year,8,10)
+    if ss_start < today < ss_end:
+        # yes, we are in summer
+        class_root = rwkos.get_root("445")
+        # this is a bit clunky; I think we just need to make things
+        # relative to the home folder, which is where
+        # http://localhost:8888/lab/tree/ points/starts
+        jupyter_root = "http://localhost:8888/lab/tree/445_local_prep/grading"
 
-    root_345 = rwkos.get_root("345")
+
+    #jupyter_root = "http://localhost:8888/lab/tree/445_545_SS24/grading"
+    #if rwkos.amiLinux():
+    #    # no jupyter lab yet in Ubuntu
+    #    jupyter_root = "http://localhost:8888/tree/345_F24_local/grading"
+    #else:
+    #    jupyter_root = "http://localhost:8888/lab/tree/345_F24_local/grading"
+
+    #root_345 = rwkos.get_root("345")
     # Note: this probably fails if the path hasn't been cleaned 
     # properly
     #grading_root = "/Users/kraussry/445_545_SS24/grading" 
-    grading_root = os.path.join(root_345,"grading") 
+    grading_root = os.path.join(class_root,"grading") 
     curdir = os.getcwd()
     curdir = clean_course_path(curdir)
     reldir = relpath.relpath(curdir, grading_root)
