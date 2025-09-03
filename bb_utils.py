@@ -91,6 +91,7 @@ def open_files_for_student(all_files):
     ## is it summer:
     ss_start = date(cur_year, 5, 1)
     ss_end = date(cur_year,8,10)
+    fall_start = date(cur_year, 8, 15)
     if ss_start < today < ss_end:
         # yes, we are in summer
         class_root = rwkos.get_root("445")
@@ -98,6 +99,12 @@ def open_files_for_student(all_files):
         # relative to the home folder, which is where
         # http://localhost:8888/lab/tree/ points/starts
         jupyter_root = "http://localhost:8888/lab/tree/445_local_prep/grading"
+    elif today > fall_start:
+        class_root = rwkos.get_root("345")
+        # this is a bit clunky; I think we just need to make things
+        # relative to the home folder, which is where
+        # http://localhost:8888/lab/tree/ points/starts
+        jupyter_root = "http://localhost:8888/lab/tree/345_local_prep/grading"
 
 
     #jupyter_root = "http://localhost:8888/lab/tree/445_545_SS24/grading"
