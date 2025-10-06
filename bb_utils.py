@@ -82,7 +82,7 @@ def clean_course_path(pathin):
 
 
 def open_files_for_student(all_files):
-    app_dict = dict({'pdf':'okular', \
+    app_dict = dict({'pdf':'evince', \
                  'jpg':'eog', \
                  'png':'eog'})
 
