@@ -27,6 +27,8 @@ def make_message(content,subject=None,to_addr=None,from_addr=None,
     
     properties_string = ",".join(properties)
 
+    print("attach: %s" % attach)
+    print('\n'*5)
     template = 'make new %s with properties {%s:"%s"}'
     make_new = []
     if to_addr:
@@ -60,6 +62,7 @@ def make_message(content,subject=None,to_addr=None,from_addr=None,
     return p.returncode
 
 
+send = make_message
 
 #content = "Happy anniversary again"
 #subject = "congrats - 2"

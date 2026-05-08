@@ -10,8 +10,10 @@ from krauss_misc import rwkos
 from krauss_misc import relpath
 
 
-student_folders = ['/Users/kraussry/445_local_prep/learning_activities_EGR_445_545']
-solution_folders = ['/Users/kraussry/445_local_prep/solutions_EGR_445_545']
+student_folders = ['/Users/kraussry/445_local_prep/learning_activities_EGR_445_545', \
+                   '/Users/kraussry/learning_activities_345']
+solution_folders = ['/Users/kraussry/445_local_prep/solutions_EGR_445_545', \
+                    '/Users/kraussry/solutions_345']
 mymap = dict(zip(solution_folders, student_folders))
 inv_map = {v: k for k, v in mymap.items()}
 
