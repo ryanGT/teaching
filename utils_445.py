@@ -5,6 +5,7 @@ from krauss_misc import rwkos, relpath
 
 git_root = os.path.expanduser("~/instructor_git_445_545/")
 images_root = os.path.join(git_root, "445_images")
+facweb_images_root = "https://faculty.gvsu.edu/kraussry/445_images"
 
 
 def html_str_to_relpath(img_path):
@@ -41,7 +42,7 @@ def save_445_image(fn, chapter=2):
     return html_str
 
 
-def find_image_445(pat, chapter=None):
+def find_image_match_list(pat, chapter=None):
     if chapter is not None:
         folder = "chapter_%i" % chapter
         folder_path = os.path.join(images_root, folder)
@@ -49,6 +50,11 @@ def find_image_445(pat, chapter=None):
         folder_path = images_root
 
     mylist = rwkos.find_in_top_and_all_sub_dirs(folder_path, pat)
+    return mylist
+
+
+def find_image_445(pat, chapter=None):
+    mylist = find_image_match_list(pat, chapter)
     if len(mylist) > 1:
         return mylist
     elif len(mylist) == 1:
@@ -57,6 +63,26 @@ def find_image_445(pat, chapter=None):
         return html_str
     else:
         return None
+
+
+def find_facweb_image_path(pat, chapter=None):
+    """Search for images locally in 445_images.  If more than one image is
+    found, return the list.  If exactly one image is found that matches pat,
+    convert to html source code assuming the image exists in facweb 445_images.
+
+    Note that I need to manaul sync local 445_images to facweb.  Not attempt 
+    is made by this code to verify that the image exists in facweb folder."""
+    mylist = find_image_match_list(pat, chapter)
+    if len(mylist) > 1:
+        return mylist
+    else:
+        localpath = mylist[0]
+        localabs = os.path.abspath(localpath)
+        rp = relpath.relpath(localabs, images_root)
+        html_path = os.path.join(facweb_images_root, rp)
+        html_str = '<img src="%s" width=800px>' % html_path
+        return html_str
+
 
 
 

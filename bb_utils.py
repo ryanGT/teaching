@@ -40,7 +40,7 @@ folder_to_assignment_dict = {'LA':'learning activity', \
                              'Project':'project', \
                              }
 
-label_regexp_base_pats_dict ={'LA':'LA[_ ]*', \
+label_regexp_base_pats_dict ={'LA':'LA[_ 0]*', \
                               #'LA':'[Ll]earning.*[Aa]ctivity *', \
                              #'HW':'[Hh]omework *', \
                              'HW':'[HhWw]+ *', \
