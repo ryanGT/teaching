@@ -186,6 +186,7 @@ def get_assign_number(folder_name):
     q = assign_p.match(folder_name)
     if q is None:
         print("folder_name: %s" % folder_name)
+        #return None#<-- kind of overrides the stuff below.....
     assert q is not None, "Problem with folder pattern: %s" % folder_name
     return int(q.group(2))
 
