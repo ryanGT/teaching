@@ -1,6 +1,6 @@
 from krauss_misc import txt_mixin
 import os, txt_database
-from numpy import where, zeros, array, append, column_stack, row_stack, \
+from numpy import where, zeros, array, append, column_stack, vstack, \
      delete
 import numpy
 from delimited_file_utils import open_delimited_with_sniffer_and_check

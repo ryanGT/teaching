@@ -2,6 +2,7 @@ import pylab_util as PU
 
 import os
 from krauss_misc import rwkos, relpath
+import pyperclip
 
 git_root = os.path.expanduser("~/instructor_git_345/")
 images_root = os.path.join(git_root, "345_images")
@@ -53,8 +54,8 @@ def find_image_match_list(pat, chapter=None):
     return mylist
 
 
-def find_image_345(pat, chapter=None):
-    mylist = find_image_match_list(pat, chapter)
+
+def _handle_image_list(mylist):
     if len(mylist) > 1:
         return mylist
     elif len(mylist) == 1:
@@ -64,9 +65,21 @@ def find_image_345(pat, chapter=None):
         img_str = '<img src="%s" width=800px>' % rp
         #html_str = html_str_to_relpath(img_path)
         #return html_str
+        pyperclip.copy(img_str)
         print(img_str)
     else:
         return None
+
+
+def find_image_345(pat, chapter=None):
+    mylist = find_image_match_list(pat, chapter)
+    return _handle_image_list(mylist)
+
+
+def find_image_here_or_below(pat):
+    mylist = rwkos.glob_all_subdirs('.',pat)
+    return _handle_image_list(mylist)
+
 
 
 def find_facweb_image_path(pat, chapter=None):

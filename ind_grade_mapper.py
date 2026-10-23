@@ -1,6 +1,6 @@
 from krauss_misc import txt_mixin
 import os
-from numpy import where, zeros, array, append, column_stack, row_stack
+from numpy import where, zeros, array, append, column_stack, vstack
 
 from spreadsheet_mapper import clean_quotes, delimited_grade_spreadsheet, \
      source_spreadsheet_first_and_lastnames
@@ -245,7 +245,7 @@ class ind_grade_mapper_v2(delimited_grade_spreadsheet):
         else:
             labels = self.new_labels
             data = self.new_data
-        out_mat = row_stack([labels, data])
+        out_mat = vstack([labels, data])
         txt_mixin.delimited_txt_file.save(self, pathout=self.output_path, \
                                           array=out_mat, \
                                           delim=delim)
